@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Leap Motion JavaScript Sample</title>
+<script src="http://js.leapmotion.com/0.2.0/leap.min.js"></script>
+<script src="jquery.js"></script>
+<script>
+	var previousFrame = null;
+	var paused = false;
+	var pauseOnGesture = false;
+	var browserWidth,browserHeight;
+	var circdi=20;
+	
+	var currIDs = [],prevIDs = [];
+
+	window.onload = function()
+	{
+		browserWidth = window.innerWidth;
+		browserHeight = window.innerHeight;
+	};
+	window.onresize = function()
+	{
+		browserWidth = window.innerWidth;
+		browserHeight = window.innerHeight;
+	}
+	// Setup Leap loop with frame callback function
+	var controllerOptions = {enableGestures: true};
+	
+	Leap.loop(controllerOptions, function(frame) {
+		currIDs = [];
+		var $circ,point;
+		for(var i =0; i< frame.fingers.length;i++)
+		{
+			point = frame.fingers[i];
+			
+			var id = point.id;
+			
+			if (prevIDs.indexOf(id) > -1)
+			{
+				//already assigned
+				$circ = $('.circ[data-id='+id+']');
+			}
+			else
+			{
+				//add and assign to circle
+				$circ = $("<div class='blue circ' data-id='"+id+"'></div>");
+				
+				$('body').append($circ);
+			}
+			currIDs.push(id);
+			setCirclePos($circ,point);
+			setCircleWidth($circ,point);
+		}
+		//remove any elements that no longer exist
+		for (var i = prevIDs.length-1;i>=0;i--)
+		{
+			if (!(currIDs.indexOf(prevIDs[i]) > -1))
+			{
+				//console.log('running');
+				var id = prevIDs[i];
+				$('.circ[data-id='+id+']').remove();
+			}
+		}
+		
+		prevIDs = currIDs;
+		previousframe = frame;
+	});
+	
+	function setCirclePos($circ,point)
+	{
+		var pos = point.tipPosition;
+			
+		var x = pos[0];
+		var y = pos[1];
+		var z = pos[2];
+			
+			
+			
+		x = map(x,-150,150,0,browserWidth);
+		y = map(y,100,300,0,browserHeight);
+			
+		//because of the inversion when dealing with screen
+		y = browserHeight - y;
+
+			
+			
+			
+		$circ.css({
+				left:x,
+				top:y
+			});
+	}
+	function setCircleWidth($circ,point)
+	{
+		//fix me
+	
+		var pos = point.tipPosition;
+		var z = pos[2],oldz=z;
+		
+		z = map(z,-50,100,20,100);
+		
+		//console.log(z+', '+oldz);
+		
+		var op = map(z,20,80,.2,.8);
+		
+		op = 1-op;
+		
+		if (z <= 20) $circ.addClass('clicked'); else $circ.removeClass('clicked');
+		
+		$circ.css({
+				width:z,
+				height:z,
+				"border-radius":z,
+				opacity:op
+			});
+	}
+	function vectorToString(vector, digits) {
+	  if (typeof digits === "undefined") {
+		digits = 1;
+	  }
+	  return "(" + vector[0].toFixed(digits) + ", "
+				 + vector[1].toFixed(digits) + ", "
+				 + vector[2].toFixed(digits) + ")";
+	}
+	function map(value, start1, stop1, start2, stop2) {
+		if (value < start1) value = start1;
+		else if (value > stop1) value = stop1;
+	
+		return start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1));
+	}
+</script>
+<style>
+	.circ
+	{
+		opacity:.4;
+		width:20px;
+		height:20px;
+		border-radius:20px;
+		position:absolute;
+		background-color:#555;
+		margin-top:-10px;
+		margin-left:-10px;
+		border:3px solid #111;
+	}
+	.circ.clicked
+	{
+		background-color:#A8A0EB;
+		border:3px solid #A8A0EB;d
+	}
+</style>
+</head>
+<body>
+	
+</body>
+</html>
