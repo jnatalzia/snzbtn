@@ -65,7 +65,7 @@
 	{
 		//DRAW COMMON UI ELEMENTS
 		ctx.fillStyle = "#919191";
-		ctx.fillRect(browserWidth/10 - 55, browserHeight - 150, 100, 100);
+		ctx.drawImage(toolboxIMG,browserWidth/10 - 55, browserHeight - 150, 100, 100);
 
 		ctx.strokeStyle = "#eee";
 		ctx.strokeRect( 10, 10, browserWidth - 20, browserHeight - 200);
@@ -117,7 +117,7 @@
 				if (startDragY != -1)
 				{
 					dragCircle.y = c1.y;
-					if (startDragY - c1.y > 150)
+					if (startDragY - c1.y > 100)
 					{
 						//console.log("UITHINGSHAPPEN");
 						openToolbox();
