@@ -24,6 +24,7 @@
 	var gameState = 1;
 
 	var STATE_CAN_PINCH = false;
+	var currentMag = 100;
 
 	var toolboxIMG = new Image(),toolBox;
 	toolboxIMG.src = "img/toolbox.png";
@@ -270,6 +271,7 @@
 
 		previousFrame = frame;
 		pinch(frame);
+		zoom(frame);
 
 	}
 	function isCloseToDestination(pos,dest)
@@ -475,16 +477,60 @@
 				f2.y = f2.tipPosition[1];
 				var sub = getSubtractedVector(f1,f2);
 				var mag = getMagnitude(sub);
-				console.log('Distance Apart: '+mag);
-				if (mag < 30)
+				console.log('Magnitude: '+mag);
+				
+				if (mag < 100)
 				{
-					console.log("touching");
-					return true;
+					if(currentMag-mag > 0)
+					{
+						console.log('pinching');
+						currentMag = mag;
+						console.log('currentMag: '+currentMag);
+						if (mag < 30)
+						{
+							console.log("touching");
+						}
+					}
 				}
-				else return false;
 			}
 		}
+	}
+	function zoom(frame){
+		if(frame.hands.length == 2)
+		{
+			var h1 = frame.hands[0];
+			var h2 = frame.hands[1];
 
+			if(h1.fingers.length == 1 && h2.fingers.length == 1)
+			{
+				STATE_CAN_PINCH = true;
+				gameState = STATE_CAN_PINCH;
+				var f1 = frame.fingers[0];
+				var f2 = frame.fingers[1];
+				f1.x = f1.tipPosition[0];
+				f1.y = f1.tipPosition[1];
+				f2.x = f2.tipPosition[0];
+				f2.y = f2.tipPosition[1];
+				var sub = getSubtractedVector(f1,f2);
+				var mag = getMagnitude(sub);
+				
+				if (mag > 30)
+				{
+					if(currentMag-mag < 0)
+					{
+						console.log('zooming');
+						currentMag = mag;
+						console.log('currentMag: '+currentMag);
+						if (mag > 100)
+						{
+							console.log("zoomed");
+						}
+					}
+				}
+				
+				
+			}
+		}
 
 	}
 </script>
