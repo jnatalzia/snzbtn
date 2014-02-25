@@ -6,603 +6,603 @@
 <script src="http://js.leapmotion.com/0.2.0/leap.min.js"></script>
 <script src="jquery.js"></script>
 <script>
-	var previousFrame = null;
-	var paused = false;
-	var pauseOnGesture = false;
-	var browserWidth,browserHeight;
-	var circdi=20;
-	
-	var currIDs = [],prevIDs = [];
+    var previousFrame = null;
+    var paused = false;
+    var pauseOnGesture = false;
+    var browserWidth,browserHeight;
+    var circdi=20;
 
-	var canvas, ctx;
+    var currIDs = [],prevIDs = [];
 
-	var startDragY = -1;
+    var canvas, ctx;
 
-	var dragCircle;
+    var startDragY = -1;
 
-	var STATE_TOOLBOX_OPEN = 0,STATE_TOOLBOX_CLOSED= 1,STATE_TOOLBOX_CLOSING = 2;
-	var gameState = 1;
+    var dragCircle;
 
-	var STATE_CAN_PINCH = false;
-	var currentMag = 100;
+    var STATE_TOOLBOX_OPEN = 0,STATE_TOOLBOX_CLOSED= 1,STATE_TOOLBOX_CLOSING = 2;
+    var gameState = 1;
 
-	var toolboxIMG = new Image(),toolBox;
-	toolboxIMG.src = "img/toolbox.png";
+    var STATE_CAN_PINCH = false;
+    var currentMag = 100;
 
-	var floatingBlocks = [];
+    var toolboxIMG = new Image(),toolBox;
+    toolboxIMG.src = "img/toolbox.png";
 
-
-	window.onload = function()
-	{
-		browserWidth = window.innerWidth;
-		browserHeight = window.innerHeight;
-
-		canvas = document.getElementById("canvas");
-		ctx = canvas.getContext("2d");
-		ctx.canvas.width  = window.innerWidth;
-  		ctx.canvas.height = window.innerHeight;
-
-  		dragCircle = {};
-  		dragCircle.x = browserWidth/10 - 5;
-  		dragCircle.y = browserHeight - 100;
-  		dragCircle.radius = 10;
-
-  		console.log("working");
-	};
-	window.onresize = function()
-	{
-		browserWidth = window.innerWidth;
-		browserHeight = window.innerHeight;
-
-		ctx.canvas.width  = window.innerWidth;
-  		ctx.canvas.height = window.innerHeight;
-	}
-	// Setup Leap loop with frame callback function
-	var controllerOptions = {enableGestures: true};
-	
-	Leap.loop(controllerOptions, function(frame) {
-		ctx.clearRect(0,0,browserWidth,browserHeight);
-		drawUI(frame);
-		//pinch(frame);
-	});
-	function drawUI(frame)
-	{
-		//DRAW COMMON UI ELEMENTS
-		ctx.fillStyle = "#919191";
-		ctx.drawImage(toolboxIMG,browserWidth/10 - 55, browserHeight - 150, 100, 100);
-
-		ctx.strokeStyle = "#eee";
-		ctx.strokeRect( 10, 10, browserWidth - 20, browserHeight - 200);
-
-		ctx.strokeRect(browserWidth /10 + 100, browserHeight - 150, browserWidth/3*2, 100);
-
-		//ui
-		if (gameState === STATE_TOOLBOX_CLOSED)
-		{
-			ctx.fillStyle = "#E04C4C";
-			ctx.beginPath();
-			ctx.arc(dragCircle.x,dragCircle.y,dragCircle.radius,0,2*Math.PI);
-			ctx.fill();
-			ctx.closePath();
+    var floatingBlocks = [];
 
 
-			if (frame.hands[0])
-			{
-				var hand = frame.hands[0];
-				var x = hand.palmPosition[0];
-				var y = hand.palmPosition[1];
-				//console.log(hand);
+    window.onload = function()
+    {
+        browserWidth = window.innerWidth;
+        browserHeight = window.innerHeight;
 
-				var handX = map(x,-150,150,0,browserWidth);
-				var handY = map(y,100,300,browserHeight,0);
+        canvas = document.getElementById("canvas");
+        ctx = canvas.getContext("2d");
+        ctx.canvas.width  = window.innerWidth;
+          ctx.canvas.height = window.innerHeight;
 
-				//console.log(handX+", "+handY);
+          dragCircle = {};
+          dragCircle.x = browserWidth/10 - 5;
+          dragCircle.y = browserHeight - 100;
+          dragCircle.radius = 10;
 
-				ctx.fillStyle = "#4CE083";
-				ctx.beginPath();
-				ctx.arc(handX,handY,20,0,2*Math.PI);
-				ctx.fill();
-				ctx.closePath();
-				//check for placement over pullup
-				var c1 = {};
-				c1.x = handX;
-				c1.y = handY;
-				c1.radius = 20;
-				if (hand.fingers.length > 0)
-				{
-					startDragY = -1;
-					dragCircle.y = browserHeight - 100;
-				}
-				if (circlesIntersect(c1,dragCircle) && hand.fingers.length <= 0 && startDragY == -1)
-				{
-					console.log("PALM");
-					startDragY = c1.y;
-				}
-				if (startDragY != -1)
-				{
-					dragCircle.y = c1.y;
-					if (startDragY - c1.y > 100)
-					{
-						//console.log("UITHINGSHAPPEN");
-						openToolbox();
-					}
-				}
-				
-			}
-		}
-		else if (gameState === STATE_TOOLBOX_OPEN)
-		{
-			ctx.globalAlpha = .75;
-			ctx.fillStyle = "#000";
-			ctx.fillRect(0,0,browserWidth,browserHeight);
-			ctx.globalAlpha = 1;
+          console.log("working");
+    };
+    window.onresize = function()
+    {
+        browserWidth = window.innerWidth;
+        browserHeight = window.innerHeight;
 
-			if (toolBox.isMoving)
-			{
-				//move this stuff
-				toolBox.y -= 4.5;
-				if (toolBox.y < browserHeight - 250)
-				{
-					toolBox.isMoving = false;
-					floatingBlocks = [];
-					createBlocks();
-				}
-			}
-			ctx.drawImage(toolboxIMG,toolBox.x,toolBox.y,toolBox.width,toolBox.height);
+        ctx.canvas.width  = window.innerWidth;
+          ctx.canvas.height = window.innerHeight;
+    }
+    // Setup Leap loop with frame callback function
+    var controllerOptions = {enableGestures: true};
 
-			for (var i in floatingBlocks)
-			{
-				var b = floatingBlocks[i];
-				if (b.isMoving)
-				{
-						//get destination vector and scale by block speed
-						if (isCloseToDestination(b.position,b.destination))
-						{
-							b.isMoving = false;
-						}
-						else
-						{
-							var idealVec = getSubtractedVector(b.position,b.destination);
-							//arbitrary block speed
-							idealVec = getNormalizedVector(idealVec);
-							idealVec = getScaledVector(idealVec,12);
+    Leap.loop(controllerOptions, function(frame) {
+        ctx.clearRect(0,0,browserWidth,browserHeight);
+        drawUI(frame);
+        //pinch(frame);
+    });
+    function drawUI(frame)
+    {
+        //DRAW COMMON UI ELEMENTS
+        ctx.fillStyle = "#919191";
+        ctx.drawImage(toolboxIMG,browserWidth/10 - 55, browserHeight - 150, 100, 100);
 
-							b.position.x += idealVec.x;
-							b.position.y += idealVec.y;
-						}	
-				}
-				else
-				{
-					//perlin noise it around;
+        ctx.strokeStyle = "#eee";
+        ctx.strokeRect( 10, 10, browserWidth - 20, browserHeight - 200);
 
-				}
-				//draw it
-				ctx.fillStyle = b.fill;
-				ctx.fillRect(b.position.x,b.position.y,b.size.width,b.size.height);
-			}
+        ctx.strokeRect(browserWidth /10 + 100, browserHeight - 150, browserWidth/3*2, 100);
 
-			if (previousFrame.fingers.length == 5)
-			{
-				//retract blocks
-				var gestureRecognized = false;
-				for (var i in frame.gestures)
-				{
-					var g = frame.gestures[i];
-					if(g.type == "swipe" && !gestureRecognized)
-					{
-						if (g.direction[1] < -.75)
-						{
-							console.log("CLOSE");
-							gestureRecognized = true;
-							for (var i in floatingBlocks)
-							{
-								var b = floatingBlocks[i];
-								b.isMoving = true;
-								b.destination = b.initialPosition;
-								gameState = STATE_TOOLBOX_CLOSING;
-							}
-						}
-						//console.log(g.direction[1]);
-					}
-				}
-				//console.log(frame.gestures);
-			}
-			drawFingers(frame);
-		}
-		//fix this to impolemetn in the STATE_TOOLBOX OPEN
-		else if (gameState == STATE_TOOLBOX_CLOSING){
-			ctx.globalAlpha = .75;
-			ctx.fillStyle = "#000";
-			ctx.fillRect(0,0,browserWidth,browserHeight);
-			ctx.globalAlpha = 1;
+        //ui
+        if (gameState === STATE_TOOLBOX_CLOSED)
+        {
+        	ctx.fillStyle = "#E04C4C";
+        	ctx.beginPath();
+        	ctx.arc(dragCircle.x,dragCircle.y,dragCircle.radius,0,2*Math.PI);
+        	ctx.fill();
+        	ctx.closePath();
 
-			if (toolBox.isMoving)
-			{
-				//move this stuff
-				toolBox.y -= 4.5;
-				if (toolBox.y < browserHeight - 250)
-				{
-					toolBox.isMoving = false;
-					floatingBlocks = [];
-					createBlocks();
-				}
-			}
-			ctx.drawImage(toolboxIMG,toolBox.x,toolBox.y,toolBox.width,toolBox.height);
 
-			var allBlocksClosed = true;
-			for (var i in floatingBlocks)
-			{
-				var b = floatingBlocks[i];
-				if (b.isMoving)
-				{
-						//get destination vector and scale by block speed
-						if (isCloseToDestination(b.position,b.destination))
-						{
-							b.isMoving = false;
-						}
-						else
-						{
-							var idealVec = getSubtractedVector(b.position,b.destination);
-							//arbitrary block speed
-							idealVec = getNormalizedVector(idealVec);
-							idealVec = getScaledVector(idealVec,12);
+        	if (frame.hands[0])
+        	{
+        		var hand = frame.hands[0];
+        		var x = hand.palmPosition[0];
+        		var y = hand.palmPosition[1];
+        		//console.log(hand);
 
-							b.position.x += idealVec.x;
-							b.position.y += idealVec.y;
-						}	
-						allBlocksClosed = false;
-				}
-				else
-				{
-					//perlin noise it around;
+        		var handX = map(x,-150,150,0,browserWidth);
+        		var handY = map(y,100,300,browserHeight,0);
 
-				}
-				//draw it
-				ctx.fillStyle = b.fill;
-				ctx.fillRect(b.position.x,b.position.y,b.size.width,b.size.height);
-				if (allBlocksClosed)
-				{
-					gameState = STATE_TOOLBOX_CLOSED;
-					$('.circ').remove();
-				}
-			}
-			drawFingers(frame);
-		}
+        		//console.log(handX+", "+handY);
 
-		previousFrame = frame;
-		pinch(frame);
-		zoom(frame);
+        		ctx.fillStyle = "#4CE083";
+        		ctx.beginPath();
+        		ctx.arc(handX,handY,20,0,2*Math.PI);
+        		ctx.fill();
+        		ctx.closePath();
+        		//check for placement over pullup
+        		var c1 = {};
+        		c1.x = handX;
+        		c1.y = handY;
+        		c1.radius = 20;
+        		if (hand.fingers.length > 0)
+        		{
+        			startDragY = -1;
+        			dragCircle.y = browserHeight - 100;
+        		}
+        		if (circlesIntersect(c1,dragCircle) && hand.fingers.length <= 0 && startDragY == -1)
+        		{
+        			console.log("PALM");
+        			startDragY = c1.y;
+        		}
+        		if (startDragY != -1)
+        		{
+        			dragCircle.y = c1.y;
+        			if (startDragY - c1.y > 100)
+        			{
+        				//console.log("UITHINGSHAPPEN");
+        				openToolbox();
+        			}
+        		}
 
-	}
-	function isCloseToDestination(pos,dest)
-	{
-		var sub = getSubtractedVector(pos,dest);
-		var mag = getMagnitude(sub);
-		if (mag < 10)
-		{
-			return true;
-		}
-		else return false;
-	}
-	function getMagnitude(v1){
-		return Math.sqrt((v1.x*v1.x)+(v1.y*v1.y));
-	}
-	function getNormalizedVector(v1){
-		var mag = getMagnitude(v1);
-		return{
-			x:v1.x/mag,
-			y:v1.y/mag
-		};
-	}
-	//from v1->v2 which means v2-v1
-	function getSubtractedVector(v1,v2){
-		return {
-			x: v2.x-v1.x,
-			y: v2.y-v1.y
-		};
-	}
-	function getScaledVector(v1,scalar){
-		return {
-			x:v1.x*scalar,
-			y:v1.y*scalar
-		};
-	}
-	function createBlocks()
-	{
-		var numBlocks = 6; //test variable
-		for (var i = 0; i < numBlocks; i++)
-		{
-			var b = {};
-			b.size = {width:100,height:100}; //testNumbers
-			b.position = {
-				x:browserWidth/2 - b.size.width/2,
-				y:browserHeight + b.size.height/2
-			}//starting pos
-			b.initialPosition = {
-				x:browserWidth/2 - b.size.width/2,
-				y:browserHeight + b.size.height/2
-			};
-			//these should be based on the current 'i' value 
-			b.destination = {
-				x:browserWidth/numBlocks * i + 80,
-				y:50
-			};//do some math
-			b.fill = "#fff";
-			b.isMoving = true;
-			floatingBlocks.push(b);
-		}
-	}
-	function openToolbox()
-	{
-		console.log(toolboxIMG);
+        	}
+        }
+        else if (gameState === STATE_TOOLBOX_OPEN)
+        {
+        	ctx.globalAlpha = .75;
+        	ctx.fillStyle = "#000";
+        	ctx.fillRect(0,0,browserWidth,browserHeight);
+        	ctx.globalAlpha = 1;
 
-		gameState = STATE_TOOLBOX_OPEN;
-		toolBox = {};
-		toolBox.width = browserWidth/3;
-		toolBox.height = browserWidth/3;
-		toolBox.x = browserWidth/2 - toolBox.width/2;
-		toolBox.y = browserHeight;
-		toolBox.isMoving = true;
-	}
-	function drawFingers(frame)
-	{
-		currIDs = [];
-		var $circ,point;
-		for(var i =0; i< frame.fingers.length;i++)
-		{
-			point = frame.fingers[i];
-			
-			var id = point.id;
-			
-			if (prevIDs.indexOf(id) > -1)
-			{
-				//already assigned
-				$circ = $('.circ[data-id='+id+']');
-			}
-			else
-			{
-				//add and assign to circle
-				$circ = $("<div class='blue circ' data-id='"+id+"'></div>");
-				
-				$('body').append($circ);
-			}
-			currIDs.push(id);
-			setCirclePos($circ,point);
-			setCircleWidth($circ,point);
-		}
-		//remove any elements that no longer exist
-		for (var i = prevIDs.length-1;i>=0;i--)
-		{
-			if (!(currIDs.indexOf(prevIDs[i]) > -1))
-			{
-				//console.log('running');
-				var id = prevIDs[i];
-				$('.circ[data-id='+id+']').remove();
-			}
-		}
-		
-		prevIDs = currIDs;
-		previousframe = frame;
-	}
-	
-	function setCirclePos($circ,point)
-	{
-		var pos = point.tipPosition;
-			
-		var x = pos[0];
-		var y = pos[1];
-		var z = pos[2];
-			
-			
-			
-		x = map(x,-150,150,0,browserWidth);
-		y = map(y,100,300,0,browserHeight);
-			
-		//because of the inversion when dealing with screen
-		y = browserHeight - y;
+        	if (toolBox.isMoving)
+        	{
+        		//move this stuff
+        		toolBox.y -= 4.5;
+        		if (toolBox.y < browserHeight - 250)
+        		{
+        			toolBox.isMoving = false;
+        			floatingBlocks = [];
+        			createBlocks();
+        		}
+        	}
+        	ctx.drawImage(toolboxIMG,toolBox.x,toolBox.y,toolBox.width,toolBox.height);
 
-			
-			
-			
-		$circ.css({
-				left:x,
-				top:y
-			});
-	}
-	function setCircleWidth($circ,point)
-	{
-		//fix me
-	
-		var pos = point.tipPosition;
-		var z = pos[2],oldz=z;
-		
-		z = map(z,-50,100,20,100);
-		
-		//console.log(z+', '+oldz);
-		
-		var op = map(z,20,80,.2,.8);
-		
-		op = 1-op;
-		
-		if (z <= 20) 
-		{
-			$circ.addClass('clicked'); 
-			//console.log($circ.offset())
-		}
-		else $circ.removeClass('clicked');
-		
-		$circ.css({
-				width:z,
-				height:z,
-				"border-radius":z,
-				opacity:op
-			});
-	}
-	function vectorToString(vector, digits) {
-	  if (typeof digits === "undefined") {
-		digits = 1;
-	  }
-	  return "(" + vector[0].toFixed(digits) + ", "
-				 + vector[1].toFixed(digits) + ", "
-				 + vector[2].toFixed(digits) + ")";
-	}
-	function map(value, start1, stop1, start2, stop2) {
-		if (value < start1) value = start1;
-		else if (value > stop1) value = stop1;
-	
-		return start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1));
-	}
-	function circlesIntersect(c1,c2){
-		var dx = c2.x - c1.x;
-		var dy = c2.y - c1.y;
-		var distance = Math.sqrt(dx*dx + dy*dy);
-		return distance < c1.radius + c2.radius;
-	}
-	function pinch(frame){
-		STATE_CAN_PINCH = false;
-		if(frame.hands.length == 2)
-		{
-			var h1 = frame.hands[0];
-			var h2 = frame.hands[1];
+        	for (var i in floatingBlocks)
+        	{
+        		var b = floatingBlocks[i];
+        		if (b.isMoving)
+        		{
+        				//get destination vector and scale by block speed
+        				if (isCloseToDestination(b.position,b.destination))
+        				{
+        					b.isMoving = false;
+        				}
+        				else
+        				{
+        					var idealVec = getSubtractedVector(b.position,b.destination);
+        					//arbitrary block speed
+        					idealVec = getNormalizedVector(idealVec);
+        					idealVec = getScaledVector(idealVec,12);
 
-			if(h1.fingers.length == 1 && h2.fingers.length == 1)
-			{
-				STATE_CAN_PINCH = true;
-				gameState = STATE_CAN_PINCH;
-				var f1 = frame.fingers[0];
-				var f2 = frame.fingers[1];
-				f1.x = f1.tipPosition[0];
-				f1.y = f1.tipPosition[1];
-				f2.x = f2.tipPosition[0];
-				f2.y = f2.tipPosition[1];
-				var sub = getSubtractedVector(f1,f2);
-				var mag = getMagnitude(sub);
-				console.log('Magnitude: '+mag);
-				
-				if (mag < 100)
-				{
-					if(currentMag-mag > 0)
-					{
-						console.log('pinching');
-						currentMag = mag;
-						console.log('currentMag: '+currentMag);
-						if (mag < 30)
-						{
-							console.log("touching");
-						}
-					}
-				}
-			}
-		}
-	}
-	function zoom(frame){
-		if(frame.hands.length == 2)
-		{
-			var h1 = frame.hands[0];
-			var h2 = frame.hands[1];
+        					b.position.x += idealVec.x;
+        					b.position.y += idealVec.y;
+        				}
+        		}
+        		else
+        		{
+        			//perlin noise it around;
 
-			if(h1.fingers.length == 1 && h2.fingers.length == 1)
-			{
-				STATE_CAN_PINCH = true;
-				gameState = STATE_CAN_PINCH;
-				var f1 = frame.fingers[0];
-				var f2 = frame.fingers[1];
-				f1.x = f1.tipPosition[0];
-				f1.y = f1.tipPosition[1];
-				f2.x = f2.tipPosition[0];
-				f2.y = f2.tipPosition[1];
-				var sub = getSubtractedVector(f1,f2);
-				var mag = getMagnitude(sub);
-				
-				if (mag > 30)
-				{
-					if(currentMag-mag < 0)
-					{
-						console.log('zooming');
-						currentMag = mag;
-						console.log('currentMag: '+currentMag);
-						if (mag > 100)
-						{
-							console.log("zoomed");
-						}
-					}
-				}
-				
-				
-			}
-		}
+        		}
+        		//draw it
+        		ctx.fillStyle = b.fill;
+        		ctx.fillRect(b.position.x,b.position.y,b.size.width,b.size.height);
+        	}
 
-	}
+        	if (previousFrame.fingers.length == 5)
+        	{
+        		//retract blocks
+        		var gestureRecognized = false;
+        		for (var i in frame.gestures)
+        		{
+        			var g = frame.gestures[i];
+        			if(g.type == "swipe" && !gestureRecognized)
+        			{
+        				if (g.direction[1] < -.75)
+        				{
+        					console.log("CLOSE");
+        					gestureRecognized = true;
+        					for (var i in floatingBlocks)
+        					{
+        						var b = floatingBlocks[i];
+        						b.isMoving = true;
+        						b.destination = b.initialPosition;
+        						gameState = STATE_TOOLBOX_CLOSING;
+        					}
+        				}
+        				//console.log(g.direction[1]);
+        			}
+        		}
+        		//console.log(frame.gestures);
+        	}
+        	drawFingers(frame);
+        }
+        //fix this to impolemetn in the STATE_TOOLBOX OPEN
+        else if (gameState == STATE_TOOLBOX_CLOSING){
+        	ctx.globalAlpha = .75;
+        	ctx.fillStyle = "#000";
+        	ctx.fillRect(0,0,browserWidth,browserHeight);
+        	ctx.globalAlpha = 1;
+
+        	if (toolBox.isMoving)
+        	{
+        		//move this stuff
+        		toolBox.y -= 4.5;
+        		if (toolBox.y < browserHeight - 250)
+        		{
+        			toolBox.isMoving = false;
+        			floatingBlocks = [];
+        			createBlocks();
+        		}
+        	}
+        	ctx.drawImage(toolboxIMG,toolBox.x,toolBox.y,toolBox.width,toolBox.height);
+
+        	var allBlocksClosed = true;
+        	for (var i in floatingBlocks)
+        	{
+        		var b = floatingBlocks[i];
+        		if (b.isMoving)
+        		{
+        				//get destination vector and scale by block speed
+        				if (isCloseToDestination(b.position,b.destination))
+        				{
+        					b.isMoving = false;
+        				}
+        				else
+        				{
+        					var idealVec = getSubtractedVector(b.position,b.destination);
+        					//arbitrary block speed
+        					idealVec = getNormalizedVector(idealVec);
+        					idealVec = getScaledVector(idealVec,12);
+
+        					b.position.x += idealVec.x;
+        					b.position.y += idealVec.y;
+        				}
+        				allBlocksClosed = false;
+        		}
+        		else
+        		{
+        			//perlin noise it around;
+
+        		}
+        		//draw it
+        		ctx.fillStyle = b.fill;
+        		ctx.fillRect(b.position.x,b.position.y,b.size.width,b.size.height);
+        		if (allBlocksClosed)
+        		{
+        			gameState = STATE_TOOLBOX_CLOSED;
+        			$('.circ').remove();
+        		}
+        	}
+        	drawFingers(frame);
+        }
+
+        previousFrame = frame;
+        pinch(frame);
+        zoom(frame);
+
+    }
+    function isCloseToDestination(pos,dest)
+    {
+        var sub = getSubtractedVector(pos,dest);
+        var mag = getMagnitude(sub);
+        if (mag < 10)
+        {
+        	return true;
+        }
+        else return false;
+    }
+    function getMagnitude(v1){
+        return Math.sqrt((v1.x*v1.x)+(v1.y*v1.y));
+    }
+    function getNormalizedVector(v1){
+        var mag = getMagnitude(v1);
+        return{
+        	x:v1.x/mag,
+        	y:v1.y/mag
+        };
+    }
+    //from v1->v2 which means v2-v1
+    function getSubtractedVector(v1,v2){
+        return {
+        	x: v2.x-v1.x,
+        	y: v2.y-v1.y
+        };
+    }
+    function getScaledVector(v1,scalar){
+        return {
+        	x:v1.x*scalar,
+        	y:v1.y*scalar
+        };
+    }
+    function createBlocks()
+    {
+        var numBlocks = 6; //test variable
+        for (var i = 0; i < numBlocks; i++)
+        {
+        	var b = {};
+        	b.size = {width:100,height:100}; //testNumbers
+        	b.position = {
+        		x:browserWidth/2 - b.size.width/2,
+        		y:browserHeight + b.size.height/2
+        	}//starting pos
+        	b.initialPosition = {
+        		x:browserWidth/2 - b.size.width/2,
+        		y:browserHeight + b.size.height/2
+        	};
+        	//these should be based on the current 'i' value
+        	b.destination = {
+        		x:browserWidth/numBlocks * i + 80,
+        		y:50
+        	};//do some math
+        	b.fill = "#fff";
+        	b.isMoving = true;
+        	floatingBlocks.push(b);
+        }
+    }
+    function openToolbox()
+    {
+        console.log(toolboxIMG);
+
+        gameState = STATE_TOOLBOX_OPEN;
+        toolBox = {};
+        toolBox.width = browserWidth/3;
+        toolBox.height = browserWidth/3;
+        toolBox.x = browserWidth/2 - toolBox.width/2;
+        toolBox.y = browserHeight;
+        toolBox.isMoving = true;
+    }
+    function drawFingers(frame)
+    {
+        currIDs = [];
+        var $circ,point;
+        for(var i =0; i< frame.fingers.length;i++)
+        {
+        	point = frame.fingers[i];
+
+        	var id = point.id;
+
+        	if (prevIDs.indexOf(id) > -1)
+        	{
+        		//already assigned
+        		$circ = $('.circ[data-id='+id+']');
+        	}
+        	else
+        	{
+        		//add and assign to circle
+        		$circ = $("<div class='blue circ' data-id='"+id+"'></div>");
+
+        		$('body').append($circ);
+        	}
+        	currIDs.push(id);
+        	setCirclePos($circ,point);
+        	setCircleWidth($circ,point);
+        }
+        //remove any elements that no longer exist
+        for (var i = prevIDs.length-1;i>=0;i--)
+        {
+        	if (!(currIDs.indexOf(prevIDs[i]) > -1))
+        	{
+        		//console.log('running');
+        		var id = prevIDs[i];
+        		$('.circ[data-id='+id+']').remove();
+        	}
+        }
+
+        prevIDs = currIDs;
+        previousframe = frame;
+    }
+
+    function setCirclePos($circ,point)
+    {
+        var pos = point.tipPosition;
+
+        var x = pos[0];
+        var y = pos[1];
+        var z = pos[2];
+
+
+
+        x = map(x,-150,150,0,browserWidth);
+        y = map(y,100,300,0,browserHeight);
+
+        //because of the inversion when dealing with screen
+        y = browserHeight - y;
+
+
+
+
+        $circ.css({
+        		left:x,
+        		top:y
+        	});
+    }
+    function setCircleWidth($circ,point)
+    {
+        //fix me
+
+        var pos = point.tipPosition;
+        var z = pos[2],oldz=z;
+
+        z = map(z,-50,100,20,100);
+
+        //console.log(z+', '+oldz);
+
+        var op = map(z,20,80,.2,.8);
+
+        op = 1-op;
+
+        if (z <= 20)
+        {
+        	$circ.addClass('clicked');
+        	//console.log($circ.offset())
+        }
+        else $circ.removeClass('clicked');
+
+        $circ.css({
+        		width:z,
+        		height:z,
+        		"border-radius":z,
+        		opacity:op
+        	});
+    }
+    function vectorToString(vector, digits) {
+      if (typeof digits === "undefined") {
+        digits = 1;
+      }
+      return "(" + vector[0].toFixed(digits) + ", "
+        		 + vector[1].toFixed(digits) + ", "
+        		 + vector[2].toFixed(digits) + ")";
+    }
+    function map(value, start1, stop1, start2, stop2) {
+        if (value < start1) value = start1;
+        else if (value > stop1) value = stop1;
+
+        return start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1));
+    }
+    function circlesIntersect(c1,c2){
+        var dx = c2.x - c1.x;
+        var dy = c2.y - c1.y;
+        var distance = Math.sqrt(dx*dx + dy*dy);
+        return distance < c1.radius + c2.radius;
+    }
+    function pinch(frame){
+        STATE_CAN_PINCH = false;
+        if(frame.hands.length == 2)
+        {
+        	var h1 = frame.hands[0];
+        	var h2 = frame.hands[1];
+
+        	if(h1.fingers.length == 1 && h2.fingers.length == 1)
+        	{
+        		STATE_CAN_PINCH = true;
+        		gameState = STATE_CAN_PINCH;
+        		var f1 = frame.fingers[0];
+        		var f2 = frame.fingers[1];
+        		f1.x = f1.tipPosition[0];
+        		f1.y = f1.tipPosition[1];
+        		f2.x = f2.tipPosition[0];
+        		f2.y = f2.tipPosition[1];
+        		var sub = getSubtractedVector(f1,f2);
+        		var mag = getMagnitude(sub);
+        		console.log('Magnitude: '+mag);
+
+        		if (mag < 100)
+        		{
+        			if(currentMag-mag > 0)
+        			{
+        				console.log('pinching');
+        				currentMag = mag;
+        				console.log('currentMag: '+currentMag);
+        				if (mag < 30)
+        				{
+        					console.log("touching");
+        				}
+        			}
+        		}
+        	}
+        }
+    }
+    function zoom(frame){
+        if(frame.hands.length == 2)
+        {
+        	var h1 = frame.hands[0];
+        	var h2 = frame.hands[1];
+
+        	if(h1.fingers.length == 1 && h2.fingers.length == 1)
+        	{
+        		STATE_CAN_PINCH = true;
+        		gameState = STATE_CAN_PINCH;
+        		var f1 = frame.fingers[0];
+        		var f2 = frame.fingers[1];
+        		f1.x = f1.tipPosition[0];
+        		f1.y = f1.tipPosition[1];
+        		f2.x = f2.tipPosition[0];
+        		f2.y = f2.tipPosition[1];
+        		var sub = getSubtractedVector(f1,f2);
+        		var mag = getMagnitude(sub);
+
+        		if (mag > 30)
+        		{
+        			if(currentMag-mag < 0)
+        			{
+        				console.log('zooming');
+        				currentMag = mag;
+        				console.log('currentMag: '+currentMag);
+        				if (mag > 100)
+        				{
+        					console.log("zoomed");
+        				}
+        			}
+        		}
+
+
+        	}
+        }
+
+    }
 </script>
 <style>
-	/* http://meyerweb.com/eric/tools/css/reset/ 
-	   v2.0 | 20110126
-	   License: none (public domain)
-	*/
+    /* http://meyerweb.com/eric/tools/css/reset/
+       v2.0 | 20110126
+       License: none (public domain)
+    */
 
-	html, body, div, span, applet, object, iframe,
-	h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-	a, abbr, acronym, address, big, cite, code,
-	del, dfn, em, img, ins, kbd, q, s, samp,
-	small, strike, strong, sub, sup, tt, var,
-	b, u, i, center,
-	dl, dt, dd, ol, ul, li,
-	fieldset, form, label, legend,
-	table, caption, tbody, tfoot, thead, tr, th, td,
-	article, aside, canvas, details, embed, 
-	figure, figcaption, footer, header, hgroup, 
-	menu, nav, output, ruby, section, summary,
-	time, mark, audio, video {
-		margin: 0;
-		padding: 0;
-		border: 0;
-		font-size: 100%;
-		font: inherit;
-		vertical-align: baseline;
-	}
-	/* HTML5 display-role reset for older browsers */
-	article, aside, details, figcaption, figure, 
-	footer, header, hgroup, menu, nav, section {
-		display: block;
-	}
-	body {
-		line-height: 1;
-	}
-	ol, ul {
-		list-style: none;
-	}
-	blockquote, q {
-		quotes: none;
-	}
-	blockquote:before, blockquote:after,
-	q:before, q:after {
-		content: '';
-		content: none;
-	}
-	table {
-		border-collapse: collapse;
-		border-spacing: 0;
-	}
-	.circ
-	{
-		opacity:.4;
-		width:20px;
-		height:20px;
-		border-radius:20px;
-		position:absolute;
-		background-color:#555;
-		margin-top:-10px;
-		margin-left:-10px;
-		border:3px solid #111;
-	}
-	.circ.clicked
-	{
-		background-color:#A8A0EB;
-		border:3px solid #A8A0EB;d
-	}
+    html, body, div, span, applet, object, iframe,
+    h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+    a, abbr, acronym, address, big, cite, code,
+    del, dfn, em, img, ins, kbd, q, s, samp,
+    small, strike, strong, sub, sup, tt, var,
+    b, u, i, center,
+    dl, dt, dd, ol, ul, li,
+    fieldset, form, label, legend,
+    table, caption, tbody, tfoot, thead, tr, th, td,
+    article, aside, canvas, details, embed,
+    figure, figcaption, footer, header, hgroup,
+    menu, nav, output, ruby, section, summary,
+    time, mark, audio, video {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: baseline;
+    }
+    /* HTML5 display-role reset for older browsers */
+    article, aside, details, figcaption, figure,
+    footer, header, hgroup, menu, nav, section {
+        display: block;
+    }
+    body {
+        line-height: 1;
+    }
+    ol, ul {
+        list-style: none;
+    }
+    blockquote, q {
+        quotes: none;
+    }
+    blockquote:before, blockquote:after,
+    q:before, q:after {
+        content: '';
+        content: none;
+    }
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+    .circ
+    {
+        opacity:.4;
+        width:20px;
+        height:20px;
+        border-radius:20px;
+        position:absolute;
+        background-color:#555;
+        margin-top:-10px;
+        margin-left:-10px;
+        border:3px solid #111;
+    }
+    .circ.clicked
+    {
+        background-color:#A8A0EB;
+        border:3px solid #A8A0EB;d
+    }
 </style>
 </head>
 <body>
-	<canvas id='canvas'>GET A BROWSER</canvas>
+    <canvas id='canvas'>GET A BROWSER</canvas>
 </body>
 </html>
