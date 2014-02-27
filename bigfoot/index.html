@@ -5,6 +5,8 @@
 <title>Leap Motion JavaScript Sample</title>
 <script src="http://js.leapmotion.com/0.2.0/leap.min.js"></script>
 <script src="jquery.js"></script>
+<!--//load classes-->
+<script src="classes/VariableBlock.js"></script>
 <script>
 	var previousFrame = null;
 	var paused = false;
@@ -28,6 +30,7 @@
 
 	var floatingBlocks = [];
 
+	var tempBlock;
 
 	window.onload = function()
 	{
@@ -45,6 +48,10 @@
   		dragCircle.radius = 10;
 
   		console.log("working");
+
+  		tempBlock = new VariableBlock({x:browserWidth/2-50,y:browserHeight/2-50},{width:100,height:100});
+
+  		//tempBlock.sayHi();
 	};
 	window.onresize = function()
 	{
@@ -59,8 +66,38 @@
 	
 	Leap.loop(controllerOptions, function(frame) {
 		ctx.clearRect(0,0,browserWidth,browserHeight);
-		drawUI(frame);
+		//commented to test varible block code
+		//drawUI(frame);
+		//console.log(tempBlock);
+		tempBlock.blockHoverTest(frame,ctx);
+		drawFingers(frame);
 	});
+	function drawFingers(frame)
+	{
+		for (var i in frame.hands)
+			for (var k in frame.hands[i].fingers)
+			{
+				var finger = frame.hands[i].fingers[k];
+				var pos = finger.stabilizedTipPosition;
+
+				var fx = pos[0];
+				var fy = pos[1];
+				var fz = pos[2];
+						
+						
+					//draw the finger on screen
+				fx = map(fx,-150,150,0,browserWidth);
+				fy = map(fy,100,300,0,browserHeight);
+
+				fy = browserHeight - fy;
+				ctx.fillStyle = "#E04C4C";
+				ctx.beginPath();
+				ctx.arc(fx,fy,10,0,2*Math.PI);
+				ctx.fill();
+				ctx.closePath();
+			}
+			
+	}
 	function drawUI(frame)
 	{
 		//DRAW COMMON UI ELEMENTS
@@ -295,6 +332,22 @@
 			y: v2.y-v1.y
 		};
 	}
+	function angleFromPointToPoint(p1,p2)
+	{
+		var sub = getSubtractedVector(p1,p2);
+
+		var angle = Math.atan2(sub.y,sub.x);
+
+		if (angle < 0){
+			angle = Math.abs(angle);
+			angle = Math.PI*2 - angle;
+			
+		}
+		//angle = Math.abs(angle - Math.PI);
+
+
+		return angle;
+	}
 	function getScaledVector(v1,scalar){
 		return {
 			x:v1.x*scalar,
@@ -338,7 +391,7 @@
 		toolBox.y = browserHeight;
 		toolBox.isMoving = true;
 	}
-	function drawFingers(frame)
+	/*function drawFingers(frame)
 	{
 		currIDs = [];
 		var $circ,point;
@@ -377,7 +430,7 @@
 		
 		prevIDs = currIDs;
 		previousframe = frame;
-	}
+	}*/
 	
 	function setCirclePos($circ,point)
 	{
@@ -451,6 +504,10 @@
 		var dy = c2.y - c1.y;
 		var distance = Math.sqrt(dx*dx + dy*dy);
 		return distance < c1.radius + c2.radius;
+	}
+	function pointIntersectsRect(pt,rect)
+	{
+		return (pt.x > rect.x && pt.x < rect.x + rect.width && pt.y > rect.y && pt.y < rect.y + rect.height);
 	}
 </script>
 <style>
