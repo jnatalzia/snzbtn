@@ -25,6 +25,12 @@
 	var STATE_TOOLBOX_OPEN = 0,STATE_TOOLBOX_CLOSED= 1,STATE_TOOLBOX_CLOSING = 2;
 	var gameState = 1;
 
+	var STATE_CAN_PINCH = false;
+	var STATE_PINCH = false;
+	var STATE_CAN_ZOOM = false;
+	var STATE_ZOOM = false;
+	var currentMag = 100;
+
 	var toolboxIMG = new Image(),toolBox;
 	toolboxIMG.src = "img/toolbox.png";
 
@@ -71,6 +77,8 @@
 		//console.log(tempBlock);
 		tempBlock.blockHoverTest(frame,ctx);
 		drawFingers(frame);
+		drawUI(frame);
+		//pinch(frame);
 	});
 	function drawFingers(frame)
 	{
@@ -303,6 +311,8 @@
 		}
 
 		previousFrame = frame;
+		pinch(frame);
+		zoom(frame);
 
 	}
 	function isCloseToDestination(pos,dest)
@@ -391,46 +401,6 @@
 		toolBox.y = browserHeight;
 		toolBox.isMoving = true;
 	}
-	/*function drawFingers(frame)
-	{
-		currIDs = [];
-		var $circ,point;
-		for(var i =0; i< frame.fingers.length;i++)
-		{
-			point = frame.fingers[i];
-			
-			var id = point.id;
-			
-			if (prevIDs.indexOf(id) > -1)
-			{
-				//already assigned
-				$circ = $('.circ[data-id='+id+']');
-			}
-			else
-			{
-				//add and assign to circle
-				$circ = $("<div class='blue circ' data-id='"+id+"'></div>");
-				
-				$('body').append($circ);
-			}
-			currIDs.push(id);
-			setCirclePos($circ,point);
-			setCircleWidth($circ,point);
-		}
-		//remove any elements that no longer exist
-		for (var i = prevIDs.length-1;i>=0;i--)
-		{
-			if (!(currIDs.indexOf(prevIDs[i]) > -1))
-			{
-				//console.log('running');
-				var id = prevIDs[i];
-				$('.circ[data-id='+id+']').remove();
-			}
-		}
-		
-		prevIDs = currIDs;
-		previousframe = frame;
-	}*/
 	
 	function setCirclePos($circ,point)
 	{
@@ -508,6 +478,87 @@
 	function pointIntersectsRect(pt,rect)
 	{
 		return (pt.x > rect.x && pt.x < rect.x + rect.width && pt.y > rect.y && pt.y < rect.y + rect.height);
+	function pinch(frame){
+		STATE_CAN_PINCH = false;
+		if(frame.hands.length == 2)
+		{
+			var h1 = frame.hands[0];
+			var h2 = frame.hands[1];
+
+			if(h1.fingers.length == 1 && h2.fingers.length == 1)
+			{
+				STATE_CAN_PINCH = true;
+				gameState = STATE_CAN_PINCH;
+				var f1 = frame.fingers[0];
+				var f2 = frame.fingers[1];
+				f1.x = f1.tipPosition[0];
+				f1.y = f1.tipPosition[1];
+				f2.x = f2.tipPosition[0];
+				f2.y = f2.tipPosition[1];
+				var sub = getSubtractedVector(f1,f2);
+				var mag = getMagnitude(sub);
+				console.log('Magnitude: '+mag);
+				
+				if (mag < 100)
+				{
+					if(currentMag-mag > 0)
+					{
+						console.log('pinching');
+						STATE_CAN_PINCH = false;
+						STATE_PINCH = true;
+						gameState = STATE_PINCH;
+						currentMag = mag;
+						console.log('currentMag: '+currentMag);
+						if (mag < 30)
+						{
+							console.log("touching");
+							STATE_PINCH = false;
+						}
+					}
+				}
+			}
+		}
+	}
+	function zoom(frame){
+		if(frame.hands.length == 2)
+		{
+			var h1 = frame.hands[0];
+			var h2 = frame.hands[1];
+
+			if(h1.fingers.length == 1 && h2.fingers.length == 1)
+			{
+				STATE_CAN_ZOOM = true;
+				gameState = STATE_CAN_ZOOM;
+				var f1 = frame.fingers[0];
+				var f2 = frame.fingers[1];
+				f1.x = f1.tipPosition[0];
+				f1.y = f1.tipPosition[1];
+				f2.x = f2.tipPosition[0];
+				f2.y = f2.tipPosition[1];
+				var sub = getSubtractedVector(f1,f2);
+				var mag = getMagnitude(sub);
+				
+				if (mag > 30)
+				{
+					if(currentMag-mag < 0)
+					{
+						console.log('zooming');
+						STATE_CAN_ZOOM = false;
+						STATE_ZOOM = true;
+						gameState = STATE_ZOOM;
+						currentMag = mag;
+						console.log('currentMag: '+currentMag);
+						if (mag > 100)
+						{
+							console.log("zoomed");
+							STATE_ZOOM = false;
+						}
+					}
+				}
+				
+				
+			}
+		}
 	}
 </script>
 <style>
