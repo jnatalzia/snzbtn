@@ -24,6 +24,9 @@
 	var gameState = 1;
 
 	var STATE_CAN_PINCH = false;
+	var STATE_PINCH = false;
+	var STATE_CAN_ZOOM = false;
+	var STATE_ZOOM = false;
 	var currentMag = 100;
 
 	var toolboxIMG = new Image(),toolBox;
@@ -484,11 +487,15 @@
 					if(currentMag-mag > 0)
 					{
 						console.log('pinching');
+						STATE_CAN_PINCH = false;
+						STATE_PINCH = true;
+						gameState = STATE_PINCH;
 						currentMag = mag;
 						console.log('currentMag: '+currentMag);
 						if (mag < 30)
 						{
 							console.log("touching");
+							STATE_PINCH = false;
 						}
 					}
 				}
@@ -503,8 +510,8 @@
 
 			if(h1.fingers.length == 1 && h2.fingers.length == 1)
 			{
-				STATE_CAN_PINCH = true;
-				gameState = STATE_CAN_PINCH;
+				STATE_CAN_ZOOM = true;
+				gameState = STATE_CAN_ZOOM;
 				var f1 = frame.fingers[0];
 				var f2 = frame.fingers[1];
 				f1.x = f1.tipPosition[0];
@@ -519,11 +526,15 @@
 					if(currentMag-mag < 0)
 					{
 						console.log('zooming');
+						STATE_CAN_ZOOM = false;
+						STATE_ZOOM = true;
+						gameState = STATE_ZOOM;
 						currentMag = mag;
 						console.log('currentMag: '+currentMag);
 						if (mag > 100)
 						{
 							console.log("zoomed");
+							STATE_ZOOM = false;
 						}
 					}
 				}
