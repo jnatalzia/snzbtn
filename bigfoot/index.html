@@ -7,6 +7,7 @@
 <script src="jquery.js"></script>
 <!--//load classes-->
 <script src="classes/VariableBlock.js"></script>
+<script src="classes/SpriteNode.js"></script>
 <script>
 	var previousFrame = null;
 	var paused = false;
@@ -36,7 +37,9 @@
 
 	var floatingBlocks = [];
 
-	var tempBlock;
+	var tempBlock, tempSprite;
+
+	var globalFrame;
 
 	window.onload = function()
 	{
@@ -57,7 +60,9 @@
 
   		tempBlock = new VariableBlock({x:browserWidth/2-50,y:browserHeight/2-50},{width:100,height:100});
 
-  		//tempBlock.sayHi();
+  		tempSprite = new SpriteNode("img/test_sprite.png",27,10,{width:135,height:135},{x:200,y:200},7,4);
+
+  		update();
 	};
 	window.onresize = function()
 	{
@@ -70,16 +75,27 @@
 	// Setup Leap loop with frame callback function
 	var controllerOptions = {enableGestures: true};
 	
-	Leap.loop(controllerOptions, function(frame) {
-		ctx.clearRect(0,0,browserWidth,browserHeight);
-		//commented to test varible block code
-		//drawUI(frame);
-		//console.log(tempBlock);
-		tempBlock.blockHoverTest(frame,ctx);
-		drawFingers(frame);
-		drawUI(frame);
-		//pinch(frame);
+	Leap.loop(controllerOptions, function(f) {
+		//console.log(f);
+		globalFrame = f;
 	});
+	function update()
+	{
+		if (globalFrame)
+		{
+			ctx.clearRect(0,0,browserWidth,browserHeight);
+				//commented to test varible block code
+				//tempBlock.blockHoverTest(globalFrame,ctx);
+			drawFingers(globalFrame);
+			drawUI(globalFrame);
+
+			//tempSprite.draw(ctx,globalFrame);
+		}
+
+
+		window.requestAnimationFrame(update);
+		//console.log(globalFrame);
+	}
 	function drawFingers(frame)
 	{
 		for (var i in frame.hands)
@@ -417,9 +433,6 @@
 			
 		//because of the inversion when dealing with screen
 		y = browserHeight - y;
-
-			
-			
 			
 		$circ.css({
 				left:x,
@@ -434,8 +447,6 @@
 		var z = pos[2],oldz=z;
 		
 		z = map(z,-50,100,20,100);
-		
-		//console.log(z+', '+oldz);
 		
 		var op = map(z,20,80,.2,.8);
 		
@@ -478,6 +489,7 @@
 	function pointIntersectsRect(pt,rect)
 	{
 		return (pt.x > rect.x && pt.x < rect.x + rect.width && pt.y > rect.y && pt.y < rect.y + rect.height);
+	}
 	function pinch(frame){
 		STATE_CAN_PINCH = false;
 		if(frame.hands.length == 2)
