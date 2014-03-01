@@ -41,6 +41,10 @@
 
 	var globalFrame;
 
+	//dragging objects variables
+	var STATE_CAN_DRAG = false;
+	var STATE_DRAG
+
 	window.onload = function()
 	{
 		browserWidth = window.innerWidth;
@@ -329,6 +333,7 @@
 		previousFrame = frame;
 		pinch(frame);
 		zoom(frame);
+		drag(frame);
 
 	}
 	function isCloseToDestination(pos,dest)
@@ -566,10 +571,42 @@
 							STATE_ZOOM = false;
 						}
 					}
-				}
-				
+				}	
 				
 			}
+		}
+	}
+	function drag(frame){
+		if(frame.hands.length == 1)
+		{
+			var grab = frame.hands[0];
+			//check for a fist or grab
+			if(grab.fingers.length == 1)
+			{
+				//find the position of the fist
+				var grab_position;
+				grab_position = grab.palmPosition;
+				//console.log(grab_position[0]); // x pos of grab
+				//console.log(grab_position[2]); // z pos of grab
+				for(var i in floatingBlocks)
+					{
+						var b = floatingBlocks[i];
+						//check for x and y position of the box that is being grabbed
+						var bx = b.position[0];
+						var by = b.position[1];
+						if(grab_position[1] > by)
+						{
+							console.log(by);
+							console.log("above the boxes");
+						}
+					}
+
+				if(grab_position[2] < 200)
+				{
+					console.log("selected");	
+				}
+			}
+			
 		}
 	}
 </script>
