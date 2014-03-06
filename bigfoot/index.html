@@ -8,6 +8,7 @@
 <!--//load classes-->
 <script src="classes/VariableBlock.js"></script>
 <script src="classes/SpriteNode.js"></script>
+<script src="classes/Cutscene.js"></script>
 <script>
 	var previousFrame = null;
 	var paused = false;
@@ -37,7 +38,7 @@
 
 	var floatingBlocks = [];
 
-	var tempBlock, tempSprite;
+	var tempBlock, tempSprite, tempCutscene;
 
 	var globalFrame;
 
@@ -56,11 +57,9 @@
   		dragCircle.y = browserHeight - 100;
   		dragCircle.radius = 10;
 
-  		console.log("working");
-
   		tempBlock = new VariableBlock({x:browserWidth/2-50,y:browserHeight/2-50},{width:100,height:100});
 
-  		tempSprite = new SpriteNode("img/test_sprite.png",27,10,{width:135,height:135},{x:200,y:200},7,4);
+  		tempSprite = new SpriteNode("img/test_sprite.png",24,4,{width:150,height:145},{x:200,y:200},6,4);
 
   		update();
 	};
@@ -83,13 +82,21 @@
 	{
 		if (globalFrame)
 		{
+			if (!tempCutscene)
+			{
+				tempCutscene = new Cutscene(globalFrame.timestamp);
+				tempCutscene.init();
+			}
+
 			ctx.clearRect(0,0,browserWidth,browserHeight);
 				//commented to test varible block code
 				//tempBlock.blockHoverTest(globalFrame,ctx);
-			drawFingers(globalFrame);
-			drawUI(globalFrame);
+			//drawFingers(globalFrame);
+			//drawUI(globalFrame);
 
 			//tempSprite.draw(ctx,globalFrame);
+
+			tempCutscene.update(globalFrame,ctx);
 		}
 
 

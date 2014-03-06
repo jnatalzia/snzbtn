@@ -13,6 +13,7 @@ window.SpriteNode = function(src,numFrames,framesBetween,sizeV,posV,cols,rows)
 
 	this.numColumns = cols;
 	this.numRows = rows;
+	this.isOnScreen = true;
 
 	this.draw = function(ctx,frame)
 	{
@@ -35,11 +36,6 @@ window.SpriteNode = function(src,numFrames,framesBetween,sizeV,posV,cols,rows)
 		//draw current frame
 		var sx = this.size.width * (this.frameNumber%this.numColumns);
 		var sy = this.size.height * Math.floor(this.frameNumber/this.numColumns);
-
-		//get row
-		//var sy = this.spriteSheet.height/this.size.height * Math.floor(this.spriteSheet.height/this.size.height/this.frameNumber);
-
-		//console.log(sx + ", "  +sy);
 
 		ctx.drawImage(this.spriteSheet,sx,sy,this.size.width,this.size.height,this.pos.x,this.pos.y,this.size.width,this.size.height);
 	}
