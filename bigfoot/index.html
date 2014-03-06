@@ -9,6 +9,7 @@
 <script src="classes/VariableBlock.js"></script>
 <script src="classes/SpriteNode.js"></script>
 <script src="classes/Cutscene.js"></script>
+<script src="classes/Hand.js"></script>
 <script>
 	var previousFrame = null;
 	var paused = false;
@@ -37,8 +38,7 @@
 	toolboxIMG.src = "img/toolbox.png";
 
 	var floatingBlocks = [];
-
-	var tempBlock, tempSprite, tempCutscene;
+	var tempBlock, tempSprite, tempCutscene, tempHand;
 
 	var globalFrame;
 
@@ -59,7 +59,9 @@
 
   		tempBlock = new VariableBlock({x:browserWidth/2-50,y:browserHeight/2-50},{width:100,height:100});
 
-  		tempSprite = new SpriteNode("img/test_sprite.png",24,4,{width:150,height:145},{x:200,y:200},6,4);
+  		tempSprite = new SpriteNode("img/test_sprite.png",27,10,{width:135,height:135},{x:200,y:200},7,4);
+  		
+  		tempHand = new Hand();
 
   		update();
 	};
@@ -95,7 +97,6 @@
 			//drawUI(globalFrame);
 
 			//tempSprite.draw(ctx,globalFrame);
-
 			tempCutscene.update(globalFrame,ctx);
 		}
 
@@ -127,6 +128,7 @@
 				ctx.fill();
 				ctx.closePath();
 			}
+		tempHand.draw(frame,ctx);
 			
 	}
 	function drawUI(frame)
@@ -516,21 +518,21 @@
 				f2.y = f2.tipPosition[1];
 				var sub = getSubtractedVector(f1,f2);
 				var mag = getMagnitude(sub);
-				console.log('Magnitude: '+mag);
+				//console.log('Magnitude: '+mag);
 				
 				if (mag < 100)
 				{
 					if(currentMag-mag > 0)
 					{
-						console.log('pinching');
+						//console.log('pinching');
 						STATE_CAN_PINCH = false;
 						STATE_PINCH = true;
 						gameState = STATE_PINCH;
 						currentMag = mag;
-						console.log('currentMag: '+currentMag);
+						//console.log('currentMag: '+currentMag);
 						if (mag < 30)
 						{
-							console.log("touching");
+							//console.log("touching");
 							STATE_PINCH = false;
 						}
 					}
@@ -561,15 +563,15 @@
 				{
 					if(currentMag-mag < 0)
 					{
-						console.log('zooming');
+						//console.log('zooming');
 						STATE_CAN_ZOOM = false;
 						STATE_ZOOM = true;
 						gameState = STATE_ZOOM;
 						currentMag = mag;
-						console.log('currentMag: '+currentMag);
+						//console.log('currentMag: '+currentMag);
 						if (mag > 100)
 						{
-							console.log("zoomed");
+							//console.log("zoomed");
 							STATE_ZOOM = false;
 						}
 					}
