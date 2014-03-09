@@ -165,9 +165,5 @@ window.Hand = function()
 
 		//draw current frame
 	}
-	this.handPosition = function(x,y)
-	{
-		
-	}
 }
 

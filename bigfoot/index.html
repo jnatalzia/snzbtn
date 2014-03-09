@@ -42,6 +42,9 @@
 
 	var globalFrame;
 
+	var STATE_CAN_DRAG = false;
+	var STATE_DRAG;
+
 	window.onload = function()
 	{
 		browserWidth = window.innerWidth;
@@ -339,7 +342,55 @@
 		previousFrame = frame;
 		pinch(frame);
 		zoom(frame);
+		drag(frame);
+	}
+	function drag(frame){
+		if(frame.hands.length == 1)
+		{
+			var grab = frame.hands[0];
+			//check for a fist or grab
+			if(grab.fingers.length == 1)
+			{
+				var one_finger = true;
+				//find the position of the fist
+				var grab_position;
+				grab_position = grab.fingers[0].tipPosition;
 
+				var grab_positionX = map(grab_position[0], -150, 150,0,browserWidth);
+				var grab_positionY = map(grab_position[1], 100, 300, browserHeight,0);
+				//console.log("block x works: " + grab_positionX);
+				//console.log("block y works: " + grab_positionY);
+
+				for(var i in floatingBlocks)
+				{
+					var b = floatingBlocks[i];
+					var bx = b.position.x;
+					var by = b.position.y;
+
+					if(grab_positionX <= bx + 100 && grab_positionX >= bx - 100 && grab_positionY <= by + 100 && grab_positionY >= by - 100)
+						{
+							console.log(b);
+							b.isBeingDragged  = true;
+
+						}
+						else if(b.isBeingDragged)
+						{	
+							b.position.x = grab_positionX;
+							b.position.y = grab_positionY;
+						}
+					
+				}
+				
+			}
+			else
+			{
+				for(var i in floatingBlocks)
+				{
+					floatingBlocks[i].isBeingDragged = false;
+				}
+			}
+			
+		}
 	}
 	function isCloseToDestination(pos,dest)
 	{
