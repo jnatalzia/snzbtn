@@ -35,7 +35,23 @@
 	var currentMag = 100;
 
 	var toolboxIMG = new Image(),toolBox;
-	toolboxIMG.src = "img/toolbox.png";
+	toolboxIMG.src = "img/wires/toolBox/closed.png";
+
+	var buildBar = new Image();
+	buildBar.src = "img/wires/buildBar.png";
+
+	var runBtnActive = new Image();
+	runBtnActive.src = "img/wires/runBTN_active.png";
+
+	var runBtnInactive = new Image();
+	runBtnInactive.src = "img/wires/runBTN_inactive.png";
+
+	var exitBtn = new Image();
+	exitBtn.src = "img/wires/exitBTN.png";
+
+	var arrowIcon = new Image();
+	arrowIcon.src = "img/wires/arrow.png";
+
 
 	var floatingBlocks = [];
 	var tempBlock, tempSprite, tempCutscene, tempHand;
@@ -60,7 +76,7 @@
   		dragCircle.y = browserHeight - 100;
   		dragCircle.radius = 10;
 
-  		tempBlock = new VariableBlock({x:browserWidth/2-50,y:browserHeight/2-50},{width:100,height:100});
+  		tempBlock = new VariableBlock({x:browserWidth/2-50,y:browserHeight/2-150},{width:100,height:100});
 
   		tempSprite = new SpriteNode("img/test_sprite.png",27,10,{width:135,height:135},{x:200,y:200},7,4);
   		
@@ -97,7 +113,7 @@
 				//commented to test varible block code
 				//tempBlock.blockHoverTest(globalFrame,ctx);
 			drawFingers(globalFrame);
-			//drawUI(globalFrame);
+			drawUI(globalFrame);
 
 			//tempSprite.draw(ctx,globalFrame);
 			//tempCutscene.update(globalFrame,ctx);
@@ -141,10 +157,14 @@
 		ctx.fillStyle = "#919191";
 		ctx.drawImage(toolboxIMG,browserWidth/10 - 55, browserHeight - 150, 100, 100);
 
-		ctx.strokeStyle = "#eee";
-		ctx.strokeRect( 10, 10, browserWidth - 20, browserHeight - 200);
+		ctx.strokeStyle = "#000";
+		ctx.strokeRect( 10, 10, browserWidth - 20, browserHeight - 250);
 
-		ctx.strokeRect(browserWidth /10 + 100, browserHeight - 150, browserWidth/3*2, 100);
+		//placeholder toolbar
+		//ctx.strokeRect(browserWidth /10 + 100, browserHeight - 150, browserWidth/3*2, 100);
+
+		//actual toolbar
+		ctx.drawImage(buildBar,browserWidth /10 + 150, browserHeight - 210);
 
 		//ui
 		if (gameState === STATE_TOOLBOX_CLOSED)

@@ -14,6 +14,15 @@ window.VariableBlock = function(pos,size)
 
 	this.startAngles = [];
 
+	var glassTitle = new Image();
+	glassTitle.src = "img/wires/radialMenu/bottomLeft.png";
+	var metalTitle = new Image();
+	metalTitle.src = "img/wires/radialMenu/topLeft.png";
+	var woodTitle = new Image();
+	woodTitle.src = "img/wires/radialMenu/topRight.png";
+	var cancelTitle = new Image();
+	cancelTitle.src = "img/wires/radialMenu/bottomRight.png";
+
 	this.pointIsInside = function(pt)
 	{
 		return (pt.x > this.pos.x && pt.x < this.pos.x + this.size.width && pt.y > this.pos.y && pt.y < this.pos.y + this.size.height);
@@ -21,30 +30,26 @@ window.VariableBlock = function(pos,size)
 	//test options
 	this.options = [
 		{
-			title:"Play",
-			fillColor:"#000",
-			isHighlighted: false
-		},
-		{
-			title:"Ready",
-			fillColor:"#000",
-			isHighlighted: false
-		},
-		{
 			title:"Cancel",
 			fillColor:"#000",
 			isHighlighted: false
 		},
 		{
-			title:"Ready",
+			title:"Glass",
 			fillColor:"#000",
 			isHighlighted: false
 		},
 		{
-			title:"Cancel",
+			title:"Metal",
 			fillColor:"#000",
 			isHighlighted: false
-		}
+		},
+		{
+			title:"Wood",
+			fillColor:"#000",
+			isHighlighted: false
+		},
+
 	];
 	this.getCenterPos = function(){
 		return {x:this.pos.x + (this.size.width/2),y:this.pos.y + (this.size.height/2)};
@@ -60,7 +65,7 @@ window.VariableBlock = function(pos,size)
 		var block = this;
 		//draw block
 		//fix this stuff
-		var wheelRadius = block.size.width+100;
+		var wheelRadius = block.size.width+130;
 		if (frame.hands.length == 1 && frame.hands[0].fingers.length == 1)
 		{
 
@@ -180,11 +185,14 @@ window.VariableBlock = function(pos,size)
 				ctx.lineTo(np.x,np.y);
 				ctx.lineTo(block.pos.x + block.size.width/2,block.pos.y+ block.size.height/2);
 				ctx.closePath();
-
+				ctx.drawImage(glassTitle,block.pos.x+ block.size.width/2-wheelRadius, block.pos.y + block.size.height/2);
+				ctx.drawImage(metalTitle,block.pos.x+ block.size.width/2-wheelRadius, block.pos.y + block.size.height/2-wheelRadius);
+				ctx.drawImage(woodTitle,block.pos.x+ block.size.width/2, block.pos.y + block.size.height/2-wheelRadius);
+				ctx.drawImage(cancelTitle,block.pos.x+ block.size.width/2, block.pos.y + block.size.height/2);
 				ctx.stroke();
 				if (block.options[i].isHighlighted)
 				{
-					ctx.fillStyle = "#FF0000";
+					ctx.fillStyle = "#ccc";
 					ctx.fill();
 				}
 
@@ -193,7 +201,7 @@ window.VariableBlock = function(pos,size)
 				ctx.font = "24pt Arial";
 				ctx.textAlign = "center";
 
-				ctx.fillText(i,p.x,p.y);
+				//ctx.fillText(i,p.x,p.y);
 
 			}
 
