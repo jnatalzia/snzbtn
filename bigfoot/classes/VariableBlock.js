@@ -32,7 +32,7 @@ window.VariableBlock = function(pos,size)
 		{
 			title:"Cancel",
 			fillColor:"#000",
-			isHighlighted: false
+			isHighlighted: false,
 		},
 		{
 			title:"Glass",
@@ -86,7 +86,7 @@ window.VariableBlock = function(pos,size)
 			if (this.pointIsInside({x:fx,y:fy}))
 			{
 				//console.log('works');
-				setTimeout(function()
+				this.optionTimer = setTimeout(function()
 				{
 					block.displayOptions = true;
 				},2000);
@@ -131,6 +131,7 @@ window.VariableBlock = function(pos,size)
 						{
 							selected = block.options[i];
 							block.displayOptions = false;
+							console.log(selected.title);
 							break;
 						}
 					}
@@ -138,6 +139,11 @@ window.VariableBlock = function(pos,size)
 					//console.log(selected);
 				}
 			}
+		}
+		else
+		{
+			clearTimeout(this.optionTimer);
+			this.displayOptions = false;
 		}
 
 		if (block.displayOptions)
