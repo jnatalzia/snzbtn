@@ -15,8 +15,8 @@ function getCorrectedSize(size)
 
 	var ratio = {width:window.innerWidth/1920,height:window.innerHeight/1080};
 
-	newpos.width = size.width * ratio.width;
-	newpos.height = size.height * ratio.height;
+	newsize.width = size.width * ratio.width;
+	newsize.height = size.height * ratio.height;
 
 	return newsize;
 }
