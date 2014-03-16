@@ -6,6 +6,8 @@ function getCorrectedPosition(pos)
 
 	newpos.x = pos.x * ratio.width;
 	newpos.y = pos.y * ratio.height;
+
+	return newpos;
 }
 function getCorrectedSize(size)
 {
@@ -15,4 +17,6 @@ function getCorrectedSize(size)
 
 	newpos.width = size.width * ratio.width;
 	newpos.height = size.height * ratio.height;
+
+	return newsize;
 }
