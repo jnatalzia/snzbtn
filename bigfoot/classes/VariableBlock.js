@@ -1,7 +1,20 @@
-window.VariableBlock = function(pos,size)
+window.VariableBlock = function(dest,size,options)
 {
-	this.pos = pos;
-	this.size = size;
+	this.destination = getCorrectedPosition(dest);
+	this.size = getCorrectedSize(size);
+
+	this.isBeingDragged= false;
+
+	this.image = new Image();
+	this.image.src = 'img/emptyVariable.png';
+
+	this.position = getCorrectedPosition({
+			x:browserWidth/2 - this.size.width/2,
+			y:browserHeight + this.size.height/2
+		});
+
+	this.initialPosition = this.destination;
+
 	this.displayOptions = false;
 	this.optionTimer = undefined;
 
@@ -9,10 +22,13 @@ window.VariableBlock = function(pos,size)
 	this.optionBlockHeight = 40;
 	this.optionBlockPadding = 20;
 
+	this.isMoving = false;
 
 	this.selectedOption=undefined;
 
 	this.startAngles = [];
+
+	this.value = "";
 
 	var glassTitle = new Image();
 	glassTitle.src = "img/wires/radialMenu/bottomLeft.png";
@@ -23,44 +39,24 @@ window.VariableBlock = function(pos,size)
 	var cancelTitle = new Image();
 	cancelTitle.src = "img/wires/radialMenu/bottomRight.png";
 
+	this.isSlotted = false;
+	this.slot = undefined;
+
 	this.pointIsInside = function(pt)
 	{
-		return (pt.x > this.pos.x && pt.x < this.pos.x + this.size.width && pt.y > this.pos.y && pt.y < this.pos.y + this.size.height);
+		return (pt.x > this.position.x && pt.x < this.position.x + this.size.width && pt.y > this.position.y && pt.y < this.position.y + this.size.height);
 	}
 	//test options
-	this.options = [
-		{
-			title:"Cancel",
-			fillColor:"#000",
-			isHighlighted: false,
-		},
-		{
-			title:"Glass",
-			fillColor:"#000",
-			isHighlighted: false
-		},
-		{
-			title:"Metal",
-			fillColor:"#000",
-			isHighlighted: false
-		},
-		{
-			title:"Wood",
-			fillColor:"#000",
-			isHighlighted: false
-		},
-
-	];
+	this.options = options;
 	this.getCenterPos = function(){
-		return {x:this.pos.x + (this.size.width/2),y:this.pos.y + (this.size.height/2)};
+		return {x:this.position.x + (this.size.width/2),y:this.position.y + (this.size.height/2)};
 	}
 	//test function
 	this.sayHi = function()
 	 {
 	 	console.log('hi');
 	 }
-
-	 this.blockHoverTest = function (frame,ctx){
+	 this.draw = function (frame,ctx){
 		//
 		var block = this;
 		//draw block
@@ -132,6 +128,12 @@ window.VariableBlock = function(pos,size)
 							selected = block.options[i];
 							block.displayOptions = false;
 							console.log(selected.title);
+							if (selected.title != 'cancel') 
+							{
+								block.value = selected.title;
+
+								this.image.src = selected.onSelect();
+							}
 							break;
 						}
 					}
@@ -146,7 +148,7 @@ window.VariableBlock = function(pos,size)
 			this.displayOptions = false;
 		}
 
-		if (block.displayOptions)
+		if (block.displayOptions && !block.isSlotted)
 		{
 			//console.log('running');
 			
@@ -185,16 +187,16 @@ window.VariableBlock = function(pos,size)
 				//draw arc
 				ctx.strokeStyle = "#000000";
 				ctx.beginPath();
-				ctx.moveTo(block.pos.x + block.size.width/2,block.pos.y+ block.size.height/2);
+				ctx.moveTo(block.position.x + block.size.width/2,block.position.y+ block.size.height/2);
 				ctx.lineTo(p.x,p.y);
-				ctx.arc(block.pos.x + block.size.width/2,block.pos.y + block.size.height/2,wheelRadius,sAngle,eAngle);
+				ctx.arc(block.position.x + block.size.width/2,block.position.y + block.size.height/2,wheelRadius,sAngle,eAngle);
 				ctx.lineTo(np.x,np.y);
-				ctx.lineTo(block.pos.x + block.size.width/2,block.pos.y+ block.size.height/2);
+				ctx.lineTo(block.position.x + block.size.width/2,block.position.y+ block.size.height/2);
 				ctx.closePath();
-				ctx.drawImage(glassTitle,block.pos.x+ block.size.width/2-wheelRadius, block.pos.y + block.size.height/2);
-				ctx.drawImage(metalTitle,block.pos.x+ block.size.width/2-wheelRadius, block.pos.y + block.size.height/2-wheelRadius);
-				ctx.drawImage(woodTitle,block.pos.x+ block.size.width/2, block.pos.y + block.size.height/2-wheelRadius);
-				ctx.drawImage(cancelTitle,block.pos.x+ block.size.width/2, block.pos.y + block.size.height/2);
+				ctx.drawImage(glassTitle,block.position.x+ block.size.width/2-wheelRadius, block.position.y + block.size.height/2);
+				ctx.drawImage(metalTitle,block.position.x+ block.size.width/2-wheelRadius, block.position.y + block.size.height/2-wheelRadius);
+				ctx.drawImage(woodTitle,block.position.x+ block.size.width/2, block.position.y + block.size.height/2-wheelRadius);
+				ctx.drawImage(cancelTitle,block.position.x+ block.size.width/2, block.position.y + block.size.height/2);
 				ctx.stroke();
 				if (block.options[i].isHighlighted)
 				{
@@ -214,7 +216,7 @@ window.VariableBlock = function(pos,size)
 			//console.log(block.startAngles);
 		}
 		ctx.fillStyle = "#000";
-		ctx.fillRect(this.pos.x,this.pos.y,this.size.width,this.size.height);
+		ctx.drawImage(this.image,this.position.x,this.position.y,this.size.width,this.size.height);
 	}
 
 

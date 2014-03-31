@@ -56,7 +56,7 @@ window.Hand = function()
 			else
 			{
 				Hand.x = hand.fingers[0].tipPosition[0];
-				Hand.y = hand.fingers[0].tipPosition[1];
+				Hand.y = hand.fingers[0].tipPosition[1]-10;
 			}
 			this.handX = map(Hand.x,-150,150,0,browserWidth);
 			this.handY = map(Hand.y,100,300,browserHeight,0);

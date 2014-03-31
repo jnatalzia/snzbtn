@@ -1,22 +1,13 @@
-window.Cutscene = function(timestamp)
+window.Cutscene = function(timestamp, sprites, movements)
 {
 	this.timestamp = timestamp;
 
 	this.lastTime = 0;
 	//will eventually be made up of spritenode objects
-	this.sprites = {
-		man:{
-			image:"man.png",
-			pos:{x:100,y:100},
-			isOnScreen:true
-		},
-		duck:{
-			image:'duck.png',
-			pos:{x:1000,y:100},
-			isOnScreen:false
-		}
-	};
-	this.movements = [
+	this.sprites = sprites;
+	this.movements = movements;
+
+	/*[
 		{
 			sprite:this.sprites.man,
 			startingPos:{x:100,y:100},
@@ -31,9 +22,17 @@ window.Cutscene = function(timestamp)
 
 			}
 		}
-	];
+	];*/
+
 	this.init = function()
 	{
+		for (var i in this.movements)
+		{
+			var m = this.movements[i];
+
+			m.startingPos = getCorrectedPosition(m.startingPos);
+			m.endingPos = getCorrectedPosition(m.endingPos);
+		}
 
 	}
 	this.update = function(frame,ctx)

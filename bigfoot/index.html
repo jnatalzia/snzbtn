@@ -9,9 +9,13 @@
 <script src="utilities/helper.js"></script>
 <script src="classes/VariableBlock.js"></script>
 <script src="classes/SpriteNode.js"></script>
+<script src="classes/DragSpot.js"></script>
 <script src="classes/Cutscene.js"></script>
 <script src="classes/Hand.js"></script>
+<script src="classes/LevelOne.js"></script>
 <script>
+	var debug = true;
+
 	var previousFrame = null;
 	var paused = false;
 	var pauseOnGesture = false;
@@ -62,6 +66,9 @@
 	var STATE_CAN_DRAG = false;
 	var STATE_DRAG;
 
+	//Level Vars
+	var currLevelNum = 1,currLevel;
+
 	window.onload = function()
 	{
 		browserWidth = window.innerWidth;
@@ -77,11 +84,12 @@
   		dragCircle.y = browserHeight - 100;
   		dragCircle.radius = 10;
 
-  		tempBlock = new VariableBlock({x:browserWidth/2-50,y:browserHeight/2-150},{width:100,height:100});
-
-  		tempSprite = new SpriteNode("img/test_sprite.png",27,10,{width:135,height:135},{x:200,y:200},7,4);
-  		
   		tempHand = new Hand();
+
+  		//load all levels
+  		currLevel = new LevelOne();
+
+  		console.log(currLevel);
 
   		update();
 	};
@@ -104,20 +112,15 @@
 	{
 		if (globalFrame)
 		{
-			if (!tempCutscene)
-			{
-				tempCutscene = new Cutscene(globalFrame.timestamp);
-				tempCutscene.init();
-			}
 
 			ctx.clearRect(0,0,browserWidth,browserHeight);
-				//commented to test varible block code
-			tempBlock.blockHoverTest(globalFrame,ctx);
-			drawFingers(globalFrame);
-			//drawUI(globalFrame);
+			//commented to test varible block code
+			//tempBlock.blockHoverTest(globalFrame,ctx);
+			currLevel.update(ctx,globalFrame);
 
-			//tempSprite.draw(ctx,globalFrame);
-			//tempCutscene.update(globalFrame,ctx);
+
+			if (debug) drawFingers(globalFrame);
+			drawUI(globalFrame);
 		}
 
 
@@ -148,24 +151,34 @@
 				ctx.fill();
 				ctx.closePath();
 			}
-		
-		tempHand.draw(frame,ctx);
 			
 	}
 	function drawUI(frame)
 	{
 		//DRAW COMMON UI ELEMENTS
+		var toolboxPos = getCorrectedPosition({x:100,y:810});
+		var toolboxSize = getCorrectedSize({width:toolboxIMG.width,height:toolboxIMG.height});
+
 		ctx.fillStyle = "#919191";
-		ctx.drawImage(toolboxIMG,browserWidth/10 - 55, browserHeight - 150, 100, 100);
+		ctx.drawImage(toolboxIMG,toolboxPos.x,toolboxPos.y, toolboxSize.width, toolboxSize.height);
 
+
+		var stagePos = getCorrectedPosition({x:20,y:20}),
+		stageSize = getCorrectedSize({width:1880, height:750});
 		ctx.strokeStyle = "#000";
-		ctx.strokeRect( 10, 10, browserWidth - 20, browserHeight - 250);
+		ctx.strokeRect( stagePos.x,stagePos.y,stageSize.width,stageSize.height);
 
+		var runPos = getCorrectedPosition({x:1700,y:800}),
+		runSize = getCorrectedSize({width:200,height:200});
+
+		ctx.drawImage(runBtnActive,runPos.x,runPos.y, runSize.width, runSize.height);
 		//placeholder toolbar
 		//ctx.strokeRect(browserWidth /10 + 100, browserHeight - 150, browserWidth/3*2, 100);
 
 		//actual toolbar
-		ctx.drawImage(buildBar,browserWidth /10 + 150, browserHeight - 210);
+		var buildSize = getCorrectedSize({width:buildBar.width,height:buildBar.height});
+		var buildPos = getCorrectedPosition({x:400, y:800});
+		ctx.drawImage(buildBar,buildPos.x,buildPos.y,buildSize.width,buildSize.height);
 
 		//ui
 		if (gameState === STATE_TOOLBOX_CLOSED)
@@ -175,6 +188,20 @@
 			ctx.arc(dragCircle.x,dragCircle.y,dragCircle.radius,0,2*Math.PI);
 			ctx.fill();
 			ctx.closePath();
+
+			//draw current blocks
+			for (var i in currLevel.spotsToDrag)
+			{
+				var s = currLevel.spotsToDrag[i];
+				var b = s.slottedBlock;
+
+				if (b != undefined)
+				{
+					/*ctx.fillStyle = "#000";
+					ctx.fillRect(s.x-.width/2,s.y-s.height/2,s.width,s.height);*/
+					ctx.drawImage(b.image,b.position.x,b.position.y,b.size.width,b.size.height);
+				}
+			}
 
 
 			if (frame.hands[0])
@@ -223,44 +250,43 @@
 		}
 		else if (gameState === STATE_TOOLBOX_OPEN)
 		{
+
 			ctx.globalAlpha = .75;
 			ctx.fillStyle = "#000";
 			ctx.fillRect(0,0,browserWidth,browserHeight);
 			ctx.globalAlpha = 1;
 
-			if (toolBox.isMoving)
+			//draw spots to drag
+
+			if (floatingBlocks.length == 0)
 			{
-				//move this stuff
-				toolBox.y -= 4.5;
-				if (toolBox.y < browserHeight - 250)
-				{
-					toolBox.isMoving = false;
-					floatingBlocks = [];
-					createBlocks();
-				}
+				floatingBlocks = currLevel.blocks;
+				//console.log("running");
 			}
-			ctx.drawImage(toolboxIMG,toolBox.x,toolBox.y,toolBox.width,toolBox.height);
 
 			for (var i in floatingBlocks)
 			{
 				var b = floatingBlocks[i];
-				if (b.isMoving)
-				{
-						//get destination vector and scale by block speed
-						if (isCloseToDestination(b.position,b.destination))
-						{
-							b.isMoving = false;
-						}
-						else
-						{
-							var idealVec = getSubtractedVector(b.position,b.destination);
-							//arbitrary block speed
-							idealVec = getNormalizedVector(idealVec);
-							idealVec = getScaledVector(idealVec,12);
 
-							b.position.x += idealVec.x;
-							b.position.y += idealVec.y;
-						}	
+				if (isCloseToDestination(b.position,b.destination))
+				{
+					b.isMoving = false;
+				}
+				else
+				{
+					b.isMoving = true;
+				}
+				if (b.isMoving && !b.isSlotted)
+				{
+
+					var idealVec = getSubtractedVector(b.position,b.destination);
+					//arbitrary block speed
+					idealVec = getNormalizedVector(idealVec);
+					idealVec = getScaledVector(idealVec,12);
+
+					b.position.x += idealVec.x;
+					b.position.y += idealVec.y;
+					
 				}
 				else
 				{
@@ -268,8 +294,7 @@
 
 				}
 				//draw it
-				ctx.fillStyle = b.fill;
-				ctx.fillRect(b.position.x,b.position.y,b.size.width,b.size.height);
+				b.draw(globalFrame,ctx);
 			}
 
 			if (previousFrame.fingers.length == 5)
@@ -298,7 +323,22 @@
 				}
 				//console.log(frame.gestures);
 			}
-			drawFingers(frame);
+
+						//temp array of center locations
+			var spotsToDrag = currLevel.spotsToDrag;
+
+			for (var i = spotsToDrag.length - 1; i >= 0; i--) {
+				var s = spotsToDrag[i];
+
+				ctx.strokeStyle = "#ff0000";
+				ctx.lineWidth = 4;
+				ctx.strokeRect(s.position.x - 50,s.position.y - 50,s.size.width,s.size.height);
+			};
+
+			//console.log(spotsToDrag);
+
+			drag(globalFrame,spotsToDrag);
+			//drawFingers(frame);
 		}
 		//fix this to impolemetn in the STATE_TOOLBOX OPEN
 		else if (gameState == STATE_TOOLBOX_CLOSING){
@@ -307,80 +347,31 @@
 			ctx.fillRect(0,0,browserWidth,browserHeight);
 			ctx.globalAlpha = 1;
 
-			if (toolBox.isMoving)
-			{
-				//move this stuff
-				toolBox.y -= 4.5;
-				if (toolBox.y < browserHeight - 250)
-				{
-					toolBox.isMoving = false;
-					floatingBlocks = [];
-					createBlocks();
-				}
-			}
-			ctx.drawImage(toolboxIMG,toolBox.x,toolBox.y,toolBox.width,toolBox.height);
+			console.log(currLevel.spotsToDrag);
 
-			var allBlocksClosed = true;
-			for (var i in floatingBlocks)
-			{
-				var b = floatingBlocks[i];
-				if (b.isMoving)
-				{
-						//get destination vector and scale by block speed
-						if (isCloseToDestination(b.position,b.destination))
-						{
-							b.isMoving = false;
-						}
-						else
-						{
-							var idealVec = getSubtractedVector(b.position,b.destination);
-							//arbitrary block speed
-							idealVec = getNormalizedVector(idealVec);
-							idealVec = getScaledVector(idealVec,12);
+			gameState = STATE_TOOLBOX_CLOSED;
+			//drawFingers(frame);
 
-							b.position.x += idealVec.x;
-							b.position.y += idealVec.y;
-						}	
-						allBlocksClosed = false;
-				}
-				else
-				{
-					//perlin noise it around;
-
-				}
-				//draw it
-				ctx.fillStyle = b.fill;
-				ctx.fillRect(b.position.x,b.position.y,b.size.width,b.size.height);
-				if (allBlocksClosed)
-				{
-					gameState = STATE_TOOLBOX_CLOSED;
-					$('.circ').remove();
-				}
-			}
-			drawFingers(frame);
 		}
-
+		tempHand.draw(frame,ctx);
 		previousFrame = frame;
-		pinch(frame);
-		zoom(frame);
-		drag(frame);
+		/*pinch(frame);
+		zoom(frame);*/
 	}
-	function drag(frame){
+	function drag(frame, spotsToDrag){
 		if(frame.hands.length == 1)
 		{
 			var grab = frame.hands[0];
 			//check for a fist or grab
-			if(grab.fingers.length == 1)
+			if(grab.fingers.length == 0)
 			{
 				var one_finger = true;
 				//find the position of the fist
 				var grab_position;
-				grab_position = grab.fingers[0].tipPosition;
+				grab_position = grab.palmPosition;
 
 				var grab_positionX = map(grab_position[0], -150, 150,0,browserWidth);
 				var grab_positionY = map(grab_position[1], 100, 300, browserHeight,0);
-				//console.log("block x works: " + grab_positionX);
-				//console.log("block y works: " + grab_positionY);
 
 				for(var i in floatingBlocks)
 				{
@@ -388,17 +379,88 @@
 					var bx = b.position.x;
 					var by = b.position.y;
 
-					if(grab_positionX <= bx + 100 && grab_positionX >= bx - 100 && grab_positionY <= by + 100 && grab_positionY >= by - 100)
-						{
-							console.log(b);
-							b.isBeingDragged  = true;
-
-						}
-						else if(b.isBeingDragged)
+					if(b.isBeingDragged)
 						{	
-							b.position.x = grab_positionX;
-							b.position.y = grab_positionY;
-						}
+							b.position.x = grab_positionX - b.size.width/2;
+							b.position.y = grab_positionY - b.size.height/2;
+
+							//check for collision with spots to drag
+							var distSub = getSubtractedVector(b.position,spotsToDrag[0]);
+							var dist = getMagnitude(distSub);
+
+
+
+								var touchingSpots = [];
+								for (var k in spotsToDrag)
+								{
+									var s = spotsToDrag[k];
+
+									var spotSize = s.size;
+									var sPos = s.position;
+									var sOrigin = {x:sPos.x-spotSize.width/2,y:sPos.y-spotSize.height/2};
+
+									//debugger;
+
+									if(!(b.position.y+b.size.height < sOrigin.y ||
+									   b.position.y > sOrigin.y+spotSize.height ||
+									   b.position.x > sOrigin.x+spotSize.width ||
+									   b.position.x+b.size.width < sOrigin.x
+									   ))
+									{
+										//debugger;
+										touchingSpots.push(s);
+									}
+
+								}
+								if (touchingSpots.length == 1)
+								{
+									var spot = touchingSpots[0];
+									b.destination = {x:spot.position.x-spot.size.width/2,y:spot.position.y-spot.size.height/2};
+									b.position = {x:spot.position.x-spot.size.width/2,y:spot.position.y-spot.size.height/2};
+									
+									spot.slottedBlock = b;
+									//console.log(spot.slottedBlock);
+									b.isSlotted = true;
+									b.slot = spot;
+
+									//console.log('touching spots = 1');
+								}
+								else
+								{
+									//console.log('touchingSpots = 0');
+									b.destination = b.initialPosition;
+									//console.log('called');
+									b.isSlotted = false;
+									if (b.slot) b.slot.slottedBlock = undefined;
+									//console.log('called');
+									b.slot = undefined;
+								}
+								//console.log(spotsToDrag[k].slottedBlock);
+							if (dist > 400)
+							{
+								b.destination = b.initialPosition;
+								//console.log('called');
+								b.isSlotted = false;
+								if (b.slot)	b.slot.slottedBlock = undefined;
+								b.slot = undefined;
+							}
+					}
+					else if(grab_positionX <= bx + 100 && grab_positionX >= bx - 100 && grab_positionY <= by + 100 && grab_positionY >= by - 100)
+					{
+							//console.log(b);
+							var canDrag = true;
+							for (var k in floatingBlocks)
+							{
+								var b2 = floatingBlocks[k];
+								if (b2.isBeingDragged)
+								{
+									canDrag = false;
+								}
+							}
+							if (canDrag)
+								b.isBeingDragged  = true;
+					}
+						
 					
 				}
 				
@@ -407,7 +469,12 @@
 			{
 				for(var i in floatingBlocks)
 				{
-					floatingBlocks[i].isBeingDragged = false;
+					if (floatingBlocks[i].isBeingDragged)
+					{
+						var f = floatingBlocks[i];
+						f.isBeingDragged = false;
+						f.isMoving = true;
+					}
 				}
 			}
 			
@@ -415,6 +482,8 @@
 	}
 	function isCloseToDestination(pos,dest)
 	{
+		//console.log(pos+ ", " + dest);
+
 		var sub = getSubtractedVector(pos,dest);
 		var mag = getMagnitude(sub);
 		if (mag < 10)
@@ -462,42 +531,11 @@
 			y:v1.y*scalar
 		};
 	}
-	function createBlocks()
-	{
-		var numBlocks = 6; //test variable
-		for (var i = 0; i < numBlocks; i++)
-		{
-			var b = {};
-			b.size = {width:100,height:100}; //testNumbers
-			b.position = {
-				x:browserWidth/2 - b.size.width/2,
-				y:browserHeight + b.size.height/2
-			}//starting pos
-			b.initialPosition = {
-				x:browserWidth/2 - b.size.width/2,
-				y:browserHeight + b.size.height/2
-			};
-			//these should be based on the current 'i' value 
-			b.destination = {
-				x:browserWidth/numBlocks * i + 80,
-				y:50
-			};//do some math
-			b.fill = "#fff";
-			b.isMoving = true;
-			floatingBlocks.push(b);
-		}
-	}
 	function openToolbox()
 	{
 		console.log(toolboxIMG);
 
 		gameState = STATE_TOOLBOX_OPEN;
-		toolBox = {};
-		toolBox.width = browserWidth/3;
-		toolBox.height = browserWidth/3;
-		toolBox.x = browserWidth/2 - toolBox.width/2;
-		toolBox.y = browserHeight;
-		toolBox.isMoving = true;
 	}
 	
 	function setCirclePos($circ,point)
