@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>Leap Motion JavaScript Sample</title>
+<title>Spark*</title>
 <script src="http://js.leapmotion.com/0.2.0/leap.min.js"></script>
 <script src="jquery.js"></script>
 <!--//load classes-->
@@ -14,7 +14,7 @@
 <script src="classes/Hand.js"></script>
 <script src="classes/LevelOne.js"></script>
 <script>
-	var debug = true;
+	var debug = false;
 
 	var previousFrame = null;
 	var paused = false;
@@ -81,7 +81,7 @@
 
   		dragCircle = {};
   		dragCircle.x = browserWidth/10 - 5;
-  		dragCircle.y = browserHeight - 100;
+  		dragCircle.y = browserHeight - 50;
   		dragCircle.radius = 10;
 
   		tempHand = new Hand();
@@ -156,20 +156,20 @@
 	function drawUI(frame)
 	{
 		//DRAW COMMON UI ELEMENTS
-		var toolboxPos = getCorrectedPosition({x:100,y:810});
+		var toolboxPos = getCorrectedPosition({x:100,y:890});
 		var toolboxSize = getCorrectedSize({width:toolboxIMG.width,height:toolboxIMG.height});
 
 		ctx.fillStyle = "#919191";
 		ctx.drawImage(toolboxIMG,toolboxPos.x,toolboxPos.y, toolboxSize.width, toolboxSize.height);
 
 
-		var stagePos = getCorrectedPosition({x:20,y:20}),
-		stageSize = getCorrectedSize({width:1880, height:750});
+		var stagePos = getCorrectedPosition({x:0,y:0}),
+		stageSize = getCorrectedSize({width:1920, height:875});
 		ctx.strokeStyle = "#000";
 		ctx.strokeRect( stagePos.x,stagePos.y,stageSize.width,stageSize.height);
 
-		var runPos = getCorrectedPosition({x:1700,y:800}),
-		runSize = getCorrectedSize({width:200,height:200});
+		var runPos = getCorrectedPosition({x:1700,y:890}),
+		runSize = getCorrectedSize({width:175,height:175});
 
 		ctx.drawImage(runBtnActive,runPos.x,runPos.y, runSize.width, runSize.height);
 		//placeholder toolbar
@@ -177,7 +177,7 @@
 
 		//actual toolbar
 		var buildSize = getCorrectedSize({width:buildBar.width,height:buildBar.height});
-		var buildPos = getCorrectedPosition({x:400, y:800});
+		var buildPos = getCorrectedPosition({x:350, y:880});
 		ctx.drawImage(buildBar,buildPos.x,buildPos.y,buildSize.width,buildSize.height);
 
 		//ui
@@ -229,7 +229,7 @@
 				if (hand.fingers.length > 0)
 				{
 					startDragY = -1;
-					dragCircle.y = browserHeight - 100;
+					dragCircle.y = browserHeight - 50;
 				}
 				if (circlesIntersect(c1,dragCircle) && hand.fingers.length <= 0 && startDragY == -1)
 				{
