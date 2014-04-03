@@ -28,7 +28,7 @@
 
 	var startDragY = -1;
 
-	var dragCircle; // Here ------------- maybe change to dragSquare
+	var dragCircle;
 
 	var STATE_TOOLBOX_OPEN = 0,STATE_TOOLBOX_CLOSED= 1,STATE_TOOLBOX_CLOSING = 2;
 	var gameState = 1;
@@ -78,7 +78,6 @@
 		ctx = canvas.getContext("2d");
 		ctx.canvas.width  = window.innerWidth;
   		ctx.canvas.height = window.innerHeight;
-  		//Here ------------------------------ Change this things 
   		dragCircle = {};
   		dragCircle.x = browserWidth/10 - 5;
   		dragCircle.y = browserHeight - 100;
@@ -181,14 +180,18 @@
 		var buildPos = getCorrectedPosition({x:400, y:800});
 		ctx.drawImage(buildBar,buildPos.x,buildPos.y,buildSize.width,buildSize.height);
 
+		//set dragcircleSize to toolbox size
+		dragCircle.width = toolboxSize.width;
+		dragCircle.height = toolboxSize.height;
+
 		//ui
 		if (gameState === STATE_TOOLBOX_CLOSED)
 		{
 			ctx.fillStyle = "#E04C4C";
 			//ctx.fillStyle = "rgba(255,255,255,0.4)"; // adds a opacity to the rect for dragging
 			ctx.beginPath();
-			//ctx.arc(dragCircle.x,dragCircle.y,dragCircle.radius,0,2*Math.PI);  // makes a DragCircle
-			ctx.rect(toolboxPos.x,toolboxPos.y,toolboxSize.width,toolboxSize.height); // makes a rect for the toolbox opening
+			//ctx.arc(dragCircle.x,dragCircle.y,dragCircle.radius,0,2*Math.PI);  // makes a Circle for the toolbox opening
+			ctx.rect(toolboxPos.x,toolboxPos.y,dragCircle.width,dragCircle.height); // makes a rect for the toolbox opening
 			ctx.fill();
 			ctx.closePath();
 
