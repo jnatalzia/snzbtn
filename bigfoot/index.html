@@ -78,11 +78,11 @@
 		ctx = canvas.getContext("2d");
 		ctx.canvas.width  = window.innerWidth;
   		ctx.canvas.height = window.innerHeight;
-
   		dragCircle = {};
   		dragCircle.x = browserWidth/10 - 5;
+
   		dragCircle.y = browserHeight - 50;
-  		dragCircle.radius = 10;
+  		dragCircle.radius = 50;
 
   		tempHand = new Hand();
 
@@ -180,12 +180,18 @@
 		var buildPos = getCorrectedPosition({x:350, y:880});
 		ctx.drawImage(buildBar,buildPos.x,buildPos.y,buildSize.width,buildSize.height);
 
+		//set dragcircleSize to toolbox size
+		dragCircle.width = toolboxSize.width;
+		dragCircle.height = toolboxSize.height;
+
 		//ui
 		if (gameState === STATE_TOOLBOX_CLOSED)
 		{
 			ctx.fillStyle = "#E04C4C";
+			//ctx.fillStyle = "rgba(255,255,255,0.4)"; // adds a opacity to the rect for dragging
 			ctx.beginPath();
-			ctx.arc(dragCircle.x,dragCircle.y,dragCircle.radius,0,2*Math.PI);
+			//ctx.arc(dragCircle.x,dragCircle.y,dragCircle.radius,0,2*Math.PI);  // makes a Circle for the toolbox opening
+			ctx.rect(toolboxPos.x,toolboxPos.y,dragCircle.width,dragCircle.height); // makes a rect for the toolbox opening
 			ctx.fill();
 			ctx.closePath();
 
