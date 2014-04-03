@@ -2,6 +2,57 @@ window.LevelOne = function()
 {
 	var LevelOne = function() //takes in all init parameters here
 	{
+		//toolbox vars
+		this.debug = true;
+
+		this.previousFrame = null;
+		this.paused = false;
+		this.pauseOnGesture = false;
+		this.browserWidth= 0;
+		this.browserHeight=0;
+		this.circdi=20;
+
+		this.startDragY = -1;
+
+		this.dragCircle;
+
+		this.STATE_TOOLBOX_OPEN = 0;
+		this.STATE_TOOLBOX_CLOSED= 1;
+		this.STATE_TOOLBOX_CLOSING = 2;
+		this.gameState = 1;
+
+		this.STATE_CAN_PINCH = false;
+		this.STATE_PINCH = false;
+		this.STATE_CAN_ZOOM = false;
+		this.STATE_ZOOM = false;
+		this.currentMag = 100;
+
+		this.toolboxIMG = new Image();
+		this.toolBox = undefined;
+		this.toolboxIMG.src = "img/wires/toolBox/closed.png";
+
+		this.buildBar = new Image();
+		this.buildBar.src = "img/wires/buildBar.png";
+
+		this.runBtnActive = new Image();
+		this.runBtnActive.src = "img/wires/runBTN_active.png";
+
+		this.runBtnInactive = new Image();
+		this.runBtnInactive.src = "img/wires/runBTN_inactive.png";
+
+		this.exitBtn = new Image();
+		this.exitBtn.src = "img/wires/exitBTN.png";
+
+		this.arrowIcon = new Image();
+		this.arrowIcon.src = "img/wires/arrow.png";
+
+
+		this.floatingBlocks = [];
+
+		this.STATE_CAN_DRAG = false;
+		this.STATE_DRAG = 1;
+
+
 		//gamestates
 		this.STATE_CUTSCENE = 0;
 		this.STATE_BUILDING = 1;
@@ -132,6 +183,20 @@ window.LevelOne = function()
 
 	}
 
+	p.onloaded = function()
+	{
+		this.browserWidth = window.innerWidth;
+		this.browserHeight = window.innerHeight;
+
+  		this.dragCircle = {};
+  		this.dragCircle.x = browserWidth/10 - 5;
+
+  		this.dragCircle.y = browserHeight - 50;
+  		this.dragCircle.radius = 50;
+
+  		this.tempHand = new Hand();
+	}
+
 	p.update = function(ctx,frame)
 	{
 		for (var s in this.houseSprites)
@@ -198,8 +263,463 @@ window.LevelOne = function()
 			s.draw(ctx);
 		};*/
 
-		
+		//toolbox updating
+		if (this.debug) this.drawFingers(frame,ctx);
+		this.drawUI(frame,ctx);
+
+		this.previousFrame = frame;
+
 	}
+
+	p.drawFingers = function(frame,ctx)
+	{
+		for (var i in frame.hands)
+			for (var k in frame.hands[i].fingers)
+			{
+				var finger = frame.hands[i].fingers[k];
+				var pos = finger.stabilizedTipPosition;
+
+				var fx = pos[0];
+				var fy = pos[1];
+				var fz = pos[2];
+						
+						
+					//draw the finger on screen
+				fx = map(fx,-150,150,0,browserWidth);
+				fy = map(fy,100,300,0,browserHeight);
+
+				fy = browserHeight - fy;
+				ctx.fillStyle = "#E04C4C";
+				ctx.beginPath();
+				ctx.arc(fx,fy,10,0,2*Math.PI);
+				ctx.fill();
+				ctx.closePath();
+			}
+			
+	}
+	p.drawUI = function(frame,ctx)
+	{
+		//DRAW COMMON UI ELEMENTS
+		var toolboxPos = getCorrectedPosition({x:100,y:890});
+		var toolboxSize = getCorrectedSize({width:this.toolboxIMG.width,height:this.toolboxIMG.height});
+
+		ctx.fillStyle = "#919191";
+		ctx.drawImage(this.toolboxIMG,toolboxPos.x,toolboxPos.y, toolboxSize.width, toolboxSize.height);
+
+
+		var stagePos = getCorrectedPosition({x:0,y:0}),
+		stageSize = getCorrectedSize({width:1920, height:875});
+		ctx.strokeStyle = "#000";
+		ctx.strokeRect( stagePos.x,stagePos.y,stageSize.width,stageSize.height);
+
+		var runPos = getCorrectedPosition({x:1700,y:890}),
+		runSize = getCorrectedSize({width:175,height:175});
+
+		ctx.drawImage(this.runBtnActive,runPos.x,runPos.y, runSize.width, runSize.height);
+		//placeholder toolbar
+		//ctx.strokeRect(browserWidth /10 + 100, browserHeight - 150, browserWidth/3*2, 100);
+
+		//actual toolbar
+		var buildSize = getCorrectedSize({width:this.buildBar.width,height:this.buildBar.height});
+		var buildPos = getCorrectedPosition({x:350, y:880});
+		ctx.drawImage(this.buildBar,buildPos.x,buildPos.y,buildSize.width,buildSize.height);
+
+		//set dragcircleSize to toolbox size
+		this.dragCircle.width = toolboxSize.width;
+		this.dragCircle.height = toolboxSize.height;
+
+		//ui
+		if (this.gameState === this.STATE_TOOLBOX_CLOSED)
+		{
+			//console.log('closed');
+			ctx.beginPath();
+			//ctx.arc(dragCircle.x,dragCircle.y,dragCircle.radius,0,2*Math.PI);  // makes a Circle for the toolbox opening
+			ctx.rect(toolboxPos.x,toolboxPos.y,this.dragCircle.width,this.dragCircle.height); // makes a rect for the toolbox opening
+			ctx.fill();
+			ctx.closePath();
+
+			//draw current blocks
+			for (var i in this.spotsToDrag)
+			{
+				var s = this.spotsToDrag[i];
+				var b = s.slottedBlock;
+
+				if (b != undefined)
+				{
+					/*ctx.fillStyle = "#000";
+					ctx.fillRect(s.x-.width/2,s.y-s.height/2,s.width,s.height);*/
+					ctx.drawImage(b.image,b.position.x,b.position.y,b.size.width,b.size.height);
+				}
+			}
+
+
+			if (frame.hands[0])
+			{
+				var hand = frame.hands[0];
+				var x = hand.palmPosition[0];
+				var y = hand.palmPosition[1];
+				//console.log(hand);
+
+				var handX = map(x,-150,150,0,browserWidth);
+				var handY = map(y,100,300,browserHeight,0);
+
+				//console.log(handX+", "+handY);
+
+				ctx.fillStyle = "#4CE083";
+				ctx.beginPath();
+				ctx.arc(handX,handY,20,0,2*Math.PI);
+				ctx.fill();
+				ctx.closePath();
+				//check for placement over pullup
+				var c1 = {};
+				c1.x = handX;
+				c1.y = handY;
+				c1.radius = 20;
+				if (hand.fingers.length > 0)
+				{
+					this.startDragY = -1;
+					this.dragCircle.y = this.browserHeight - 50;
+				}
+				if (circlesIntersect(c1,this.dragCircle) && hand.fingers.length <= 0 && this.startDragY == -1)
+				{
+					console.log("PALM");
+					this.startDragY = c1.y;
+				}
+				if (this.startDragY != -1)
+				{
+					this.dragCircle.y = c1.y;
+					if (this.startDragY - c1.y > 100)
+					{
+						//console.log("UITHINGSHAPPEN");
+						this.openToolbox();
+					}
+				}
+				
+			}
+		}
+		else if (this.gameState === this.STATE_TOOLBOX_OPEN)
+		{
+
+			ctx.globalAlpha = .75;
+			ctx.fillStyle = "#000";
+			ctx.fillRect(0,0,this.browserWidth,this.browserHeight);
+			ctx.globalAlpha = 1;
+
+			//draw spots to drag
+
+			if (this.floatingBlocks.length == 0)
+			{
+				this.floatingBlocks = this.blocks;
+				//console.log("running");
+			}
+
+			for (var i in this.floatingBlocks)
+			{
+				var b = this.floatingBlocks[i];
+
+				if (isCloseToDestination(b.position,b.destination))
+				{
+					b.isMoving = false;
+				}
+				else
+				{
+					b.isMoving = true;
+				}
+				if (b.isMoving && !b.isSlotted)
+				{
+
+					var idealVec = getSubtractedVector(b.position,b.destination);
+					//arbitrary block speed
+					idealVec = getNormalizedVector(idealVec);
+					idealVec = getScaledVector(idealVec,12);
+
+					b.position.x += idealVec.x;
+					b.position.y += idealVec.y;
+					
+				}
+				else
+				{
+					//perlin noise it around;
+
+				}
+				//draw it
+				b.draw(globalFrame,ctx);
+			}
+
+			if (this.previousFrame.fingers.length == 5)
+			{
+				//retract blocks
+				var gestureRecognized = false;
+				for (var i in frame.gestures)
+				{
+					var g = frame.gestures[i];
+					if(g.type == "swipe" && !this.gestureRecognized)
+					{
+						if (g.direction[1] < -.75)
+						{
+							console.log("CLOSE");
+							this.gestureRecognized = true;
+							for (var i in this.floatingBlocks)
+							{
+								var b = this.floatingBlocks[i];
+								b.isMoving = true;
+								b.destination = b.initialPosition;
+								this.gameState = this.STATE_TOOLBOX_CLOSING;
+							}
+						}
+						//console.log(g.direction[1]);
+					}
+				}
+				//console.log(frame.gestures);
+			}
+
+						//temp array of center locations
+			var spotsToDrag = this.spotsToDrag;
+
+			for (var i = spotsToDrag.length - 1; i >= 0; i--) {
+				var s = spotsToDrag[i];
+
+				ctx.strokeStyle = "#ff0000";
+				ctx.lineWidth = 4;
+				ctx.strokeRect(s.position.x - 50,s.position.y - 50,s.size.width,s.size.height);
+			};
+
+			//console.log(spotsToDrag);
+			this.gestureRecognized = false;
+			this.drag(globalFrame,spotsToDrag);
+			//drawFingers(frame);
+		}
+		//fix this to impolemetn in the STATE_TOOLBOX OPEN
+		else if (this.gameState == this.STATE_TOOLBOX_CLOSING){
+			console.log('closing');
+
+			ctx.globalAlpha = .75;
+			ctx.fillStyle = "#000";
+			ctx.fillRect(0,0,this.browserWidth,this.browserHeight);
+			ctx.globalAlpha = 1;
+
+			//console.log(this.spotsToDrag);
+
+			this.gameState = this.STATE_TOOLBOX_CLOSED;
+			//drawFingers(frame);
+
+		}
+		this.tempHand.draw(frame,ctx);
+		/*pinch(frame);
+		zoom(frame);*/
+	}
+	p.drag = function(frame, spotsToDrag){
+		if(frame.hands.length == 1)
+		{
+			var grab = frame.hands[0];
+			//check for a fist or grab
+			if(grab.fingers.length == 0)
+			{
+				var one_finger = true;
+				//find the position of the fist
+				var grab_position;
+				grab_position = grab.palmPosition;
+
+				var grab_positionX = map(grab_position[0], -150, 150,0,browserWidth);
+				var grab_positionY = map(grab_position[1], 100, 300, browserHeight,0);
+
+				for(var i in this.floatingBlocks)
+				{
+					var b = this.floatingBlocks[i];
+					var bx = b.position.x;
+					var by = b.position.y;
+
+					if(b.isBeingDragged)
+						{	
+							b.position.x = grab_positionX - b.size.width/2;
+							b.position.y = grab_positionY - b.size.height/2;
+
+							//check for collision with spots to drag
+							var distSub = getSubtractedVector(b.position,spotsToDrag[0]);
+							var dist = getMagnitude(distSub);
+
+
+
+								var touchingSpots = [];
+								for (var k in spotsToDrag)
+								{
+									var s = spotsToDrag[k];
+
+									var spotSize = s.size;
+									var sPos = s.position;
+									var sOrigin = {x:sPos.x-spotSize.width/2,y:sPos.y-spotSize.height/2};
+
+									//debugger;
+
+									if(!(b.position.y+b.size.height < sOrigin.y ||
+									   b.position.y > sOrigin.y+spotSize.height ||
+									   b.position.x > sOrigin.x+spotSize.width ||
+									   b.position.x+b.size.width < sOrigin.x
+									   ))
+									{
+										//debugger;
+										touchingSpots.push(s);
+									}
+
+								}
+								if (touchingSpots.length == 1)
+								{
+									var spot = touchingSpots[0];
+									b.destination = {x:spot.position.x-spot.size.width/2,y:spot.position.y-spot.size.height/2};
+									b.position = {x:spot.position.x-spot.size.width/2,y:spot.position.y-spot.size.height/2};
+									
+									spot.slottedBlock = b;
+									//console.log(spot.slottedBlock);
+									b.isSlotted = true;
+									b.slot = spot;
+
+									//console.log('touching spots = 1');
+								}
+								else
+								{
+									//console.log('touchingSpots = 0');
+									b.destination = b.initialPosition;
+									//console.log('called');
+									b.isSlotted = false;
+									if (b.slot) b.slot.slottedBlock = undefined;
+									//console.log('called');
+									b.slot = undefined;
+								}
+								//console.log(spotsToDrag[k].slottedBlock);
+							if (dist > 400)
+							{
+								b.destination = b.initialPosition;
+								//console.log('called');
+								b.isSlotted = false;
+								if (b.slot)	b.slot.slottedBlock = undefined;
+								b.slot = undefined;
+							}
+					}
+					else if(grab_positionX <= bx + 100 && grab_positionX >= bx - 100 && grab_positionY <= by + 100 && grab_positionY >= by - 100)
+					{
+							//console.log(b);
+							var canDrag = true;
+							for (var k in this.floatingBlocks)
+							{
+								var b2 = this.floatingBlocks[k];
+								if (b2.isBeingDragged)
+								{
+									canDrag = false;
+								}
+							}
+							if (canDrag)
+								b.isBeingDragged  = true;
+					}
+						
+					
+				}
+				
+			}
+			else
+			{
+				for(var i in this.floatingBlocks)
+				{
+					if (this.floatingBlocks[i].isBeingDragged)
+					{
+						var f = this.floatingBlocks[i];
+						f.isBeingDragged = false;
+						f.isMoving = true;
+					}
+				}
+			}
+			
+		}
+	}
+
+	p.openToolbox = function()
+	{
+		//console.log(toolboxIMG);
+
+		this.gameState = this.STATE_TOOLBOX_OPEN;
+	}
+
+	/*p.pinch = function(frame){
+		STATE_CAN_PINCH = false;
+		if(frame.hands.length == 2)
+		{
+			var h1 = frame.hands[0];
+			var h2 = frame.hands[1];
+
+			if(h1.fingers.length == 1 && h2.fingers.length == 1)
+			{
+				STATE_CAN_PINCH = true;
+				gameState = STATE_CAN_PINCH;
+				var f1 = frame.fingers[0];
+				var f2 = frame.fingers[1];
+				f1.x = f1.tipPosition[0];
+				f1.y = f1.tipPosition[1];
+				f2.x = f2.tipPosition[0];
+				f2.y = f2.tipPosition[1];
+				var sub = getSubtractedVector(f1,f2);
+				var mag = getMagnitude(sub);
+				//console.log('Magnitude: '+mag);
+				
+				if (mag < 100)
+				{
+					if(currentMag-mag > 0)
+					{
+						//console.log('pinching');
+						STATE_CAN_PINCH = false;
+						STATE_PINCH = true;
+						gameState = STATE_PINCH;
+						currentMag = mag;
+						//console.log('currentMag: '+currentMag);
+						if (mag < 30)
+						{
+							//console.log("touching");
+							STATE_PINCH = false;
+						}
+					}
+				}
+			}
+		}
+	}
+	p.zoom = function(frame){
+		if(frame.hands.length == 2)
+		{
+			var h1 = frame.hands[0];
+			var h2 = frame.hands[1];
+
+			if(h1.fingers.length == 1 && h2.fingers.length == 1)
+			{
+				STATE_CAN_ZOOM = true;
+				gameState = STATE_CAN_ZOOM;
+				var f1 = frame.fingers[0];
+				var f2 = frame.fingers[1];
+				f1.x = f1.tipPosition[0];
+				f1.y = f1.tipPosition[1];
+				f2.x = f2.tipPosition[0];
+				f2.y = f2.tipPosition[1];
+				var sub = getSubtractedVector(f1,f2);
+				var mag = getMagnitude(sub);
+				
+				if (mag > 30)
+				{
+					if(currentMag-mag < 0)
+					{
+						//console.log('zooming');
+						STATE_CAN_ZOOM = false;
+						STATE_ZOOM = true;
+						gameState = STATE_ZOOM;
+						currentMag = mag;
+						//console.log('currentMag: '+currentMag);
+						if (mag > 100)
+						{
+							//console.log("zoomed");
+							STATE_ZOOM = false;
+						}
+					}
+				}
+				
+				
+			}
+		}
+	}*/
 
 	return LevelOne;
 }();
