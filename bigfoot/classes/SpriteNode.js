@@ -22,6 +22,8 @@ window.SpriteNode = function(src,numFrames,framesBetween,sizeV,posV,cols,rows,is
 	this.numRows = rows;
 	this.isOnScreen = isOnScreen;
 
+	this.alpha = 1;
+
 	this.draw = function(ctx)
 	{
 		if (this.isOnScreen)
@@ -48,7 +50,11 @@ window.SpriteNode = function(src,numFrames,framesBetween,sizeV,posV,cols,rows,is
 
 
 			if (this.spriteSheet != undefined)
+			{
+				ctx.globalAlpha = (this.alpha<0)?0:this.alpha;
 				ctx.drawImage(this.spriteSheet,sx,sy,this.originalSize.width,this.originalSize.height,this.pos.x,this.pos.y,this.size.width,this.size.height);
+				ctx.globalAlpha = 1;
+			}
 			else
 			{
 

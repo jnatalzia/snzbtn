@@ -16,36 +16,11 @@ window.LevelOne = function()
 
 		this.dragCircle;
 
-		this.STATE_TOOLBOX_OPEN = 0;
-		this.STATE_TOOLBOX_CLOSED= 1;
-		this.STATE_TOOLBOX_CLOSING = 2;
-		this.gameState = 1;
-
 		this.STATE_CAN_PINCH = false;
 		this.STATE_PINCH = false;
 		this.STATE_CAN_ZOOM = false;
 		this.STATE_ZOOM = false;
 		this.currentMag = 100;
-
-		this.toolboxIMG = new Image();
-		this.toolBox = undefined;
-		this.toolboxIMG.src = "img/wires/toolBox/closed.png";
-
-		this.buildBar = new Image();
-		this.buildBar.src = "img/wires/buildBar.png";
-
-		this.runBtnActive = new Image();
-		this.runBtnActive.src = "img/wires/runBTN_active.png";
-
-		this.runBtnInactive = new Image();
-		this.runBtnInactive.src = "img/wires/runBTN_inactive.png";
-
-		this.exitBtn = new Image();
-		this.exitBtn.src = "img/wires/exitBTN.png";
-
-		this.arrowIcon = new Image();
-		this.arrowIcon.src = "img/wires/arrow.png";
-
 
 		this.floatingBlocks = [];
 
@@ -54,9 +29,25 @@ window.LevelOne = function()
 
 
 		//gamestates
-		this.STATE_CUTSCENE = 0;
+		this.toolboxState = 1;
+
+		this.STATE_TOOLBOX_OPEN = 0;
+		this.STATE_TOOLBOX_CLOSED= 1;
+		this.STATE_TOOLBOX_CLOSING = 2;
+
+		this.gameState = 0;
+		this.STATE_WHALE_SCARED = 0;
 		this.STATE_BUILDING = 1;
 		this.STATE_RUNNING = 2;
+
+		//substates (for helping hands and stuff)
+		this.substate = 0;
+		this.SUBSTATE_FIRST_OPEN = 1;
+		this.SUBSTATE_SECOND_OPEN = 2;
+		this.SUBSTATE_BG_TRANSITION = 3;
+
+
+		this.startTimeout = undefined;
 
 		this.loadAssets();
 
@@ -123,22 +114,27 @@ window.LevelOne = function()
 			this.spotsToDrag.push(new DragSpot(pos.x,pos.y,spotSize.width,spotSize.height));
 		}
 
+		this.startHitBox = {
+			pos:getCorrectedPosition({x:1700,y:890}),
+			size:getCorrectedSize({width:175,height:175})
+		};
+
 	}
 
 	var p = LevelOne.prototype;
 
 	p.loadAssets = function()
 	{
-		var lvl1Size = {width:237,height:114};
-		var lvl2Size = {width:230,height:128};
-		var lvl3Size = {width:231,height:129};
+		var lvl1Size = {width:490,height:243};
+		var lvl2Size = {width:490,height:268};
+		var lvl3Size = {width:490,height:267};
 
-		var lvl1Pos = {x:880,y:500},
-		lvl2Pos = {x:880,y:350},
-		lvl3Pos = {x:880,y:200};
+		var lvl1Pos = {x:700,y:600},
+		lvl2Pos = {x:700,y:350},
+		lvl3Pos = {x:700,y:95};
 		
 		//var whaleSize = getCorrectedSize({width:350,height:222});
-		var whaleSize = {width:350,height:222};
+		var whaleSize = {width:483,height:313};
 
 		var wood1 = new SpriteNode("img/lvl1/wood_LV1.png",1,-1,lvl1Size,lvl1Pos,1,1,true);
 		
@@ -164,11 +160,18 @@ window.LevelOne = function()
 
 		this.emptyLevels = [placeholder1,placeholder2,placeholder3];
 
-		this.whaleSprite = new SpriteNode("img/lvl1/whale_fly.png",323,2,whaleSize,{x:100,y:400},19,17,true);
+		this.normalWhale = new SpriteNode("img/lvl1/whale_fly.png",162,3,whaleSize,{x:-500,y:400},18,9,true);
+
+		this.whaleSprite = this.normalWhale;
 
 		this.whaleSprite.play();
 
 		this.lightbg = new SpriteNode("img/lvl1/bg-light.png",1,-1,{width:1920,height:875},{x:0,y:0},1,1,true);
+		this.darkbg = new SpriteNode("img/lvl1/bg-dark.png",1,-1,{width:1920,height:875},{x:0,y:0},1,1,true);
+
+		//tracks current bg
+		this.currentbg = this.lightbg;
+
 		this.houseSprites = {
 			bottom_wood:wood1,
 			middle_wood:wood2,
@@ -181,8 +184,45 @@ window.LevelOne = function()
 			top_glass:glass3,
 		};
 
-	}
+		//toolbox assets
+		this.toolboxIMG = new Image();
+		this.toolBox = undefined;
+		this.toolboxIMG.src = "img/wires/toolBox/closed.png";
 
+		this.buildBar = new Image();
+		this.buildBar.src = "img/wires/buildBar.png";
+
+		this.runBtnActive = new Image();
+		this.runBtnActive.src = "img/wires/runBTN_active.png";
+
+		this.runBtnInactive = new Image();
+		this.runBtnInactive.src = "img/wires/runBTN_inactive.png";
+
+		this.exitBtn = new Image();
+		this.exitBtn.src = "img/wires/exitBTN.png";
+
+		this.arrowIcon = new Image();
+		this.arrowIcon.src = "img/wires/arrow.png";
+
+		//helper grab hand
+		this.grabHelper = new SpriteNode('img/lvl1/grab_hand.png',1,1,{width:108,height:102},{x:135,y:920},1,1,true);
+
+
+		this.bees = [
+			new SpriteNode('img/lvl1/bee.png',97,1,{width:70,height:95},{x:-50,y:400},49,2,true),
+			new SpriteNode('img/lvl1/bee.png',97,1,{width:70,height:95},{x:0,y:400},49,2,true),
+			new SpriteNode('img/lvl1/bee.png',97,1,{width:70,height:95},{x:-30,y:500},49,2,true),
+			new SpriteNode('img/lvl1/bee.png',97,1,{width:70,height:95},{x:-100,y:400},49,2,true),
+			new SpriteNode('img/lvl1/bee.png',97,1,{width:70,height:95},{x:-50,y:400},49,2,true),
+			new SpriteNode('img/lvl1/bee.png',97,1,{width:70,height:95},{x:-80,y:500},49,2,true)
+		];
+		this.zombies = [
+			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:-100,y:650},32,5,true),
+			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:0,y:650},32,5,true),
+			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:-225,y:650},32,5,true)
+		];
+
+	}
 	p.onloaded = function()
 	{
 		this.browserWidth = window.innerWidth;
@@ -199,11 +239,36 @@ window.LevelOne = function()
 
 	p.update = function(ctx,frame)
 	{
+		if (this.gameState === this.STATE_WHALE_SCARED)
+		{
+			//move the whale
+			var speed = 10;
+			var destination = getCorrectedPosition({x:1400,y:400});
+
+
+			if (isCloseToDestination(this.whaleSprite.pos,destination))
+			{
+				this.gameState = this.STATE_BUILDING;
+				//console.log('working');	
+				this.substate = this.SUBSTATE_FIRST_OPEN;
+			}
+			else
+			{
+				var idealVec = getSubtractedVector(this.whaleSprite.pos,destination);
+				//arbitrary block speed
+				idealVec = getNormalizedVector(idealVec);
+				idealVec = getScaledVector(idealVec,speed);
+
+				this.whaleSprite.pos.x += idealVec.x;
+				this.whaleSprite.pos.y += idealVec.y;	
+
+			}
+		}
+
 		for (var s in this.houseSprites)
 		{
 			this.houseSprites[s].isOnScreen = false;
 		}
-		//if (this.state)
 		for (var i = 0; i < this.spotsToDrag.length;i++)
 		{
 			var spot = this.spotsToDrag[i];
@@ -241,8 +306,23 @@ window.LevelOne = function()
 				this.emptyLevels[i].isOnScreen = true;
 			}
 		}
+		if (this.substate === this.SUBSTATE_BG_TRANSITION)
+		{
+			this.darkbg.alpha += .025;
+			this.currentbg = this.darkbg;
 
-		this.lightbg.draw(ctx);
+			//console.log(this.darkbg.alpha);
+
+			if (this.darkbg.alpha >= 1)
+			{	
+				
+				this.substate = this.SUBSTATE_SECOND_OPEN;
+			}
+
+			this.lightbg.draw(ctx);
+			
+		}
+		this.currentbg.draw(ctx);
 		//all drawing and update logic goes here
 
 		for (var s in this.houseSprites)
@@ -257,13 +337,7 @@ window.LevelOne = function()
 		}
 
 		this.whaleSprite.draw(ctx);
-		/*for (var i = this.sprites.length - 1; i >= 0; i--) {
-			var s = this.sprites[i]
 
-			s.draw(ctx);
-		};*/
-
-		//toolbox updating
 		if (this.debug) this.drawFingers(frame,ctx);
 		this.drawUI(frame,ctx);
 
@@ -324,189 +398,335 @@ window.LevelOne = function()
 		var buildPos = getCorrectedPosition({x:350, y:880});
 		ctx.drawImage(this.buildBar,buildPos.x,buildPos.y,buildSize.width,buildSize.height);
 
+		if (this.debug) ctx.strokeRect(this.startHitBox.pos.x,this.startHitBox.pos.y,this.startHitBox.size.width,this.startHitBox.size.height);
+
+
+		//draw current blocks
+		for (var i in this.spotsToDrag)
+		{
+			var s = this.spotsToDrag[i];
+			var b = s.slottedBlock;
+
+			if (b != undefined)
+			{
+				/*ctx.fillStyle = "#000";
+				ctx.fillRect(s.x-.width/2,s.y-s.height/2,s.width,s.height);*/
+				ctx.drawImage(b.image,b.position.x,b.position.y,b.size.width,b.size.height);
+			}
+		}
+
 		//set dragcircleSize to toolbox size
 		this.dragCircle.width = toolboxSize.width;
 		this.dragCircle.height = toolboxSize.height;
 
+		if (this.gameState === this.STATE_BUILDING)
+		{
 		//ui
-		if (this.gameState === this.STATE_TOOLBOX_CLOSED)
-		{
-			//console.log('closed');
-			ctx.beginPath();
-			//ctx.arc(dragCircle.x,dragCircle.y,dragCircle.radius,0,2*Math.PI);  // makes a Circle for the toolbox opening
-			ctx.rect(toolboxPos.x,toolboxPos.y,this.dragCircle.width,this.dragCircle.height); // makes a rect for the toolbox opening
-			ctx.fill();
-			ctx.closePath();
-
-			//draw current blocks
-			for (var i in this.spotsToDrag)
+			this.updateToolbox(frame,ctx);
+			if (this.substate === this.SUBSTATE_FIRST_OPEN)
 			{
-				var s = this.spotsToDrag[i];
-				var b = s.slottedBlock;
-
-				if (b != undefined)
-				{
-					/*ctx.fillStyle = "#000";
-					ctx.fillRect(s.x-.width/2,s.y-s.height/2,s.width,s.height);*/
-					ctx.drawImage(b.image,b.position.x,b.position.y,b.size.width,b.size.height);
-				}
-			}
-
-
-			if (frame.hands[0])
-			{
-				var hand = frame.hands[0];
-				var x = hand.palmPosition[0];
-				var y = hand.palmPosition[1];
-				//console.log(hand);
-
-				var handX = map(x,-150,150,0,browserWidth);
-				var handY = map(y,100,300,browserHeight,0);
-
-				//console.log(handX+", "+handY);
-
-				ctx.fillStyle = "#4CE083";
-				ctx.beginPath();
-				ctx.arc(handX,handY,20,0,2*Math.PI);
-				ctx.fill();
-				ctx.closePath();
-				//check for placement over pullup
-				var c1 = {};
-				c1.x = handX;
-				c1.y = handY;
-				c1.radius = 20;
-				if (hand.fingers.length > 0)
-				{
-					this.startDragY = -1;
-					this.dragCircle.y = this.browserHeight - 50;
-				}
-				if (circlesIntersect(c1,this.dragCircle) && hand.fingers.length <= 0 && this.startDragY == -1)
-				{
-					console.log("PALM");
-					this.startDragY = c1.y;
-				}
-				if (this.startDragY != -1)
-				{
-					this.dragCircle.y = c1.y;
-					if (this.startDragY - c1.y > 100)
-					{
-						//console.log("UITHINGSHAPPEN");
-						this.openToolbox();
-					}
-				}
+				var start_pos = getCorrectedPosition({x:135,y:920});
+				var destination = getCorrectedPosition({x:135,y:800});
+				var speed = 1;
 				
-			}
-		}
-		else if (this.gameState === this.STATE_TOOLBOX_OPEN)
-		{
-
-			ctx.globalAlpha = .75;
-			ctx.fillStyle = "#000";
-			ctx.fillRect(0,0,this.browserWidth,this.browserHeight);
-			ctx.globalAlpha = 1;
-
-			//draw spots to drag
-
-			if (this.floatingBlocks.length == 0)
-			{
-				this.floatingBlocks = this.blocks;
-				//console.log("running");
-			}
-
-			for (var i in this.floatingBlocks)
-			{
-				var b = this.floatingBlocks[i];
-
-				if (isCloseToDestination(b.position,b.destination))
+				if (isCloseToDestination(this.grabHelper.pos,destination))
 				{
-					b.isMoving = false;
+					this.grabHelper.alpha -= .05;
+					if (this.grabHelper.alpha <= -5)
+					{
+						this.grabHelper.pos = start_pos;
+						this.grabHelper.alpha = 1;
+					}
 				}
 				else
 				{
-					b.isMoving = true;
-				}
-				if (b.isMoving && !b.isSlotted)
-				{
-
-					var idealVec = getSubtractedVector(b.position,b.destination);
+					var idealVec = getSubtractedVector(this.grabHelper.pos,destination);
 					//arbitrary block speed
 					idealVec = getNormalizedVector(idealVec);
-					idealVec = getScaledVector(idealVec,12);
+					idealVec = getScaledVector(idealVec,speed);
 
-					b.position.x += idealVec.x;
-					b.position.y += idealVec.y;
+					this.grabHelper.pos.x += idealVec.x;
+					this.grabHelper.pos.y += idealVec.y;	
+				}
+
+				this.grabHelper.draw(ctx);
+			}
+		}
+		else if (this.gameState == this.STATE_RUNNING)
+		{
+			//move all the bad things
+			var zombiespeed = 1.5,
+			beespeed = 3;
+
+			var destination = getCorrectedPosition({x:700,y:0});
+
+			for (var i in this.bees)
+			{
+				var bee = this.bees[i];
+				
+				if (bee.pos.x >= destination.x)
+				{
 					
 				}
 				else
 				{
-					//perlin noise it around;
+					var idealVec = getSubtractedVector(bee.pos,destination);
+					//arbitrary block speed
+					idealVec = getNormalizedVector(idealVec);
+					idealVec = getScaledVector(idealVec,beespeed);
 
+					bee.pos.x += idealVec.x;
+					//bee.pos.y += idealVec.y;
+
+					//return true;	
 				}
-				//draw it
-				b.draw(globalFrame,ctx);
-			}
 
-			if (this.previousFrame.fingers.length == 5)
+				bee.draw(ctx);
+			}
+			for (var i in this.zombies)
 			{
-				//retract blocks
-				var gestureRecognized = false;
-				for (var i in frame.gestures)
+				var zombie = this.zombies[i];
+
+				if (zombie.pos.x >= destination.x)
 				{
-					var g = frame.gestures[i];
-					if(g.type == "swipe" && !this.gestureRecognized)
-					{
-						if (g.direction[1] < -.75)
-						{
-							console.log("CLOSE");
-							this.gestureRecognized = true;
-							for (var i in this.floatingBlocks)
-							{
-								var b = this.floatingBlocks[i];
-								b.isMoving = true;
-								b.destination = b.initialPosition;
-								this.gameState = this.STATE_TOOLBOX_CLOSING;
-							}
-						}
-						//console.log(g.direction[1]);
-					}
+					
 				}
-				//console.log(frame.gestures);
+				else
+				{
+					var idealVec = getSubtractedVector(zombie.pos,destination);
+					//arbitrary block speed
+					idealVec = getNormalizedVector(idealVec);
+					idealVec = getScaledVector(idealVec,zombiespeed);
+
+					zombie.pos.x += idealVec.x;
+					//bee.pos.y += idealVec.y;
+
+					//return true;	
+				}
+
+				zombie.draw(ctx);
 			}
-
-						//temp array of center locations
-			var spotsToDrag = this.spotsToDrag;
-
-			for (var i = spotsToDrag.length - 1; i >= 0; i--) {
-				var s = spotsToDrag[i];
-
-				ctx.strokeStyle = "#ff0000";
-				ctx.lineWidth = 4;
-				ctx.strokeRect(s.position.x - 50,s.position.y - 50,s.size.width,s.size.height);
-			};
-
-			//console.log(spotsToDrag);
-			this.gestureRecognized = false;
-			this.drag(globalFrame,spotsToDrag);
-			//drawFingers(frame);
-		}
-		//fix this to impolemetn in the STATE_TOOLBOX OPEN
-		else if (this.gameState == this.STATE_TOOLBOX_CLOSING){
-			console.log('closing');
-
-			ctx.globalAlpha = .75;
-			ctx.fillStyle = "#000";
-			ctx.fillRect(0,0,this.browserWidth,this.browserHeight);
-			ctx.globalAlpha = 1;
-
-			//console.log(this.spotsToDrag);
-
-			this.gameState = this.STATE_TOOLBOX_CLOSED;
-			//drawFingers(frame);
 
 		}
 		this.tempHand.draw(frame,ctx);
 		/*pinch(frame);
 		zoom(frame);*/
+	}
+
+	p.updateToolbox = function(frame,ctx)
+	{
+		if (this.toolboxState === this.STATE_TOOLBOX_CLOSED)
+			{
+				//console.log('closed');
+				/*ctx.beginPath();
+				//ctx.arc(dragCircle.x,dragCircle.y,dragCircle.radius,0,2*Math.PI);  // makes a Circle for the toolbox opening
+				ctx.rect(toolboxPos.x,toolboxPos.y,this.dragCircle.width,this.dragCircle.height); // makes a rect for the toolbox opening
+				ctx.fill();
+				ctx.closePath();*/
+
+
+				if (frame.hands[0])
+				{
+					var hand = frame.hands[0];
+					var x = hand.palmPosition[0];
+					var y = hand.palmPosition[1];
+					//console.log(hand);
+
+					var handX = map(x,-150,150,0,browserWidth);
+					var handY = map(y,100,300,browserHeight,0);
+
+					//console.log(handX+", "+handY);
+
+					ctx.fillStyle = "#4CE083";
+					ctx.beginPath();
+					ctx.arc(handX,handY,20,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+					//check for placement over pullup
+					var c1 = {};
+					c1.x = handX;
+					c1.y = handY;
+					c1.radius = 20;
+					if (hand.fingers.length > 0)
+					{
+						this.startDragY = -1;
+						this.dragCircle.y = this.browserHeight - 50;
+					}
+					if (circlesIntersect(c1,this.dragCircle) && hand.fingers.length <= 0 && this.startDragY == -1)
+					{
+						console.log("PALM");
+						this.startDragY = c1.y;
+					}
+					if (this.startDragY != -1)
+					{
+						this.dragCircle.y = c1.y;
+						if (this.startDragY - c1.y > 100)
+						{
+							//console.log("UITHINGSHAPPEN");
+							this.openToolbox();
+						}
+					}
+
+					//test for intersection between one finger and startbtn
+					if (hand.fingers.length == 1)
+					{
+						var f = hand.fingers[0];
+						var fpos = f.stabilizedTipPosition;
+
+						var x = fpos[0];
+						var y = fpos[1];
+						//console.log(hand);
+
+						var fx = map(x,-150,150,0,browserWidth);
+						var fy = map(y,100,300,browserHeight,0);
+
+						var shb = this.startHitBox;
+
+
+						if (fx > shb.pos.x &&
+							fx < shb.pos.x + shb.size.width &&
+							fy > shb.pos.y &&
+							fy < shb.pos.y + shb.size.height
+							)
+						{
+							//console.log("hover");
+							if (this.startTimeout == undefined)
+							{
+								var self = this;
+								this.startTimeout = setTimeout(function()
+									{
+										self.runCode();
+									},2500);
+							}
+						}
+						else
+						{
+							//cut the timer out
+							clearTimeout(this.startTimeout);
+							this.startTimeout = undefined;
+						}
+					}
+					else
+					{
+						clearTimeout(this.startTimeout);
+						this.startTimeout = undefined;
+					}
+					
+				}
+
+				//test
+			}
+			else if (this.toolboxState === this.STATE_TOOLBOX_OPEN)
+			{
+				if (this.substate == this.SUBSTATE_FIRST_OPEN)
+				{
+					this.substate = this.SUBSTATE_SECOND_OPEN;
+				}
+
+				ctx.globalAlpha = .75;
+				ctx.fillStyle = "#000";
+				ctx.fillRect(0,0,this.browserWidth,this.browserHeight);
+				ctx.globalAlpha = 1;
+
+				//draw spots to drag
+
+				if (this.floatingBlocks.length == 0)
+				{
+					this.floatingBlocks = this.blocks;
+					//console.log("running");
+				}
+
+				for (var i in this.floatingBlocks)
+				{
+					var b = this.floatingBlocks[i];
+
+					if (isCloseToDestination(b.position,b.destination))
+					{
+						b.isMoving = false;
+					}
+					else
+					{
+						b.isMoving = true;
+					}
+					if (b.isMoving && !b.isSlotted)
+					{
+
+						var idealVec = getSubtractedVector(b.position,b.destination);
+						//arbitrary block speed
+						idealVec = getNormalizedVector(idealVec);
+						idealVec = getScaledVector(idealVec,12);
+
+						b.position.x += idealVec.x;
+						b.position.y += idealVec.y;
+						
+					}
+					else
+					{
+						//perlin noise it around;
+
+					}
+					//draw it
+					b.draw(globalFrame,ctx);
+				}
+
+				if (this.previousFrame.fingers.length == 5)
+				{
+					//retract blocks
+					var gestureRecognized = false;
+					for (var i in frame.gestures)
+					{
+						var g = frame.gestures[i];
+						if(g.type == "swipe" && !this.gestureRecognized)
+						{
+							if (g.direction[1] < -.75)
+							{
+								console.log("CLOSE");
+								this.gestureRecognized = true;
+								for (var i in this.floatingBlocks)
+								{
+									var b = this.floatingBlocks[i];
+									b.isMoving = true;
+									b.destination = b.initialPosition;
+									this.toolboxState = this.STATE_TOOLBOX_CLOSING;
+								}
+							}
+							//console.log(g.direction[1]);
+						}
+					}
+					//console.log(frame.gestures);
+				}
+
+							//temp array of center locations
+				var spotsToDrag = this.spotsToDrag;
+
+				for (var i = spotsToDrag.length - 1; i >= 0; i--) {
+					var s = spotsToDrag[i];
+
+					ctx.strokeStyle = "#ff0000";
+					ctx.lineWidth = 4;
+					ctx.strokeRect(s.position.x - 50,s.position.y - 50,s.size.width,s.size.height);
+				};
+
+				//console.log(spotsToDrag);
+				this.gestureRecognized = false;
+				this.drag(globalFrame,spotsToDrag);
+				//drawFingers(frame);
+			}
+			//fix this to impolemetn in the STATE_TOOLBOX OPEN
+			else if (this.toolboxState == this.STATE_TOOLBOX_CLOSING){
+				console.log('closing');
+
+				ctx.globalAlpha = .75;
+				ctx.fillStyle = "#000";
+				ctx.fillRect(0,0,this.browserWidth,this.browserHeight);
+				ctx.globalAlpha = 1;
+
+				//console.log(this.spotsToDrag);
+
+				this.toolboxState = this.STATE_TOOLBOX_CLOSED;
+				//drawFingers(frame);
+
+			}
 	}
 	p.drag = function(frame, spotsToDrag){
 		if(frame.hands.length == 1)
@@ -635,9 +855,28 @@ window.LevelOne = function()
 	{
 		//console.log(toolboxIMG);
 
-		this.gameState = this.STATE_TOOLBOX_OPEN;
+		this.toolboxState = this.STATE_TOOLBOX_OPEN;
 	}
+	p.runCode = function()
+	{
+		//check if the program can run
+		
+		this.gameState = this.STATE_RUNNING;
+		this.substate = this.SUBSTATE_BG_TRANSITION;
+		this.darkbg.alpha = 0;
 
+		//console.log(this.gameState);
+		for (var i in this.bees)
+		{
+			this.bees[i].play();
+			this.bees[i].frameNumber = Math.floor(Math.random()*97);
+		}
+		for (var i in this.zombies)
+		{
+			this.zombies[i].play();
+			this.zombies[i].frameNumber = Math.floor(Math.random()*141);
+		}
+	}
 	/*p.pinch = function(frame){
 		STATE_CAN_PINCH = false;
 		if(frame.hands.length == 2)
