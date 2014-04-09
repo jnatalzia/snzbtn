@@ -118,6 +118,7 @@ window.LevelOne = function()
 			pos:getCorrectedPosition({x:1700,y:890}),
 			size:getCorrectedSize({width:175,height:175})
 		};
+		var bgSong;
 
 	}
 
@@ -221,6 +222,7 @@ window.LevelOne = function()
 			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:0,y:650},32,5,true),
 			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:-225,y:650},32,5,true)
 		];
+		bgSong = new Audio('cyclone');
 
 	}
 	p.onloaded = function()
@@ -235,6 +237,7 @@ window.LevelOne = function()
   		this.dragCircle.radius = 50;
 
   		this.tempHand = new Hand();
+  		bgSong.loop();
 	}
 
 	p.update = function(ctx,frame)
