@@ -715,7 +715,7 @@ window.LevelOne = function()
 				this.drag(globalFrame,spotsToDrag);
 				//drawFingers(frame);
 			}
-			//fix this to impolemetn in the STATE_TOOLBOX OPEN
+			//fix this to implement in the STATE_TOOLBOX OPEN
 			else if (this.toolboxState == this.STATE_TOOLBOX_CLOSING){
 				console.log('closing');
 
