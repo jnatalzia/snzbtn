@@ -65,29 +65,37 @@ window.LevelSelect = function()
 	{
 		//console.log('Im getting called');
 		var topics = [1,2,3,4,5];
+		var lessons = [1,2,3,4];
 
 		console.log(topics.length);
-		
+
 		var tpx = 0;
 		var tpy = 0;
-		for(var i in this.topics)
+		var lpx = 0;
+		var lpy = 0;
+
+		for(var i in topics)
 		{
-			console.log('loop function');
-			tpx = tpx + 100;
+			//console.log('loop function');
+			tpx = tpx + 200;
 			tpy = 100;
 			ctx.fillStyle = "#E04C4C"
 			ctx.beginPath();
-			ctx.rect(tpx,tpy,100,50);
+			ctx.rect(tpx,tpy,70,50);
 			ctx.fill();
 			ctx.closePath();
-			if(i < 4)
+			/*
+			for(var k in lessons)
 			{
-				console.log('need to break');
+				lpx = tpx;
+				lpy = tpy + 200;
+				ctx.fillStyle = "#E04C4C"
+				ctx.beginPath();
+				ctx.arc(lpx,lpy,10,2*Math.PI);
+				ctx.fill();
+				ctx.closePath();
 			}
-			else
-			{
-				console.log('keep going');
-			}
+			*/
 		}
 	}
 	return LevelSelect;
