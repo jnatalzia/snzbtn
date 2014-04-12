@@ -46,6 +46,9 @@ window.LevelOne = function()
 		this.SUBSTATE_SECOND_OPEN = 2;
 		this.SUBSTATE_BG_TRANSITION = 3;
 
+		this.PLAY_SONG_PLAYING = false;
+		this.BG_SONG_PLAYING = false;
+
 
 		this.startTimeout = undefined;
 
@@ -119,6 +122,7 @@ window.LevelOne = function()
 			size:getCorrectedSize({width:175,height:175})
 		};
 		var bgSong;
+		var playSong;
 
 	}
 
@@ -222,7 +226,9 @@ window.LevelOne = function()
 			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:0,y:650},32,5,true),
 			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:-225,y:650},32,5,true)
 		];
+
 		bgSong = new Audio('cyclone');
+		playSong = new Audio('abbey');
 
 	}
 	p.onloaded = function()
@@ -238,6 +244,14 @@ window.LevelOne = function()
 
   		this.tempHand = new Hand();
   		bgSong.loop();
+  		this.BG_SONG_PLAYING = true;
+  		console.log(this.BG_SONG_PLAYING);
+  		if(this.PLAY_SONG_PLAYING == true)
+  		{
+  			playSong.stop();
+  			this.PLAY_SONG_PLAYING = false;
+  			console.log(this.PLAY_SONG_PLAYING);
+  		}
 	}
 
 	p.update = function(ctx,frame)
@@ -867,6 +881,13 @@ window.LevelOne = function()
 		this.gameState = this.STATE_RUNNING;
 		this.substate = this.SUBSTATE_BG_TRANSITION;
 		this.darkbg.alpha = 0;
+
+		bgSong.stop();
+		BG_SONG_PLAYING = false;
+		console.log(BG_SONG_PLAYING);
+		playSong.loop();
+		PLAY_SONG_PLAYING = true;
+		console.log(PLAY_SONG_PLAYING);
 
 		//console.log(this.gameState);
 		for (var i in this.bees)
