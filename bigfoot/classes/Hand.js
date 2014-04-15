@@ -48,16 +48,9 @@ window.Hand = function()
 			}
 			//console.log(numFingers);
 			//console.log(handPosition);
-			if (fingers != 1)
-			{
 				Hand.x = hand.palmPosition[0];
 				Hand.y = hand.palmPosition[1];
-			}
-			else
-			{
-				Hand.x = hand.fingers[0].tipPosition[0];
-				Hand.y = hand.fingers[0].tipPosition[1]-10;
-			}
+			
 			this.handX = map(Hand.x,-150,150,0,browserWidth);
 			this.handY = map(Hand.y,100,300,browserHeight,0);
 
@@ -131,29 +124,13 @@ window.Hand = function()
 					break;
 			}
 
-			if (fingersOne != 1)
-			{
 				Hand.x = righthand.palmPosition[0];
 				Hand.y = righthand.palmPosition[1];
-			}
-			else
-			{
-				Hand.x = righthand.fingers[0].tipPosition[0];
-				Hand.y = righthand.fingers[0].tipPosition[1];
-			}
 			this.handX = map(Hand.x,-150,150,0,browserWidth);
 			this.handY = map(Hand.y,100,300,browserHeight,0);
 
-			if (fingersTwo != 1)
-			{
 				Hand.x = lefthand.palmPosition[0];
 				Hand.y = lefthand.palmPosition[1];
-			}
-			else
-			{
-				Hand.x = lefthand.fingers[0].tipPosition[0];
-				Hand.y = lefthand.fingers[0].tipPosition[1];
-			}
 			this.handTwoX = map(Hand.x,-150,150,0,browserWidth);
 			this.handTwoY = map(Hand.y,100,300,browserHeight,0);
 

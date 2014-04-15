@@ -45,12 +45,20 @@ window.LevelOne = function()
 		this.SUBSTATE_FIRST_OPEN = 1;
 		this.SUBSTATE_SECOND_OPEN = 2;
 		this.SUBSTATE_BG_TRANSITION = 3;
+		this.SUBSTATE_CANT_RUN = 4;
+		this.SUBSTATE_FIRST_BLOCK_SELECT = 5;
+		this.SUBSTATE_FIRST_BLOCK_SLOT = 6;
+		this.SUBSTATE_FIRST_CLOSE = 7;
+		this.SUBSTATE_FIRST_LEVEL_SLOTTED = 8;
 
 		this.PLAY_SONG_PLAYING = false;
 		this.BG_SONG_PLAYING = false;
 
 
 		this.startTimeout = undefined;
+
+		//caption tracker
+		this.currentCaption = undefined;
 
 		this.loadAssets();
 
@@ -107,7 +115,7 @@ window.LevelOne = function()
 		];
 
 		var spotSize = {width:150,height:150};
-		var spotPos = [{x:550,y:980},{x:750,y:980},{x:950,y:980}];
+		var spotPos = [{x:500,y:980},{x:700,y:980},{x:900,y:980}];
 
 		this.spotsToDrag = [];
 
@@ -166,6 +174,8 @@ window.LevelOne = function()
 		this.emptyLevels = [placeholder1,placeholder2,placeholder3];
 
 		this.normalWhale = new SpriteNode("img/lvl1/whale_fly.png",162,3,whaleSize,{x:-500,y:400},18,9,true);
+		this.talkingWhale = new SpriteNode("img/lvl1/whale_talking.png",161,2,{width:whaleSize.width-1,height:whaleSize.height},{x:1400,y:400},23,7,true);
+		this.happyWhale = new SpriteNode("img/lvl1/whale_happy.png",14,2,{width:whaleSize.width-1,height:whaleSize.height-12},{x:1400,y:400},7,2,true);
 
 		this.whaleSprite = this.normalWhale;
 
@@ -190,15 +200,19 @@ window.LevelOne = function()
 		};
 
 		//toolbox assets
-		this.toolboxIMG = new Image();
-		this.toolBox = undefined;
-		this.toolboxIMG.src = "img/wires/toolBox/closed.png";
+		this.toolboxTopIMG = new Image();
+		this.toolBoxTop = undefined;
+		this.toolboxTopIMG.src = "img/toolbox-top.png";
+
+		this.toolboxBottomIMG = new Image();
+		this.toolBoxBottom = undefined;
+		this.toolboxBottomIMG.src = "img/toolbox-btm.png";
 
 		this.buildBar = new Image();
 		this.buildBar.src = "img/wires/buildBar.png";
 
 		this.runBtnActive = new Image();
-		this.runBtnActive.src = "img/wires/runBTN_active.png";
+		this.runBtnActive.src = "img/runBTN_active.png";
 
 		this.runBtnInactive = new Image();
 		this.runBtnInactive.src = "img/wires/runBTN_inactive.png";
@@ -226,6 +240,15 @@ window.LevelOne = function()
 			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:0,y:650},32,5,true),
 			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:-225,y:650},32,5,true)
 		];
+
+		var spotPos = [{x:500,y:980},{x:700,y:980},{x:900,y:980}];
+
+		this.emptyBlocks = [
+			new SpriteNode('img/lvl1/box1-empty.png',1,1,{width:155,height:155},{x:spotPos[0].x-77,y:spotPos[0].y-77},1,1,true),
+			new SpriteNode('img/lvl1/box2-empty.png',1,1,{width:155,height:155},{x:spotPos[1].x-77,y:spotPos[1].y-77},1,1,true),
+			new SpriteNode('img/lvl1/box3-empty.png',1,1,{width:155,height:155},{x:spotPos[2].x-77,y:spotPos[2].y-77},1,1,true)
+		];
+
 
 		bgSong = new Audio('cyclone');
 		playSong = new Audio('abbey');
@@ -268,6 +291,11 @@ window.LevelOne = function()
 				this.gameState = this.STATE_BUILDING;
 				//console.log('working');	
 				this.substate = this.SUBSTATE_FIRST_OPEN;
+
+				this.currentCaption = captions.first_open;
+
+				this.whaleSprite = this.talkingWhale;
+				this.whaleSprite.play();
 			}
 			else
 			{
@@ -311,16 +339,21 @@ window.LevelOne = function()
 					var obj = this.houseSprites[level+'_'+block.value];
 
 					this.emptyLevels[i].isOnScreen = false;
+					this.emptyBlocks[i].isOnScreen = false;
 					obj.isOnScreen = true;
 				}
 				else
 				{
 					this.emptyLevels[i].isOnScreen = true;
+					//draw thing on ground
+					this.emptyBlocks[i].isOnScreen = true;
+
 				}
 			}
 			else
 			{
 				this.emptyLevels[i].isOnScreen = true;
+				this.emptyBlocks[i].isOnScreen = true;
 			}
 		}
 		if (this.substate === this.SUBSTATE_BG_TRANSITION)
@@ -333,7 +366,7 @@ window.LevelOne = function()
 			if (this.darkbg.alpha >= 1)
 			{	
 				
-				this.substate = this.SUBSTATE_SECOND_OPEN;
+				//this.substate = this.SUBSTATE_SECOND_OPEN;
 			}
 
 			this.lightbg.draw(ctx);
@@ -352,11 +385,36 @@ window.LevelOne = function()
 		{
 			this.emptyLevels[s].draw(ctx);
 		}
-
-		this.whaleSprite.draw(ctx);
+		for (var s in this.emptyBlocks)
+		{
+			this.emptyBlocks[s].draw(ctx);
+		}
 
 		if (this.debug) this.drawFingers(frame,ctx);
 		this.drawUI(frame,ctx);
+
+		this.whaleSprite.draw(ctx);
+
+		//caption drawing
+		if (this.currentCaption != undefined)
+		{
+			//console.log('running');
+
+			var lines = this.currentCaption.split("\n");
+			//console.log(lines);
+			var textPos = getCorrectedPosition({x:400,y:50});
+			var lineHeight = 24;
+
+			for (var i = 0; i < lines.length;i++)
+			{
+				ctx.fillStyle = "#FFF";
+				ctx.font="24px Impact";
+				ctx.textAlign = 'left';
+
+				ctx.fillText(lines[i],textPos.x,textPos.y+(lineHeight*i));
+			}
+		}
+
 
 		this.previousFrame = frame;
 
@@ -391,11 +449,27 @@ window.LevelOne = function()
 	p.drawUI = function(frame,ctx)
 	{
 		//DRAW COMMON UI ELEMENTS
-		var toolboxPos = getCorrectedPosition({x:100,y:890});
-		var toolboxSize = getCorrectedSize({width:this.toolboxIMG.width,height:this.toolboxIMG.height});
+		if (this.startDragY != -1)
+		{
+			var toolboxTopPos = getCorrectedPosition({x:75,y:10});
+			toolboxTopPos.y=this.dragCircle.y;
+		}
+		else
+		{
+			var toolboxTopPos = getCorrectedPosition({x:75,y:890});
+		}
+		
+		var toolboxTopSize = getCorrectedSize({width:this.toolboxTopIMG.width,height:this.toolboxTopIMG.height});
+
+
+		var toolboxBottomPos = getCorrectedPosition({x:75,y:950});
 
 		ctx.fillStyle = "#919191";
-		ctx.drawImage(this.toolboxIMG,toolboxPos.x,toolboxPos.y, toolboxSize.width, toolboxSize.height);
+
+
+		ctx.drawImage(this.toolboxBottomIMG,toolboxBottomPos.x,toolboxBottomPos.y, toolboxTopSize.width, toolboxTopSize.height);
+		ctx.drawImage(this.toolboxTopIMG,toolboxTopPos.x,toolboxTopPos.y, toolboxTopSize.width, toolboxTopSize.height);
+		
 
 
 		var stagePos = getCorrectedPosition({x:0,y:0}),
@@ -433,8 +507,8 @@ window.LevelOne = function()
 		}
 
 		//set dragcircleSize to toolbox size
-		this.dragCircle.width = toolboxSize.width;
-		this.dragCircle.height = toolboxSize.height;
+		this.dragCircle.width = toolboxTopSize.width*2;
+		this.dragCircle.height = toolboxTopSize.height*2;
 
 		if (this.gameState === this.STATE_BUILDING)
 		{
@@ -442,6 +516,8 @@ window.LevelOne = function()
 			this.updateToolbox(frame,ctx);
 			if (this.substate === this.SUBSTATE_FIRST_OPEN)
 			{
+				//this.whaleSprite = this.talkingWhale;
+
 				var start_pos = getCorrectedPosition({x:135,y:920});
 				var destination = getCorrectedPosition({x:135,y:800});
 				var speed = 1;
@@ -515,10 +591,7 @@ window.LevelOne = function()
 					idealVec = getNormalizedVector(idealVec);
 					idealVec = getScaledVector(idealVec,zombiespeed);
 
-					zombie.pos.x += idealVec.x;
-					//bee.pos.y += idealVec.y;
-
-					//return true;	
+					zombie.pos.x += idealVec.x; 
 				}
 
 				zombie.draw(ctx);
@@ -587,15 +660,18 @@ window.LevelOne = function()
 					//test for intersection between one finger and startbtn
 					if (hand.fingers.length == 1)
 					{
-						var f = hand.fingers[0];
-						var fpos = f.stabilizedTipPosition;
+						var f = hand.palmPosition;
+						var fpos = f;
 
 						var x = fpos[0];
 						var y = fpos[1];
 						//console.log(hand);
 
-						var fx = map(x,-150,150,0,browserWidth);
-						var fy = map(y,100,300,browserHeight,0);
+						var fx = map(x,-150,150,0,browserWidth) - 15;
+						var fy = map(y,100,300,browserHeight,0) - 45;
+
+						ctx.fillStyle = "#000";
+						ctx.fillRect(fx,fy,10,10);
 
 						var shb = this.startHitBox;
 
@@ -631,13 +707,21 @@ window.LevelOne = function()
 					
 				}
 
+				if (this.substate == this.SUBSTATE_CANT_RUN)
+				{
+					//play sound file of whale telling person to slot all three
+					console.log('SLOT ALL THREE DUDE');
+
+				}
+
 				//test
 			}
 			else if (this.toolboxState === this.STATE_TOOLBOX_OPEN)
 			{
 				if (this.substate == this.SUBSTATE_FIRST_OPEN)
 				{
-					this.substate = this.SUBSTATE_SECOND_OPEN;
+					this.substate = this.SUBSTATE_FIRST_BLOCK_SELECT;
+					this.currentCaption = captions.point_instruction;
 				}
 
 				ctx.globalAlpha = .75;
@@ -656,6 +740,18 @@ window.LevelOne = function()
 				for (var i in this.floatingBlocks)
 				{
 					var b = this.floatingBlocks[i];
+
+					if (this.substate == this.SUBSTATE_FIRST_BLOCK_SELECT)
+					{
+						//
+						if (b.value != '')
+						{
+							//console.log('b.value');
+							this.substate = this.SUBSTATE_FIRST_BLOCK_SLOT;
+							//change caption to
+							this.currentCaption = captions.drag_instruction;
+						}
+					}
 
 					if (isCloseToDestination(b.position,b.destination))
 					{
@@ -695,7 +791,7 @@ window.LevelOne = function()
 						var g = frame.gestures[i];
 						if(g.type == "swipe" && !this.gestureRecognized)
 						{
-							if (g.direction[1] < -.75)
+							if (g.direction[1] < -.75 && this.substate != this.SUBSTATE_FIRST_BLOCK_SELECT && this.substate != this.SUBSTATE_FIRST_BLOCK_SLOT)
 							{
 								console.log("CLOSE");
 								this.gestureRecognized = true;
@@ -727,19 +823,47 @@ window.LevelOne = function()
 				//console.log(spotsToDrag);
 				this.gestureRecognized = false;
 				this.drag(globalFrame,spotsToDrag);
+
+				if (this.substate == this.SUBSTATE_FIRST_BLOCK_SLOT)
+				{
+					//console.log('running');
+					for (var k in spotsToDrag)
+					{
+						var s = spotsToDrag[k];
+						if (s.slottedBlock != undefined)
+						{
+							this.substate = this.SUBSTATE_FIRST_CLOSE;
+							this.currentCaption = captions.close_instruction;
+						}
+					}
+				}
 				//drawFingers(frame);
 			}
 			//fix this to implement in the STATE_TOOLBOX OPEN
 			else if (this.toolboxState == this.STATE_TOOLBOX_CLOSING){
-				console.log('closing');
+				//console.log('closing');
 
 				ctx.globalAlpha = .75;
 				ctx.fillStyle = "#000";
 				ctx.fillRect(0,0,this.browserWidth,this.browserHeight);
 				ctx.globalAlpha = 1;
 
-				//console.log(this.spotsToDrag);
+				if (this.substate == this.SUBSTATE_FIRST_CLOSE)
+				{
+					this.substate = this.SUBSTATE_FIRST_LEVEL_SLOTTED;
+					this.currentCaption = captions.first_slotted;
+					this.whaleSprite = this.happyWhale;
+					this.whaleSprite.play();
 
+					var self = this;
+
+					setTimeout(function()
+					{
+						self.currentCaption = captions.bees_coming;
+						//this.whaleSprite = this.scaredWhale;
+					},3000);
+				}
+				
 				this.toolboxState = this.STATE_TOOLBOX_CLOSED;
 				//drawFingers(frame);
 
@@ -877,28 +1001,45 @@ window.LevelOne = function()
 	p.runCode = function()
 	{
 		//check if the program can run
-		
-		this.gameState = this.STATE_RUNNING;
-		this.substate = this.SUBSTATE_BG_TRANSITION;
-		this.darkbg.alpha = 0;
+		var canRun = true;
 
-		bgSong.stop();
-		BG_SONG_PLAYING = false;
-		console.log(BG_SONG_PLAYING);
-		playSong.loop();
-		PLAY_SONG_PLAYING = true;
-		console.log(PLAY_SONG_PLAYING);
-
-		//console.log(this.gameState);
-		for (var i in this.bees)
+		for (var i in this.spotsToDrag)
 		{
-			this.bees[i].play();
-			this.bees[i].frameNumber = Math.floor(Math.random()*97);
+			if (this.spotsToDrag[i].slottedBlock == undefined)
+			{
+				canRun = false;
+			}
 		}
-		for (var i in this.zombies)
+
+		if (canRun)
 		{
-			this.zombies[i].play();
-			this.zombies[i].frameNumber = Math.floor(Math.random()*141);
+			
+			this.gameState = this.STATE_RUNNING;
+			this.substate = this.SUBSTATE_BG_TRANSITION;
+			this.darkbg.alpha = 0;
+
+			bgSong.stop();
+			BG_SONG_PLAYING = false;
+			console.log(BG_SONG_PLAYING);
+			playSong.loop();
+			PLAY_SONG_PLAYING = true;
+			console.log(PLAY_SONG_PLAYING);
+
+			//console.log(this.gameState);
+			for (var i in this.bees)
+			{
+				this.bees[i].play();
+				this.bees[i].frameNumber = Math.floor(Math.random()*97);
+			}
+			for (var i in this.zombies)
+			{
+				this.zombies[i].play();
+				this.zombies[i].frameNumber = Math.floor(Math.random()*141);
+			}
+		}
+		else
+		{
+			this.substate = this.SUBSTATE_CANT_RUN;
 		}
 	}
 	/*p.pinch = function(frame){

@@ -65,8 +65,10 @@ window.VariableBlock = function(dest,size,options)
 		if (frame.hands.length == 1 && frame.hands[0].fingers.length == 1)
 		{
 
-			var finger = frame.hands[0].fingers[0];
-			var pos = finger.stabilizedTipPosition;
+			var finger = frame.hands[0].palmPosition;
+			var pos = finger;
+
+			//console.log(finger);
 
 			var fx = pos[0];
 			var fy = pos[1];
@@ -74,10 +76,13 @@ window.VariableBlock = function(dest,size,options)
 					
 					
 				//draw the finger on screen
-			fx = map(fx,-150,150,0,browserWidth);
-			fy = map(fy,100,300,0,browserHeight);
+			fx = map(fx,-150,150,0,browserWidth) - 15;
+			fy = map(fy,100,300,0,browserHeight) + 45;
 
 			fy = browserHeight - fy;
+
+			ctx.fillStyle = "#000";
+			ctx.fillRect(fx,fy,10,10);
 
 			if (this.pointIsInside({x:fx,y:fy}))
 			{
