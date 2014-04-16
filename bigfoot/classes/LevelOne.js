@@ -131,6 +131,9 @@ window.LevelOne = function()
 		};
 		var bgSong;
 		var playSong;
+		var beeSfx;
+		var zombieSfx;
+		var lightningSfx;
 
 	}
 
@@ -236,9 +239,11 @@ window.LevelOne = function()
 			new SpriteNode('img/lvl1/bee.png',97,1,{width:70,height:95},{x:-80,y:500},49,2,true)
 		];
 		this.zombies = [
-			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:-100,y:650},32,5,true),
+			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:-125,y:650},32,5,true),
 			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:0,y:650},32,5,true),
-			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:-225,y:650},32,5,true)
+			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:-75,y:650},32,5,true),
+			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:-225,y:650},32,5,true),
+			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:-175,y:650},32,5,true)
 		];
 
 		var spotPos = [{x:500,y:980},{x:700,y:980},{x:900,y:980}];
@@ -252,6 +257,8 @@ window.LevelOne = function()
 
 		bgSong = new Audio('cyclone');
 		playSong = new Audio('abbey');
+		beeSfx = new Audio('bees');
+		zombieSfx = new Audio('zombies');
 
 	}
 	p.onloaded = function()
@@ -1020,21 +1027,21 @@ window.LevelOne = function()
 
 			bgSong.stop();
 			BG_SONG_PLAYING = false;
-			console.log(BG_SONG_PLAYING);
 			playSong.loop();
 			PLAY_SONG_PLAYING = true;
-			console.log(PLAY_SONG_PLAYING);
 
 			//console.log(this.gameState);
 			for (var i in this.bees)
 			{
 				this.bees[i].play();
 				this.bees[i].frameNumber = Math.floor(Math.random()*97);
+				beeSfx.loop();
 			}
 			for (var i in this.zombies)
 			{
 				this.zombies[i].play();
 				this.zombies[i].frameNumber = Math.floor(Math.random()*141);
+				zombieSfx.loop()
 			}
 		}
 		else
