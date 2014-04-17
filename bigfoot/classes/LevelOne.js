@@ -3,7 +3,7 @@ window.LevelOne = function()
 	var LevelOne = function() //takes in all init parameters here
 	{
 		//toolbox vars
-		this.debug = true;
+		this.debug = false;
 
 		this.previousFrame = null;
 		this.paused = false;
@@ -50,6 +50,8 @@ window.LevelOne = function()
 		this.SUBSTATE_FIRST_BLOCK_SLOT = 6;
 		this.SUBSTATE_FIRST_CLOSE = 7;
 		this.SUBSTATE_FIRST_LEVEL_SLOTTED = 8;
+		this.SUBSTATE_SECOND_LEVEL_SLOTTED = 9;
+		this.SUBSTATE_RUN_READY = 10;
 
 		this.PLAY_SONG_PLAYING = false;
 		this.BG_SONG_PLAYING = false;
@@ -176,6 +178,7 @@ window.LevelOne = function()
 		this.normalWhale = new SpriteNode("img/lvl1/whale_fly.png",162,3,whaleSize,{x:-500,y:400},18,9,true);
 		this.talkingWhale = new SpriteNode("img/lvl1/whale_talking.png",161,2,{width:whaleSize.width-1,height:whaleSize.height},{x:1400,y:400},23,7,true);
 		this.happyWhale = new SpriteNode("img/lvl1/whale_happy.png",14,2,{width:whaleSize.width-1,height:whaleSize.height-12},{x:1400,y:400},7,2,true);
+		this.sadWhale = new SpriteNode("img/lvl1/whale_sad.png",14,2,{width:whaleSize.width,height:whaleSize.height-12},{x:1400,y:400},7,2,true);
 
 		this.whaleSprite = this.normalWhale;
 
@@ -834,6 +837,7 @@ window.LevelOne = function()
 						{
 							this.substate = this.SUBSTATE_FIRST_CLOSE;
 							this.currentCaption = captions.close_instruction;
+							break;
 						}
 					}
 				}
@@ -848,6 +852,9 @@ window.LevelOne = function()
 				ctx.fillRect(0,0,this.browserWidth,this.browserHeight);
 				ctx.globalAlpha = 1;
 
+				this.toolboxState = this.STATE_TOOLBOX_CLOSED;
+				//drawFingers(frame);
+				var spotsToDrag = this.spotsToDrag;
 				if (this.substate == this.SUBSTATE_FIRST_CLOSE)
 				{
 					this.substate = this.SUBSTATE_FIRST_LEVEL_SLOTTED;
@@ -860,12 +867,48 @@ window.LevelOne = function()
 					setTimeout(function()
 					{
 						self.currentCaption = captions.bees_coming;
-						//this.whaleSprite = this.scaredWhale;
-					},3000);
+						self.whaleSprite = self.sadWhale;
+						self.whaleSprite.play();
+					},5000);
 				}
 				
-				this.toolboxState = this.STATE_TOOLBOX_CLOSED;
-				//drawFingers(frame);
+				
+				else if (this.substate == this.SUBSTATE_FIRST_LEVEL_SLOTTED)
+				{
+					var count = 0;
+					for (var k in spotsToDrag)
+					{
+						var s = spotsToDrag[k];
+						if (s.slottedBlock != undefined)
+						{
+							count++;
+						}
+					}
+					if (count >= 2)
+					{
+						this.substate = this.SUBSTATE_SECOND_LEVEL_SLOTTED;
+						this.currentCaption = captions.second_slotted;
+					}
+					console.log(count);
+				}
+				else if (this.substate == this.SUBSTATE_SECOND_LEVEL_SLOTTED)
+				{
+					var count = 0;
+					for (var k in spotsToDrag)
+					{
+						var s = spotsToDrag[k];
+						if (s.slottedBlock != undefined)
+						{
+							count++;
+						}
+					}
+					if (count >= 3)
+					{
+						this.substate = this.SUBSTATE_RUN_READY;
+						this.currentCaption = captions.run_ready;
+						this.whaleSprite = this.happyWhale;
+					}
+				}
 
 			}
 	}
