@@ -13,7 +13,6 @@
 <script src="classes/DragSpot.js"></script>
 <script src="classes/Cutscene.js"></script>
 <script src="classes/Hand.js"></script>
-
 <script src="classes/LevelOne.js"></script>
 
 <!--
@@ -21,6 +20,7 @@
 -->
 <script src="classes/Audio.js"></script>
 <script src="classes/Video.js"></script>
+<script src="classes/Intro.js"></script>
 <script>
 	var globalFrame;
 
@@ -42,10 +42,11 @@
   		ctx.canvas.height = window.innerHeight;
 
   		//load all levels
-  		currLevel = new LevelOne(); //for testing ------------------
+  		currLevel = new Intro(); //for testing ------------------
   		//currLevel = new LevelSelect(); // for testing ------------------
-
+		console.log(currLevel);
   		currLevel.onloaded();
+
 
   		console.log(currLevel);
 
