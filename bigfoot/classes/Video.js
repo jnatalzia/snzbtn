@@ -15,7 +15,7 @@ window.Video = function(canvas,ctx,videoID)
 
   	function draw(v,c,w,h) 
   	{  
-   		if(video.paused || v.ended) return false;  
+   		if(video.paused || video.ended) return false;  
    		c.drawImage(v,0,0,w,h);  
    		setTimeout(draw,20,v,c,w,h);  
 	}  

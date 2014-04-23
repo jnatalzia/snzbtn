@@ -3,9 +3,9 @@ window.Intro = function()
 	var Intro = function()
 	{
 		var openingVideo;
-		this.loadAssets()
+		this.loadAssets();
 	}
-	var p = LevelOne.prototype;
+	var p = Intro.prototype;
 	p.loadAssets = function()
 	{
 		openingVideo = new Video(canvas,ctx,'opening');
@@ -20,14 +20,16 @@ window.Intro = function()
 
   		this.dragCircle.y = browserHeight - 50;
   		this.dragCircle.radius = 50;
+
 		openingVideo.play();
-		if(openingVideo.ended)
-		{
-			currLevel = new LevelOne();
-		}
+		openingVideo.addEventListener('ended',function(){
+			return('hi');
+		});
 	}
 	p.update = function(ctx,frame)
 	{
 
 	}
-}
+	return Intro;
+}();
+
