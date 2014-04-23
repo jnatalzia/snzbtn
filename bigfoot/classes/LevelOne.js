@@ -136,7 +136,6 @@ window.LevelOne = function()
 		var beeSfx;
 		var zombieSfx;
 		var lightningSfx;
-		var openingVideo;
 	}
 
 	var p = LevelOne.prototype;
@@ -262,8 +261,6 @@ window.LevelOne = function()
 		playSong = new Audio('abbey');
 		beeSfx = new Audio('bees');
 		zombieSfx = new Audio('zombies');
-		openingVideo = new Video(canvas,ctx,'opening');
-
 	}
 	p.onloaded = function()
 	{
@@ -286,7 +283,7 @@ window.LevelOne = function()
   			this.PLAY_SONG_PLAYING = false;
   			console.log(this.PLAY_SONG_PLAYING);
   		}
-  		//openingVideo.play();
+  		
 	}
 
 	p.update = function(ctx,frame)
