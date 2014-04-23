@@ -27,7 +27,8 @@ window.LevelOne = function()
 		this.STATE_CAN_DRAG = false;
 		this.STATE_DRAG = 1;
 
-
+		//for sin movement;
+		this.step = 0;
 		//gamestates
 		this.toolboxState = 1;
 
@@ -39,6 +40,8 @@ window.LevelOne = function()
 		this.STATE_WHALE_SCARED = 0;
 		this.STATE_BUILDING = 1;
 		this.STATE_RUNNING = 2;
+		this.STATE_OVER = 3;
+		this.WAITING = 4;
 
 		//substates (for helping hands and stuff)
 		this.substate = 0;
@@ -53,6 +56,7 @@ window.LevelOne = function()
 		this.SUBSTATE_SECOND_LEVEL_SLOTTED = 9;
 		this.SUBSTATE_RUN_READY = 10;
 		this.SUBSTATE_HOUSE_FALLING = 11;
+		this.SUBSTATE_SUCCESS = 12;
 
 		this.PLAY_SONG_PLAYING = false;
 		this.BG_SONG_PLAYING = false;
@@ -62,7 +66,7 @@ window.LevelOne = function()
 		this.resetTimeout = undefined;
 
 		//caption tracker
-		this.currentCaption = undefined;
+		this.currentCaption = captions.enemies_coming;
 
 		this.loadAssets();
 
@@ -180,10 +184,10 @@ window.LevelOne = function()
 
 		this.emptyLevels = [placeholder1,placeholder2,placeholder3];
 
-		this.normalWhale = new SpriteNode("img/lvl1/whale_fly.png",162,3,whaleSize,{x:-500,y:400},18,9,true);
+		this.normalWhale = new SpriteNode("img/lvl1/whale_fly.png",162,3,whaleSize,{x:1400,y:400},18,9,true);
 		this.talkingWhale = new SpriteNode("img/lvl1/whale_talking.png",161,2,{width:whaleSize.width-1,height:whaleSize.height},{x:1400,y:400},23,7,true);
 		this.happyWhale = new SpriteNode("img/lvl1/whale_happy.png",14,2,{width:whaleSize.width-1,height:whaleSize.height-12},{x:1400,y:400},7,2,true);
-		this.sadWhale = new SpriteNode("img/lvl1/whale_sad.png",14,2,{width:whaleSize.width,height:whaleSize.height-12},{x:1400,y:400},7,2,true);
+		this.sadWhale = new SpriteNode("img/lvl1/whale_sad.png",14,2,{width:whaleSize.width,height:whaleSize.height-12},{x:-500,y:400},7,2,true);
 
 		this.whaleSprite = this.normalWhale;
 
@@ -302,6 +306,9 @@ window.LevelOne = function()
 		this.ashHouse = new SpriteNode('img/lvl1/ash.png',1,1,{width:490,height:300},{x:700,y:600},1,1,true);
 		this.ashHouse.alpha = 0;
 //this.ashHouse = 'img/lvl1/ash.png';
+
+		this.successScreen = new SpriteNode('img/lvl1/success.png',1,1,{width:1920,height:1080},{x:0,y:0},1,1,true);
+		this.successScreen.alpha = 0;
 		
 
 		bgSong = new Audio('cyclone');
@@ -343,18 +350,27 @@ window.LevelOne = function()
 			//move the whale
 			var speed = 10;
 			var destination = getCorrectedPosition({x:1400,y:400});
+			this.whaleSprite = this.sadWhale;
 
 
 			if (isCloseToDestination(this.whaleSprite.pos,destination))
 			{
-				this.gameState = this.STATE_BUILDING;
-				//console.log('working');	
-				this.substate = this.SUBSTATE_FIRST_OPEN;
+				var self = this;
+				this.gameState = this.WAITING;
 
-				this.currentCaption = captions.first_open;
+				setTimeout(function()
+				{
+					self.gameState = self.STATE_BUILDING;
+					//console.log('working');	
+					self.substate = self.SUBSTATE_FIRST_OPEN;
 
-				this.whaleSprite = this.talkingWhale;
-				this.whaleSprite.play();
+					self.currentCaption = captions.first_open;
+
+					self.whaleSprite = self.talkingWhale;
+					self.whaleSprite.play();
+				},4000);
+
+				
 			}
 			else
 			{
@@ -450,7 +466,13 @@ window.LevelOne = function()
 				{
 					this.substate = -1;
 
+					this.whaleSprite = this.normalWhale;
+					this.whaleSprite.alpha = 1;
+
 				}
+
+				
+				this.whaleSprite.alpha = 1;
 
 				this.darkbg.draw(ctx);
 			}
@@ -512,6 +534,10 @@ window.LevelOne = function()
 		if (this.debug) this.drawFingers(frame,ctx);
 		this.drawUI(frame,ctx);
 
+		//make whale float
+		this.step+=0.04;
+        this.whaleSprite.pos.y = this.whaleSprite.initialPos.y +( 5*(Math.sin(this.step)));
+
 		this.whaleSprite.draw(ctx);
 
 		//caption drawing
@@ -535,6 +561,7 @@ window.LevelOne = function()
 				ctx.fillText(lines[i],textPos.x,textPos.y+(lineHeight*i));
 			}
 		}
+		this.tempHand.draw(frame,ctx);
 
 		this.previousFrame = frame;
 
@@ -672,6 +699,8 @@ window.LevelOne = function()
 			draw2 = false,
 			draw3 = false;
 
+			var failed = false;
+
 			var done_running = true;
 
 			//move all the bad things
@@ -690,6 +719,7 @@ window.LevelOne = function()
 					if (this.spotsToDrag[1].slottedBlock.value != "glass")
 					{
 						draw2 = true;
+						failed = true;
 					}
 
 				}
@@ -719,6 +749,7 @@ window.LevelOne = function()
 					if (this.spotsToDrag[0].slottedBlock.value != "wood")
 					{
 						draw1 = true;
+						failed = true;
 					}
 				}
 				else
@@ -733,6 +764,11 @@ window.LevelOne = function()
 				}
 
 				zombie.draw(ctx);
+			}
+			if (this.spotsToDrag[2].slottedBlock.value != "metal")
+			{
+				draw3 = true;
+				failed = true;
 			}
 
 			for (var i = 0; i < this.lvl1flames.length;i++)
@@ -761,7 +797,7 @@ window.LevelOne = function()
 			{
 				var self = this;
 
-				if (draw1 || draw2 || draw3)
+				if (failed)
 				{
 					//console.log('fail!');
 
@@ -777,13 +813,36 @@ window.LevelOne = function()
 				}
 				else
 				{
-					
+					this.substate = this.SUBSTATE_SUCCESS;
 				}
 
 				
 			}
+
+			if (this.substate == this.SUBSTATE_SUCCESS && done_running)
+			{
+				this.whaleSprite = this.happyWhale;
+				if (this.successScreen.alpha < 1)
+				{
+					this.successScreen.alpha += .0145;
+				}
+				else
+				{
+					this.gameState = this.STATE_OVER;
+					setTimeout(function()
+					{
+						//opens up the survey
+						window.open("http://google.com",'_blank');
+					},5000);
+				}
+				this.successScreen.draw(ctx);
+			}
 		}
-		this.tempHand.draw(frame,ctx);
+		else if (this.gameState === this.STATE_OVER)
+		{
+			this.successScreen.draw(ctx);
+		}
+		
 		/*pinch(frame);
 		zoom(frame);*/
 	}
@@ -791,21 +850,13 @@ window.LevelOne = function()
 	{
 		this.substate = this.SUBSTATE_HOUSE_FALLING;
 		this.gameState = this.STATE_BUILDING;
-		//this.ashHouse.alpha = 0;
+		this.whaleSprite.alpha = 1;
 	}
 
 	p.updateToolbox = function(frame,ctx)
 	{
 		if (this.toolboxState === this.STATE_TOOLBOX_CLOSED)
 			{
-				//console.log('closed');
-				/*ctx.beginPath();
-				//ctx.arc(dragCircle.x,dragCircle.y,dragCircle.radius,0,2*Math.PI);  // makes a Circle for the toolbox opening
-				ctx.rect(toolboxPos.x,toolboxPos.y,this.dragCircle.width,this.dragCircle.height); // makes a rect for the toolbox opening
-				ctx.fill();
-				ctx.closePath();*/
-
-
 				if (frame.hands[0])
 				{
 					var hand = frame.hands[0];
@@ -1115,6 +1166,21 @@ window.LevelOne = function()
 				var grab_positionX = map(grab_position[0], -150, 150,0,browserWidth);
 				var grab_positionY = map(grab_position[1], 100, 300, browserHeight,0);
 
+				//test if spot can be filled 
+				var spotEmpty = [];
+				for (var k = 0; k < spotsToDrag.length; k++)
+				{
+					var s = spotsToDrag[k];
+
+					if (s.slottedBlock == undefined)
+					{
+						spotEmpty[k] = true;
+					}
+					else
+						spotEmpty[k] = false;
+
+				}
+
 				for(var i in this.floatingBlocks)
 				{
 					var b = this.floatingBlocks[i];
@@ -1130,10 +1196,11 @@ window.LevelOne = function()
 							var distSub = getSubtractedVector(b.position,spotsToDrag[0]);
 							var dist = getMagnitude(distSub);
 
-
+							if (b.value != '')
+							{
 
 								var touchingSpots = [];
-								for (var k in spotsToDrag)
+								for (var k=0; k < spotsToDrag.length;k++)
 								{
 									var s = spotsToDrag[k];
 
@@ -1147,7 +1214,7 @@ window.LevelOne = function()
 									   b.position.y > sOrigin.y+spotSize.height ||
 									   b.position.x > sOrigin.x+spotSize.width ||
 									   b.position.x+b.size.width < sOrigin.x
-									   ))
+									   ) && (spotEmpty[k] || s.slottedBlock == b))
 									{
 										//debugger;
 										touchingSpots.push(s);
@@ -1179,13 +1246,14 @@ window.LevelOne = function()
 									b.slot = undefined;
 								}
 								//console.log(spotsToDrag[k].slottedBlock);
-							if (dist > 400)
-							{
-								b.destination = b.initialPosition;
-								//console.log('called');
-								b.isSlotted = false;
-								if (b.slot)	b.slot.slottedBlock = undefined;
-								b.slot = undefined;
+								if (dist > 400)
+								{
+									b.destination = b.initialPosition;
+									//console.log('called');
+									b.isSlotted = false;
+									if (b.slot)	b.slot.slottedBlock = undefined;
+									b.slot = undefined;
+								}
 							}
 					}
 					else if(grab_positionX <= bx + 100 && grab_positionX >= bx - 100 && grab_positionY <= by + 100 && grab_positionY >= by - 100)
