@@ -52,12 +52,14 @@ window.LevelOne = function()
 		this.SUBSTATE_FIRST_LEVEL_SLOTTED = 8;
 		this.SUBSTATE_SECOND_LEVEL_SLOTTED = 9;
 		this.SUBSTATE_RUN_READY = 10;
+		this.SUBSTATE_HOUSE_FALLING = 11;
 
 		this.PLAY_SONG_PLAYING = false;
 		this.BG_SONG_PLAYING = false;
 
 
 		this.startTimeout = undefined;
+		this.resetTimeout = undefined;
 
 		//caption tracker
 		this.currentCaption = undefined;
@@ -229,6 +231,10 @@ window.LevelOne = function()
 		this.arrowIcon = new Image();
 		this.arrowIcon.src = "img/wires/arrow.png";
 
+		//text box
+		this.textBox = new SpriteNode('img/text-box.png',1,1,{width:1732,height:419},{x:330,y:500},1,1,true,{width:1299,height:314});
+		//this.textBox.destSize = {width:1299,height:314};
+
 		//helper grab hand
 		this.grabHelper = new SpriteNode('img/lvl1/grab_hand.png',1,1,{width:108,height:102},{x:135,y:920},1,1,true);
 
@@ -257,6 +263,46 @@ window.LevelOne = function()
 			new SpriteNode('img/lvl1/box3-empty.png',1,1,{width:155,height:155},{x:spotPos[2].x-77,y:spotPos[2].y-77},1,1,true)
 		];
 
+		var numFlames = Math.floor(Math.random()*3) + 4,
+		xrange = {start:700,range:330},
+		lvl1range = {start:600,range:100},
+		lvl2range = {start:350,range:100},
+		lvl3range = {start:95,range:100};
+
+
+
+		this.lvl1flames = [];
+		this.lvl2flames = [];
+		this.lvl3flames = [];
+		for (var i = 0; i < numFlames;i++)
+		{
+			var x1 = Math.floor(Math.random()*xrange.range + xrange.start); 
+			var x2 = Math.floor(Math.random()*xrange.range + xrange.start); 
+			var x3 = Math.floor(Math.random()*xrange.range + xrange.start); 
+
+			var y1 = Math.floor(Math.random()*lvl1range.range + lvl1range.start); 
+			var y2 = Math.floor(Math.random()*lvl2range.range + lvl2range.start);
+			var y3 = Math.floor(Math.random()*lvl3range.range + lvl3range.start);  
+
+			var ratio = Math.random() * .5 + .5;
+			var flameSize1 = {width:140*ratio,height:160*ratio};
+
+			ratio = Math.random() * .5 + .5;
+			var flameSize2 = {width:140 * ratio,height:160* ratio};
+
+			ratio = Math.random() * .5 + .5;
+			var flameSize3 = {width:140*ratio,height:160*ratio};
+
+			this.lvl1flames.push(new SpriteNode('img/lvl1/fire.png',5,5,{width:140,height:160},{x:x1,y:y1},5,1,true,flameSize1));
+			this.lvl2flames.push(new SpriteNode('img/lvl1/fire.png',5,5,{width:140,height:160},{x:x2,y:y2},5,1,true,flameSize2));
+			this.lvl3flames.push(new SpriteNode('img/lvl1/fire.png',5,5,{width:140,height:160},{x:x3,y:y3},5,1,true,flameSize3));
+		}
+
+
+		this.ashHouse = new SpriteNode('img/lvl1/ash.png',1,1,{width:490,height:300},{x:700,y:600},1,1,true);
+		this.ashHouse.alpha = 0;
+//this.ashHouse = 'img/lvl1/ash.png';
+		
 
 		bgSong = new Audio('cyclone');
 		playSong = new Audio('abbey');
@@ -289,6 +335,7 @@ window.LevelOne = function()
 
 	p.update = function(ctx,frame)
 	{
+
 		if (this.gameState === this.STATE_WHALE_SCARED)
 		{
 			//move the whale
@@ -368,18 +415,76 @@ window.LevelOne = function()
 		}
 		if (this.substate === this.SUBSTATE_BG_TRANSITION)
 		{
-			this.darkbg.alpha += .025;
-			this.currentbg = this.darkbg;
+			if (this.gameState == this.STATE_RUNNING)
+			{
+				this.darkbg.alpha += .025;
+				this.currentbg = this.darkbg;
 
-			//console.log(this.darkbg.alpha);
+				//console.log(this.darkbg.alpha);
 
-			if (this.darkbg.alpha >= 1)
-			{	
+				if (this.darkbg.alpha >= 1)
+				{	
+					
+					this.substate = -1;
+				}
+
+				this.lightbg.draw(ctx);
+			}
+			else
+			{
+				this.lightbg.alpha += .025;
+				this.currentbg = this.lightbg;
+
+				this.ashHouse.alpha -= .025;
+
+				for (var s in this.houseSprites)
+				{
+					var obj = this.houseSprites[s];
+
+					obj.alpha += .025;
+				}
+
+				if (this.lightbg.alpha >= 1)
+				{
+					this.substate = -1;
+
+				}
+
+				this.darkbg.draw(ctx);
+			}
+			
+		}
+		else if (this.substate === this.SUBSTATE_HOUSE_FALLING)
+		{
+			var over = false;
+			for (var s in this.houseSprites)
+			{
+				var obj = this.houseSprites[s];
+				obj.alpha -=.025;
+				if (obj.alpha <= 0) 
+					{
+						over = true;
+						obj.alpha = 0;
+					}
 				
-				//this.substate = this.SUBSTATE_SECOND_OPEN;
 			}
 
-			this.lightbg.draw(ctx);
+			this.ashHouse.alpha += .025;
+
+			if (this.ashHouse.alpha >= 1) this.ashHouse.alpha = 1;
+
+			//
+			if (over)
+			{
+				var self = this;
+				if (this.resetTimeout == undefined) this.resetTimeout = setTimeout(function(){
+					self.substate = self.SUBSTATE_BG_TRANSITION;
+					self.lightbg.alpha = 0;
+					clearTimeout(self.resetTimeout);
+					self.resetTimeout  =undefined;
+				},3000);
+			}
+			
 			
 		}
 		this.currentbg.draw(ctx);
@@ -400,6 +505,8 @@ window.LevelOne = function()
 			this.emptyBlocks[s].draw(ctx);
 		}
 
+		this.ashHouse.draw(ctx);
+
 		if (this.debug) this.drawFingers(frame,ctx);
 		this.drawUI(frame,ctx);
 
@@ -412,19 +519,20 @@ window.LevelOne = function()
 
 			var lines = this.currentCaption.split("\n");
 			//console.log(lines);
-			var textPos = getCorrectedPosition({x:400,y:50});
-			var lineHeight = 24;
+			var textPos = getCorrectedPosition({x:400,y:600});
+			var lineHeight = 30;
+
+			this.textBox.draw(ctx);
 
 			for (var i = 0; i < lines.length;i++)
 			{
 				ctx.fillStyle = "#FFF";
-				ctx.font="24px Impact";
+				ctx.font="30px GothamMedium";
 				ctx.textAlign = 'left';
 
 				ctx.fillText(lines[i],textPos.x,textPos.y+(lineHeight*i));
 			}
 		}
-
 
 		this.previousFrame = frame;
 
@@ -557,6 +665,13 @@ window.LevelOne = function()
 		}
 		else if (this.gameState == this.STATE_RUNNING)
 		{
+			//check for flames
+			var draw1 = false,
+			draw2 = false,
+			draw3 = false;
+
+			var done_running = true;
+
 			//move all the bad things
 			var zombiespeed = 1.5,
 			beespeed = 3;
@@ -567,9 +682,14 @@ window.LevelOne = function()
 			{
 				var bee = this.bees[i];
 				
-				if (bee.pos.x >= destination.x)
+				if (bee.pos.x >= destination.x - 20)
 				{
-					
+					//start flames if wrong
+					if (this.spotsToDrag[1].slottedBlock.value != "glass")
+					{
+						draw2 = true;
+					}
+
 				}
 				else
 				{
@@ -582,6 +702,7 @@ window.LevelOne = function()
 					//bee.pos.y += idealVec.y;
 
 					//return true;	
+					done_running = false;
 				}
 
 				bee.draw(ctx);
@@ -590,9 +711,13 @@ window.LevelOne = function()
 			{
 				var zombie = this.zombies[i];
 
-				if (zombie.pos.x >= destination.x)
+				if (zombie.pos.x >= destination.x - 50)
 				{
-					
+					//start flames if wrong
+					if (this.spotsToDrag[0].slottedBlock.value != "wood")
+					{
+						draw1 = true;
+					}
 				}
 				else
 				{
@@ -602,15 +727,69 @@ window.LevelOne = function()
 					idealVec = getScaledVector(idealVec,zombiespeed);
 
 					zombie.pos.x += idealVec.x; 
+					done_running = false;
 				}
 
 				zombie.draw(ctx);
 			}
 
+			for (var i = 0; i < this.lvl1flames.length;i++)
+			{
+				if (draw1) 
+					{
+						if (this.lvl1flames[i].alpha < 1)
+							this.lvl1flames[i].alpha += .1;
+						this.lvl1flames[i].draw(ctx);
+					}
+				if (draw2) 
+					{
+						if (this.lvl2flames[i].alpha < 1)
+							this.lvl2flames[i].alpha += .1;
+						this.lvl2flames[i].draw(ctx);
+					}
+				if (draw3)
+					{
+						if (this.lvl3flames[i].alpha < 1)
+							this.lvl3flames[i].alpha += .1;
+						this.lvl3flames[i].draw(ctx);
+					}
+			}
+
+			if (done_running)
+			{
+				var self = this;
+
+				if (draw1 || draw2 || draw3)
+				{
+					//console.log('fail!');
+
+					self.currentCaption = captions.failure;
+
+					setTimeout(function()
+					{
+						self.currentCaption = undefined;
+						self.whaleSprite = self.normalWhale;
+					},4000);
+
+					self.reset();
+				}
+				else
+				{
+					
+				}
+
+				
+			}
 		}
 		this.tempHand.draw(frame,ctx);
 		/*pinch(frame);
 		zoom(frame);*/
+	}
+	p.reset = function()
+	{
+		this.substate = this.SUBSTATE_HOUSE_FALLING;
+		this.gameState = this.STATE_BUILDING;
+		//this.ashHouse.alpha = 0;
 	}
 
 	p.updateToolbox = function(frame,ctx)
@@ -720,7 +899,7 @@ window.LevelOne = function()
 				if (this.substate == this.SUBSTATE_CANT_RUN)
 				{
 					//play sound file of whale telling person to slot all three
-					console.log('SLOT ALL THREE DUDE');
+					//console.log('SLOT ALL THREE DUDE');
 
 				}
 
@@ -970,6 +1149,7 @@ window.LevelOne = function()
 									{
 										//debugger;
 										touchingSpots.push(s);
+										
 									}
 
 								}
@@ -1059,11 +1239,25 @@ window.LevelOne = function()
 			{
 				canRun = false;
 			}
+			else if (this.spotsToDrag[i].slottedBlock.value == "")
+			{
+				canRun = false;
+			}
 		}
 
 		if (canRun)
 		{
-			
+
+			this.currentCaption = captions.running;
+
+			var self = this;
+			setTimeout(function()
+			{
+				self.currentCaption = undefined;
+			},3000);
+			this.whaleSprite = this.sadWhale;
+			//this.whaleSprite = this.scaredWhale;
+
 			this.gameState = this.STATE_RUNNING;
 			this.substate = this.SUBSTATE_BG_TRANSITION;
 			this.darkbg.alpha = 0;
@@ -1073,16 +1267,27 @@ window.LevelOne = function()
 			playSong.loop();
 			PLAY_SONG_PLAYING = true;
 
+			for (var i = 0; i < this.lvl1flames.length;i++)
+			{
+				this.lvl1flames[i].alpha = 0;
+				this.lvl2flames[i].alpha = 0;
+				this.lvl3flames[i].alpha = 0;
+			}
+
 			//console.log(this.gameState);
 			for (var i in this.bees)
 			{
 				this.bees[i].play();
+				this.bees[i].pos = {x:this.bees[i].initialPos.x,y:this.bees[i].initialPos.y};
+				this.bees[i].alpha = 1;
 				this.bees[i].frameNumber = Math.floor(Math.random()*97);
 				beeSfx.loop();
 			}
 			for (var i in this.zombies)
 			{
 				this.zombies[i].play();
+				this.zombies[i].pos = {x:this.zombies[i].initialPos.x,y:this.zombies[i].initialPos.y};
+				this.zombies[i].alpha = 1;
 				this.zombies[i].frameNumber = Math.floor(Math.random()*141);
 				zombieSfx.loop()
 			}
@@ -1090,6 +1295,7 @@ window.LevelOne = function()
 		else
 		{
 			this.substate = this.SUBSTATE_CANT_RUN;
+			this.currentCaption = captions.run_not_ready;
 		}
 	}
 	/*p.pinch = function(frame){

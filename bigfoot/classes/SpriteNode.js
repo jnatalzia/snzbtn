@@ -1,4 +1,4 @@
-window.SpriteNode = function(src,numFrames,framesBetween,sizeV,posV,cols,rows,isOnScreen)
+window.SpriteNode = function(src,numFrames,framesBetween,sizeV,posV,cols,rows,isOnScreen,destSize)
 {
 	if (src.length > 0)
 	{
@@ -12,11 +12,13 @@ window.SpriteNode = function(src,numFrames,framesBetween,sizeV,posV,cols,rows,is
 	this.frameNumber = 0;
 	this.frameCount = 0;
 	this.framesBetween = framesBetween;
-	this.isPlaying = false;
+	this.isPlaying = true;
 	//size is the size of each frame
 	this.size = getCorrectedSize(sizeV);
 	this.originalSize = sizeV;
 	this.pos = getCorrectedPosition(posV);
+	this.initialPos = {x:this.pos.x,y:this.pos.y};
+	if (destSize != undefined) this.destSize = getCorrectedSize(destSize);
 
 	this.numColumns = cols;
 	this.numRows = rows;
@@ -52,7 +54,8 @@ window.SpriteNode = function(src,numFrames,framesBetween,sizeV,posV,cols,rows,is
 			if (this.spriteSheet != undefined)
 			{
 				ctx.globalAlpha = (this.alpha<0)?0:this.alpha;
-				ctx.drawImage(this.spriteSheet,sx,sy,this.originalSize.width,this.originalSize.height,this.pos.x,this.pos.y,this.size.width,this.size.height);
+				if (this.destSize == undefined) ctx.drawImage(this.spriteSheet,sx,sy,this.originalSize.width,this.originalSize.height,this.pos.x,this.pos.y,this.size.width,this.size.height);
+				else ctx.drawImage(this.spriteSheet,sx,sy,this.originalSize.width,this.originalSize.height,this.pos.x,this.pos.y,this.destSize.width,this.destSize.height);
 				ctx.globalAlpha = 1;
 			}
 			else
