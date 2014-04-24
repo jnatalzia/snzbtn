@@ -4,13 +4,9 @@ window.LevelSelect = function()
 	{
 		this.dragCircle;
 
-		/* MENU ITEMS
-			Title 
-			Variable 1-4
-			Functions 1-4
-			Loops 1-4
-			Conditionals 1-4
-		*/
+		var variables, functions, loops, conditionals, lessonOne, lessonTwo, lessonThree, lessonFour;
+
+		this.loadAssets();
 		
 	}
 
@@ -18,24 +14,36 @@ window.LevelSelect = function()
 
 	p.loadAssets = function()
 	{
+		/*  Need new images for the title and 
 		var screenTitle = new Image(); // title for levelSelect
-		screenTitle.src = "";
-		var variables = new Image(); // variables topic
-		variables .src = "";
-		var functions = new Image(); // funcitons topic
-		functions.src = "";
-		var loops = new Image(); // loops topic
-		loops.src = "";
-		var conditionals = new Image(); // conditionals topic
-		conditionals.src = "";
-		var lessonOne = new Image(); // lesson one
-		lessonOne.src = "";
-		var lessonTwo = new Image(); // lesson two
-		lessonTwo.src = "";
-		var lessonThree = new Image(); // lesson three
-		lessonThree.src = "";
-		var lessonFour = new Image(); // lesson four
-		lessonFour.src = "";
+		screenTitle.src = "img/levelSelect/";
+		*/
+
+		variables = new Image(); // variables topic
+		variables.src = "img/levelSelect/variables.png";
+
+		console.log(variables);
+
+		functions = new Image(); // funcitons topic
+		functions.src = "img/levelSelect/functions.png";
+
+		loops = new Image(); // loops topic
+		loops.src = "img/levelSelect/loops.png";
+
+		conditionals = new Image(); // conditionals topic
+		conditionals.src = "img/levelSelect/conditionals.png";
+
+		lessonOne = new Image(); // lesson one
+		lessonOne.src = "img/levelSelect/1.png";
+
+		lessonTwo = new Image(); // lesson two
+		lessonTwo.src = "img/levelSelect/2.png";
+
+		lessonThree = new Image(); // lesson three
+		lessonThree.src = "img/levelSelect/3.png";
+
+		lessonFour = new Image(); // lesson four
+		lessonFour.src = "img/levelSelect/4.png";
 	}
 	p.onloaded = function()
 	{
@@ -80,10 +88,14 @@ window.LevelSelect = function()
 	}
 	p.drawUI = function(frame,ctx)
 	{
-		var topics = [1,2,3,4]; // change to hold the topic images for the menu 
-		var lessons = [1,2,3,4]; // change to hold the lesson images for the menu
-
-		console.log(topics.length);
+		
+		var topics = [variables,functions,loops,conditionals]; 
+		var lessons = [lessonOne,lessonTwo,lessonThree,lessonFour];
+		
+		/*
+		var topics = [this.variables,this.functions,this.loops,this.conditionals]; 
+		var lessons = [this.lessonOne,this.lessonTwo,this.lessonThree,this.lessonFour];
+		*/
 
 		var tpx = 0;
 		var tpy = 0;
@@ -96,25 +108,34 @@ window.LevelSelect = function()
 			//console.log('loop function');
 			tpx = tpx + 200;
 			tpy = 100;
+			console.log(topics[i]);
 
-			//replace this with drawing the topic images
+			ctx.drawImage(topics[i],tpx,tpy);
+			/*
+
 			ctx.fillStyle = "#E04C4C"
 			ctx.beginPath();
 			ctx.rect(tpx,tpy,70,50);
 			ctx.fill();
 			ctx.closePath();
+			*/
 			
 			for(var k in lessons)
 			{
 				lpy = lpy + tpy + 100;
-				lpx = tpx + 35;
+				lpx = tpx + 55;
+
+				//width of topic image, divided by half the width of lesson number circle
+
+				ctx.drawImage(lessons[k],lpx,lpy);
+				/*
 				//replace this with drawing the lesson images
 				ctx.fillStyle = "#E04C4C"
 				ctx.beginPath();
 				ctx.arc(lpx,lpy,10,0,2*Math.PI);
 				ctx.fill();
 				ctx.closePath();
-
+				*/
 				tpy = 0;
 			}
 
