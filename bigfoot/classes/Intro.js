@@ -23,7 +23,7 @@ window.Intro = function()
 
 		this.grabHelper = new SpriteNode('img/lvl1/grab_hand.png',1,1,{width:108,height:102},{x:window.innerWidth/2,y:350},1,1,true);
 
-
+		here is a change to fix some things
 		//this.toolboxTop = new SpriteNode('img/toolbox-top.png',1,1,)
 
 		/*
