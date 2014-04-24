@@ -22,8 +22,6 @@ window.LevelSelect = function()
 		variables = new Image(); // variables topic
 		variables.src = "img/levelSelect/variables.png";
 
-		console.log(variables);
-
 		functions = new Image(); // funcitons topic
 		functions.src = "img/levelSelect/functions.png";
 
@@ -92,54 +90,40 @@ window.LevelSelect = function()
 		var topics = [variables,functions,loops,conditionals]; 
 		var lessons = [lessonOne,lessonTwo,lessonThree,lessonFour];
 		
-		/*
-		var topics = [this.variables,this.functions,this.loops,this.conditionals]; 
-		var lessons = [this.lessonOne,this.lessonTwo,this.lessonThree,this.lessonFour];
-		*/
-
+		//set variable zeros 
 		var tpx = 0;
 		var tpy = 0;
 		var lpx = 0;
 		var lpy = 0;
-
+		
+		/*
+		pos:getCorrectedPosition({x:1700,y:890}),
+		size:getCorrectedSize({width:175,height:175})
+		*/
 
 		for(var i in topics)
 		{
-			//console.log('loop function');
+			//console.log('topics loop');
+
 			tpx = tpx + 200;
 			tpy = 100;
-			console.log(topics[i]);
+			
 
-			ctx.drawImage(topics[i],tpx,tpy);
-			/*
-
-			ctx.fillStyle = "#E04C4C"
-			ctx.beginPath();
-			ctx.rect(tpx,tpy,70,50);
-			ctx.fill();
-			ctx.closePath();
-			*/
+			ctx.drawImage(topics[i],tpx,tpy); // draws the topic number circles 
+			
 			
 			for(var k in lessons)
 			{
 				lpy = lpy + tpy + 100;
 				lpx = tpx + 55;
 
-				//width of topic image, divided by half the width of lesson number circle
-
-				ctx.drawImage(lessons[k],lpx,lpy);
-				/*
-				//replace this with drawing the lesson images
-				ctx.fillStyle = "#E04C4C"
-				ctx.beginPath();
-				ctx.arc(lpx,lpy,10,0,2*Math.PI);
-				ctx.fill();
-				ctx.closePath();
-				*/
+				
+				ctx.drawImage(lessons[k],lpx,lpy); // draws the lesson number circles
+		
 				tpy = 0;
 			}
 
-			lpy = 0;
+			lpy = 0; //reset the start point of the y value for the lessons
 			
 		}
 	}
