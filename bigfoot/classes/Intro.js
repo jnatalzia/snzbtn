@@ -8,18 +8,36 @@ window.Intro = function()
 	var p = Intro.prototype;
 	p.loadAssets = function()
 	{	
-		openingVideo = new Video(canvas,ctx,'opening');
+		openingVideo = new Video(canvas,ctx,'opening'); //load the opening video
+
 		var whaleSize = {width:483,height:313};
 		this.normalWhale = new SpriteNode("img/lvl1/whale_fly.png",162,3,whaleSize,{x:30,y:720},18,9,true);
 		this.happyWhale = new SpriteNode("img/lvl1/whale_happy.png",14,2,{width:whaleSize.width-1,height:whaleSize.height-12},{x:30,y:720},7,2,true);
 		this.sadWhale = new SpriteNode("img/lvl1/whale_sad.png",14,2,{width:whaleSize.width,height:whaleSize.height-12},{x:30,y:720},7,2,true);
 		this.talkingWhale = new SpriteNode("img/lvl1/whale_talking.png",161,2,{width:whaleSize.width-1,height:whaleSize.height},{x:30,y:720},23,7,true);
 		this.whaleSprite = this.normalWhale;
+
 		this.whaleSprite.play();
 
 		this.textBox = new SpriteNode('img/text-box.png',1,1,{width:1732,height:419},{x:565,y:725},1,1,true,{width:1299,height:314});
 
 		this.grabHelper = new SpriteNode('img/lvl1/grab_hand.png',1,1,{width:108,height:102},{x:window.innerWidth/2,y:350},1,1,true);
+
+
+		//this.toolboxTop = new SpriteNode('img/toolbox-top.png',1,1,)
+
+		/*
+		//toolbox info --------------------------------------------
+		this.toolboxTopIMG = new Image();
+		this.toolBoxTop = undefined;
+		this.toolboxTopIMG.src = "img/toolbox-top.png";
+
+		this.toolboxBottomIMG = new Image();
+		this.toolBoxBottom = undefined;
+		this.toolboxBottomIMG.src = "img/toolbox-btm.png";
+		// block info ----------------------------------------------
+		new SpriteNode('img/lvl1/box1-empty.png',1,1,{width:155,height:155},{x:spotPos[0].x-77,y:spotPos[0].y-77},1,1,true),
+		*/
 	}
 	p.onloaded = function()
 	{	
