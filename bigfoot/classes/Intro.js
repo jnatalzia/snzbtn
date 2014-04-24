@@ -7,11 +7,23 @@ window.Intro = function()
 	}
 	var p = Intro.prototype;
 	p.loadAssets = function()
-	{
+	{	
 		openingVideo = new Video(canvas,ctx,'opening');
+		var whaleSize = {width:483,height:313};
+		this.normalWhale = new SpriteNode("img/lvl1/whale_fly.png",162,3,whaleSize,{x:30,y:720},18,9,true);
+		this.happyWhale = new SpriteNode("img/lvl1/whale_happy.png",14,2,{width:whaleSize.width-1,height:whaleSize.height-12},{x:30,y:720},7,2,true);
+		this.sadWhale = new SpriteNode("img/lvl1/whale_sad.png",14,2,{width:whaleSize.width,height:whaleSize.height-12},{x:30,y:720},7,2,true);
+		this.talkingWhale = new SpriteNode("img/lvl1/whale_talking.png",161,2,{width:whaleSize.width-1,height:whaleSize.height},{x:30,y:720},23,7,true);
+		this.whaleSprite = this.normalWhale;
+		this.whaleSprite.play();
+
+		this.textBox = new SpriteNode('img/text-box.png',1,1,{width:1732,height:419},{x:565,y:725},1,1,true,{width:1299,height:314});
+
+		this.grabHelper = new SpriteNode('img/lvl1/grab_hand.png',1,1,{width:108,height:102},{x:window.innerWidth/2,y:350},1,1,true);
 	}
 	p.onloaded = function()
-	{
+	{	
+		this.tempHand = new Hand();
 		this.browserWidth = window.innerWidth;
 		this.browserHeight = window.innerHeight;
 
@@ -21,14 +33,47 @@ window.Intro = function()
   		this.dragCircle.y = browserHeight - 50;
   		this.dragCircle.radius = 50;
 
-		openingVideo.play();
+		/*openingVideo.play();
 		openingVideo.addEventListener('ended',function(){
 			return('hi');
-		});
+		});*/
 	}
 	p.update = function(ctx,frame)
 	{
+		this.whaleSprite.draw(ctx);
+		this.textBox.draw(ctx);
+		this.tempHand.draw(frame,ctx);
 
+		if (this.substate === this.SUBSTATE_FIRST_OPEN)
+			{
+				//this.whaleSprite = this.talkingWhale;
+
+				var start_pos = getCorrectedPosition({x:window.innerWidth/2,y:350});
+				var destination = getCorrectedPosition({x:window.innerWidth/2,y:450});
+				var speed = 1;
+				
+				if (isCloseToDestination(this.grabHelper.pos,destination))
+				{
+					this.grabHelper.alpha -= .05;
+					if (this.grabHelper.alpha <= -5)
+					{
+						this.grabHelper.pos = start_pos;
+						this.grabHelper.alpha = 1;
+					}
+				}
+				else
+				{
+					var idealVec = getSubtractedVector(this.grabHelper.pos,destination);
+					//arbitrary block speed
+					idealVec = getNormalizedVector(idealVec);
+					idealVec = getScaledVector(idealVec,speed);
+
+					this.grabHelper.pos.x += idealVec.x;
+					this.grabHelper.pos.y += idealVec.y;	
+				}
+
+				this.grabHelper.draw(ctx);
+			}
 	}
 	return Intro;
 }();
