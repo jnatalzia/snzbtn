@@ -23,11 +23,9 @@ window.Intro = function()
 
 		this.grabHelper = new SpriteNode('img/lvl1/grab_hand.png',1,1,{width:108,height:102},{x:window.innerWidth/2,y:350},1,1,true);
 
-		here is a change to fix some things
-		//this.toolboxTop = new SpriteNode('img/toolbox-top.png',1,1,)
 
-		/*
-		//toolbox info --------------------------------------------
+
+
 		this.toolboxTopIMG = new Image();
 		this.toolBoxTop = undefined;
 		this.toolboxTopIMG.src = "img/toolbox-top.png";
@@ -36,8 +34,8 @@ window.Intro = function()
 		this.toolBoxBottom = undefined;
 		this.toolboxBottomIMG.src = "img/toolbox-btm.png";
 		// block info ----------------------------------------------
-		new SpriteNode('img/lvl1/box1-empty.png',1,1,{width:155,height:155},{x:spotPos[0].x-77,y:spotPos[0].y-77},1,1,true),
-		*/
+		var spotPos = [{x:500,y:980},{x:700,y:980},{x:900,y:980}];
+		new SpriteNode('img/lvl1/box1-empty.png',1,1,{width:155,height:155},{x:spotPos[0].x-77,y:spotPos[0].y-77},1,1,true);
 	}
 	p.onloaded = function()
 	{	
@@ -56,12 +54,18 @@ window.Intro = function()
 			return('hi');
 		});*/
 	}
-	p.update = function(ctx,frame)
+	p.drawUI = function(ctx,frame)
 	{
+		//draw whale
 		this.whaleSprite.draw(ctx);
+		
+		//draw textbox
 		this.textBox.draw(ctx);
+
+		//draw hands
 		this.tempHand.draw(frame,ctx);
 
+		//draw helper hand
 		if (this.substate === this.SUBSTATE_FIRST_OPEN)
 			{
 				//this.whaleSprite = this.talkingWhale;
@@ -93,5 +97,33 @@ window.Intro = function()
 				this.grabHelper.draw(ctx);
 			}
 	}
+
+	//draw the toolbox
+	//DRAW COMMON UI ELEMENTS
+		if (this.startDragY != -1)
+		{
+			var toolboxTopPos = getCorrectedPosition({x:75,y:10});
+			toolboxTopPos.y=this.dragCircle.y;
+		}
+		else
+		{
+			var toolboxTopPos = getCorrectedPosition({x:75,y:890});
+		}
+		
+		var toolboxTopSize = getCorrectedSize({width:this.toolboxTopIMG.width,height:this.toolboxTopIMG.height});
+
+
+		var toolboxBottomPos = getCorrectedPosition({x:75,y:950});
+
+		ctx.fillStyle = "#919191";
+		ctx.drawImage(this.toolboxBottomIMG,toolboxBottomPos.x,toolboxBottomPos.y, toolboxTopSize.width, toolboxTopSize.height);
+		ctx.drawImage(this.toolboxTopIMG,toolboxTopPos.x,toolboxTopPos.y, toolboxTopSize.width, toolboxTopSize.height);
+	}
+
+	p.update = function(ctx,frame)
+	{
+		drawUI(ctx,frame);
+	}
+	
 	return Intro;
 }();
