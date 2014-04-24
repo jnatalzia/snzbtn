@@ -5,5 +5,5 @@ window.DragSpot = function(xPos,yPos,w,h)
 	this.size = getCorrectedSize({width:w,height:h});
 	this.slottedBlock = undefined;
 
-	console.log(this);
+	//console.log(this);
 }

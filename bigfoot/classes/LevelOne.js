@@ -552,7 +552,10 @@ window.LevelOne = function()
 			for (var i = 0; i < lines.length;i++)
 			{
 				ctx.fillStyle = "#FFF";
-				ctx.font="30px GothamMedium";
+
+				var fontSize = (30 * .75) * 1920/window.innerWidth;
+
+				ctx.font=fontSize+"px GothamMedium";
 				ctx.textAlign = 'left';
 
 				ctx.fillText(lines[i],textPos.x,textPos.y+(lineHeight*i));
@@ -713,7 +716,7 @@ window.LevelOne = function()
 				if (bee.pos.x >= destination.x - 20)
 				{
 					//start flames if wrong
-					if (this.spotsToDrag[1].slottedBlock.value != "glass")
+					if (this.spotsToDrag[1].slottedBlock.value != "wood")
 					{
 						draw2 = true;
 						failed = true;
@@ -743,7 +746,7 @@ window.LevelOne = function()
 				if (zombie.pos.x >= destination.x - 50)
 				{
 					//start flames if wrong
-					if (this.spotsToDrag[0].slottedBlock.value != "wood")
+					if (this.spotsToDrag[0].slottedBlock.value != "metal")
 					{
 						draw1 = true;
 						failed = true;
@@ -762,7 +765,7 @@ window.LevelOne = function()
 
 				zombie.draw(ctx);
 			}
-			if (this.spotsToDrag[2].slottedBlock.value != "metal")
+			if (this.spotsToDrag[2].slottedBlock.value != "glass")
 			{
 				draw3 = true;
 				failed = true;

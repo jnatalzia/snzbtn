@@ -96,7 +96,7 @@ window.Intro = function()
 
 				this.grabHelper.draw(ctx);
 			}
-	}
+	
 
 	//draw the toolbox
 	//DRAW COMMON UI ELEMENTS
@@ -122,7 +122,7 @@ window.Intro = function()
 
 	p.update = function(ctx,frame)
 	{
-		drawUI(ctx,frame);
+		this.drawUI(ctx,frame);
 	}
 	
 	return Intro;
