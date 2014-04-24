@@ -18,7 +18,24 @@ window.LevelSelect = function()
 
 	p.loadAssets = function()
 	{
-		//eventually assets will take the place of rects and circs
+		var screenTitle = new Image(); // title for levelSelect
+		screenTitle.src = "";
+		var variables = new Image(); // variables topic
+		variables .src = "";
+		var functions = new Image(); // funcitons topic
+		functions.src = "";
+		var loops = new Image(); // loops topic
+		loops.src = "";
+		var conditionals = new Image(); // conditionals topic
+		conditionals.src = "";
+		var lessonOne = new Image(); // lesson one
+		lessonOne.src = "";
+		var lessonTwo = new Image(); // lesson two
+		lessonTwo.src = "";
+		var lessonThree = new Image(); // lesson three
+		lessonThree.src = "";
+		var lessonFour = new Image(); // lesson four
+		lessonFour.src = "";
 	}
 	p.onloaded = function()
 	{
@@ -63,9 +80,8 @@ window.LevelSelect = function()
 	}
 	p.drawUI = function(frame,ctx)
 	{
-		//console.log('Im getting called');
-		var topics = [1,2,3,4,5];
-		var lessons = [1,2,3,4];
+		var topics = [1,2,3,4]; // change to hold the topic images for the menu 
+		var lessons = [1,2,3,4]; // change to hold the lesson images for the menu
 
 		console.log(topics.length);
 
@@ -74,28 +90,36 @@ window.LevelSelect = function()
 		var lpx = 0;
 		var lpy = 0;
 
+
 		for(var i in topics)
 		{
 			//console.log('loop function');
 			tpx = tpx + 200;
 			tpy = 100;
+
+			//replace this with drawing the topic images
 			ctx.fillStyle = "#E04C4C"
 			ctx.beginPath();
 			ctx.rect(tpx,tpy,70,50);
 			ctx.fill();
 			ctx.closePath();
-			/*
+			
 			for(var k in lessons)
 			{
-				lpx = tpx;
-				lpy = tpy + 200;
+				lpy = lpy + tpy + 100;
+				lpx = tpx + 35;
+				//replace this with drawing the lesson images
 				ctx.fillStyle = "#E04C4C"
 				ctx.beginPath();
-				ctx.arc(lpx,lpy,10,2*Math.PI);
+				ctx.arc(lpx,lpy,10,0,2*Math.PI);
 				ctx.fill();
 				ctx.closePath();
+
+				tpy = 0;
 			}
-			*/
+
+			lpy = 0;
+			
 		}
 	}
 	return LevelSelect;

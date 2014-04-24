@@ -14,10 +14,7 @@
 <script src="classes/Cutscene.js"></script>
 <script src="classes/Hand.js"></script>
 <script src="classes/LevelOne.js"></script>
-
-<!--
 <script src="classes/LevelSelect.js"></script> 
--->
 <script src="classes/Audio.js"></script>
 <script src="classes/Video.js"></script>
 <script src="classes/Intro.js"></script>
@@ -42,8 +39,15 @@
   		ctx.canvas.height = window.innerHeight;
 
   		//load all levels
+<<<<<<< Updated upstream
   		currLevel = new Intro(); //for testing ------------------
   		//currLevel = new LevelSelect(); // for testing ------------------
+=======
+  		//currLevel = new LevelOne(); //for testing-------------
+  		//currLevel = new Intro(); //for testing ------------------
+  		currLevel = new LevelSelect(); // for testing ------------------
+		console.log(currLevel);
+>>>>>>> Stashed changes
   		currLevel.onloaded();
 
 
