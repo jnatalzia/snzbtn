@@ -122,7 +122,7 @@ window.VariableBlock = function(dest,size,options)
 						block.options[i].isHighlighted  = false;
 				}
 
-				//get distance from center of finger to cetner of block
+				//get distance from center of finger to center of block
 				var fingVec = getSubtractedVector(block.getCenterPos(),{x:fx,y:fy});
 				var fVecLen = getMagnitude(fingVec);
 
@@ -205,16 +205,17 @@ window.VariableBlock = function(dest,size,options)
 				ctx.lineTo(np.x,np.y);
 				ctx.lineTo(block.position.x + block.size.width/2,block.position.y+ block.size.height/2);
 				ctx.closePath();
-				ctx.drawImage(glassTitle,block.position.x+ block.size.width/2-wheelRadius, block.position.y + block.size.height/2);
-				ctx.drawImage(metalTitle,block.position.x+ block.size.width/2-wheelRadius, block.position.y + block.size.height/2-wheelRadius);
-				ctx.drawImage(woodTitle,block.position.x+ block.size.width/2, block.position.y + block.size.height/2-wheelRadius);
-				ctx.drawImage(cancelTitle,block.position.x+ block.size.width/2, block.position.y + block.size.height/2);
 				ctx.stroke();
 				if (block.options[i].isHighlighted)
 				{
 					ctx.fillStyle = "#ccc";
 					ctx.fill();
 				}
+				ctx.drawImage(glassTitle,block.position.x+ block.size.width/2-wheelRadius, block.position.y + block.size.height/2);
+				ctx.drawImage(metalTitle,block.position.x+ block.size.width/2-wheelRadius, block.position.y + block.size.height/2-wheelRadius);
+				ctx.drawImage(woodTitle,block.position.x+ block.size.width/2, block.position.y + block.size.height/2-wheelRadius);
+				ctx.drawImage(cancelTitle,block.position.x+ block.size.width/2, block.position.y + block.size.height/2);
+
 
 				//draw text for debugging
 				ctx.fillStyle = "#000";

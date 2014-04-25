@@ -32,4 +32,15 @@ window.Audio = function(soundID)
 		sound.loop = true;
 		sound.oncanplaythrough = sound.play();
 	}
+	this.randomLoop = function()
+	{
+		sound.oncanplaythrough = sound.play();
+		sound.addEventListener('ended',function(){
+			setTimeout(function()
+				{
+					sound.oncanplaythrough = sound.play();
+				},Math.random()*3000);
+		});
+		
+	}
 }

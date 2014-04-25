@@ -142,6 +142,9 @@ window.LevelOne = function()
 		var beeSfx;
 		var zombieSfx;
 		var lightningSfx;
+		var woodBreak;
+		var metalBreak;
+		var glassBreak;
 	}
 
 	var p = LevelOne.prototype;
@@ -314,6 +317,9 @@ window.LevelOne = function()
 		playSong = new Audio('abbey');
 		beeSfx = new Audio('bees');
 		zombieSfx = new Audio('zombies');
+		woodBreak = new Audio('wood');
+		metalBreak = new Audio('metal');
+		glassBreak = new Audio('glass');
 	}
 	p.onloaded = function()
 	{
@@ -720,6 +726,7 @@ window.LevelOne = function()
 					{
 						draw2 = true;
 						failed = true;
+						woodBreak.loop();
 					}
 
 				}
@@ -750,6 +757,8 @@ window.LevelOne = function()
 					{
 						draw1 = true;
 						failed = true;
+						metalBreak.randomLoop();
+						console.log('looping metalbreak D:');
 					}
 				}
 				else
@@ -769,6 +778,8 @@ window.LevelOne = function()
 			{
 				draw3 = true;
 				failed = true;
+				glassBreak.randomLoop();
+				console.log('looping glassbreak');
 			}
 
 			for (var i = 0; i < this.lvl1flames.length;i++)
@@ -802,11 +813,23 @@ window.LevelOne = function()
 					//console.log('fail!');
 
 					self.currentCaption = captions.failure;
-
+						zombieSfx.stop();
+  						beeSfx.stop();
+  						woodBreak.stop();
+  						metalBreak.stop();
+  						glassBreak.stop();
 					setTimeout(function()
 					{
 						self.currentCaption = undefined;
 						self.whaleSprite = self.normalWhale;
+						playSong.stop();
+						this.PLAY_SONG_PLAYING = false;
+
+						setTimeout(function()
+						{
+							bgSong.loop();
+							this.BG_SONG_PLAYING = true;
+						},1000);
 					},4000);
 
 					self.reset();
