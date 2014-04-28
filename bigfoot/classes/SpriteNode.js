@@ -24,6 +24,8 @@ window.SpriteNode = function(src,numFrames,framesBetween,sizeV,posV,cols,rows,is
 	this.numRows = rows;
 	this.isOnScreen = isOnScreen;
 
+	this.reversed = false;
+
 	this.alpha = 1;
 
 	this.draw = function(ctx)
@@ -34,15 +36,31 @@ window.SpriteNode = function(src,numFrames,framesBetween,sizeV,posV,cols,rows,is
 			{
 				//move the frames
 				//etc
-				this.frameCount++;
 
-				if (this.frameCount % this.framesBetween ==  0)
+				if (this.reversed)
 				{
-					this.frameCount = 0;
-					this.frameNumber++;
-				}
+					this.frameCount++;
 
-				this.frameNumber = this.frameNumber%this.numFrames;
+					if (this.frameCount % this.framesBetween ==  0)
+					{
+						this.frameCount = 0;
+						this.frameNumber--;
+					}
+					if (this.frameNumber < 0) this.frameNumber = this.numFrames-1;
+				}
+				else
+				{
+					this.frameCount++;
+
+					if (this.frameCount % this.framesBetween ==  0)
+					{
+						this.frameCount = 0;
+						this.frameNumber++;
+					}
+
+					this.frameNumber = this.frameNumber%this.numFrames;
+				}
+				
 			}
 
 

@@ -87,8 +87,10 @@ window.VariableBlock = function(dest,size,options)
 			if (this.pointIsInside({x:fx,y:fy}))
 			{
 				//console.log('works');
-				if (this.optionTime == undefined) this.optionTimer = setTimeout(function()
+				var self = this;
+				if (this.optionTimer == undefined) this.optionTimer = setTimeout(function()
 				{
+					//self.checkDisplay();
 					block.displayOptions = true;
 				},2000);
 
@@ -136,6 +138,8 @@ window.VariableBlock = function(dest,size,options)
 						{
 							selected = block.options[i];
 							block.displayOptions = false;
+							clearTimeout(this.optionTimer);
+							this.optionTimer = undefined;
 							console.log(selected.title);
 							if (selected.title != 'cancel') 
 							{
@@ -149,6 +153,7 @@ window.VariableBlock = function(dest,size,options)
 
 					clearTimeout(this.optionTimer);
 					this.optionTimer = undefined;
+					this.displayOptions = false;
 					//console.log(selected);
 				}
 			}

@@ -123,7 +123,7 @@ window.LevelOne = function()
 		];
 
 		var spotSize = {width:150,height:150};
-		var spotPos = [{x:500,y:980},{x:700,y:980},{x:900,y:980}];
+		var spotPos = [{x:525,y:980},{x:925,y:980},{x:1325,y:980}];
 
 		this.spotsToDrag = [];
 
@@ -223,7 +223,7 @@ window.LevelOne = function()
 		this.toolboxBottomIMG.src = "img/toolbox-btm.png";
 
 		this.buildBar = new Image();
-		this.buildBar.src = "img/wires/buildBar.png";
+		this.buildBar.src = "img/buildBar.png";
 
 		this.runBtnActive = new Image();
 		this.runBtnActive.src = "img/runBTN_active.png";
@@ -261,12 +261,25 @@ window.LevelOne = function()
 			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:-175,y:650},32,5,true)
 		];
 
-		var spotPos = [{x:500,y:980},{x:700,y:980},{x:900,y:980}];
+		var spotPos = [{x:525,y:980},{x:925,y:980},{x:1325,y:980}];
+
+		this.firstEmpty = new SpriteNode('img/lvl1/floors/1-empty.png',15,2,{width:263,height:171},{x:spotPos[0].x-132,y:spotPos[0].y-86},3,5,true);
+		this.firstEmpty.stop();
+
+		this.secondEmpty = new SpriteNode('img/lvl1/floors/2-empty.png',15,2,{width:263,height:171},{x:spotPos[1].x-132,y:spotPos[1].y-86},3,5,true);
+		this.secondEmpty.stop();
+
+		this.thirdEmpty = new SpriteNode('img/lvl1/floors/3-empty.png',15,2,{width:263,height:171},{x:spotPos[2].x-132,y:spotPos[2].y-86},3,5,true);
+		this.thirdEmpty.stop();
+
+		this.firstFloorSprite = this.firstEmpty;
+		this.secondFloorSprite = this.secondEmpty;
+		this.thirdFloorSprite = this.thirdEmpty;
 
 		this.emptyBlocks = [
-			new SpriteNode('img/lvl1/box1-empty.png',1,1,{width:155,height:155},{x:spotPos[0].x-77,y:spotPos[0].y-77},1,1,true),
-			new SpriteNode('img/lvl1/box2-empty.png',1,1,{width:155,height:155},{x:spotPos[1].x-77,y:spotPos[1].y-77},1,1,true),
-			new SpriteNode('img/lvl1/box3-empty.png',1,1,{width:155,height:155},{x:spotPos[2].x-77,y:spotPos[2].y-77},1,1,true)
+			this.firstFloorSprite,
+			this.secondFloorSprite,
+			this.thirdFloorSprite
 		];
 
 		var numFlames = Math.floor(Math.random()*3) + 4,
@@ -417,7 +430,12 @@ window.LevelOne = function()
 					var obj = this.houseSprites[level+'_'+block.value];
 
 					this.emptyLevels[i].isOnScreen = false;
+					
+
 					this.emptyBlocks[i].isOnScreen = false;
+					//transisiton sprite instead of hiding
+
+
 					obj.isOnScreen = true;
 				}
 				else
@@ -527,10 +545,6 @@ window.LevelOne = function()
 		{
 			this.emptyLevels[s].draw(ctx);
 		}
-		for (var s in this.emptyBlocks)
-		{
-			this.emptyBlocks[s].draw(ctx);
-		}
 
 		this.ashHouse.draw(ctx);
 
@@ -567,6 +581,11 @@ window.LevelOne = function()
 				ctx.fillText(lines[i],textPos.x,textPos.y+(lineHeight*i));
 			}
 		}
+		for (var s in this.emptyBlocks)
+		{
+			this.emptyBlocks[s].draw(ctx);
+		}
+
 		this.tempHand.draw(frame,ctx);
 
 		this.previousFrame = frame;
@@ -671,8 +690,8 @@ window.LevelOne = function()
 			{
 				//this.whaleSprite = this.talkingWhale;
 
-				var start_pos = getCorrectedPosition({x:135,y:920});
-				var destination = getCorrectedPosition({x:135,y:800});
+				var start_pos = getCorrectedPosition({x:120,y:920});
+				var destination = getCorrectedPosition({x:120,y:800});
 				var speed = 1;
 				
 				if (isCloseToDestination(this.grabHelper.pos,destination))
@@ -880,6 +899,24 @@ window.LevelOne = function()
 	{
 		if (this.toolboxState === this.STATE_TOOLBOX_CLOSED)
 			{
+				for (var i in this.emptyBlocks)
+				{
+					var e = this.emptyBlocks[i];
+
+					e.reversed = true;
+
+					//console.log(e.frameNumber + ", " + e.numFrames);
+
+					if ((e.frameNumber) == 0)
+					{
+						e.stop();
+					}
+					else
+					{
+						e.play();
+					}
+				}
+
 				if (frame.hands[0])
 				{
 					var hand = frame.hands[0];
@@ -1077,13 +1114,6 @@ window.LevelOne = function()
 							//temp array of center locations
 				var spotsToDrag = this.spotsToDrag;
 
-				for (var i = spotsToDrag.length - 1; i >= 0; i--) {
-					var s = spotsToDrag[i];
-
-					ctx.strokeStyle = "#ff0000";
-					ctx.lineWidth = 4;
-					ctx.strokeRect(s.position.x - 50,s.position.y - 50,s.size.width,s.size.height);
-				};
 
 				//console.log(spotsToDrag);
 				this.gestureRecognized = false;
@@ -1175,12 +1205,34 @@ window.LevelOne = function()
 			}
 	}
 	p.drag = function(frame, spotsToDrag){
+		for (var i in this.emptyBlocks)
+			{
+				var e = this.emptyBlocks[i];
+
+				e.reversed = false;
+
+				//console.log(e.frameNumber + ", " + e.numFrames);
+
+				if ((e.frameNumber) == e.numFrames-1)
+				{
+					e.stop();
+				}
+				else
+				{
+					e.play();
+				}
+			}
+
 		if(frame.hands.length == 1)
 		{
+
 			var grab = frame.hands[0];
 			//check for a fist or grab
 			if(grab.fingers.length == 0)
 			{
+				//animate blocks
+
+
 				var one_finger = true;
 				//find the position of the fist
 				var grab_position;
