@@ -90,8 +90,8 @@ window.LevelSelect = function()
 	p.drawUI = function(frame,ctx)
 	{
 		
-		var topics = [variables,functions,loops,conditionals]; 
-		var lessons = [lessonOne,lessonTwo,lessonThree,lessonFour];
+		var topics = [this.variables,this.functions,this.loops,this.conditionals]; 
+		var lessons = [this.lessonOne,this.lessonTwo,this.lessonThree,this.lessonFour];
 		
 		//set variable zeros 
 		var tpx = 0;

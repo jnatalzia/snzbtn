@@ -1113,7 +1113,14 @@ window.LevelOne = function()
 
 							//temp array of center locations
 				var spotsToDrag = this.spotsToDrag;
+				for (var i in spotsToDrag)
+				{
+					var s = spotsToDrag[i];
+					
 
+					ctx.strokeStyle  = "#ff0000";
+					ctx.strokeRect(s.position.x-s.size.width/2,s.position.y-s.size.height/2,s.size.width,s.size.height);
+				}
 
 				//console.log(spotsToDrag);
 				this.gestureRecognized = false;

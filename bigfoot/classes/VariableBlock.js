@@ -202,6 +202,7 @@ window.VariableBlock = function(dest,size,options)
 				block.startAngles.push(sAngle);
 
 				//draw arc
+				
 				ctx.strokeStyle = "#000000";
 				ctx.beginPath();
 				ctx.moveTo(block.position.x + block.size.width/2,block.position.y+ block.size.height/2);
@@ -210,7 +211,7 @@ window.VariableBlock = function(dest,size,options)
 				ctx.lineTo(np.x,np.y);
 				ctx.lineTo(block.position.x + block.size.width/2,block.position.y+ block.size.height/2);
 				ctx.closePath();
-				ctx.stroke();
+				//ctx.stroke();
 				if (block.options[i].isHighlighted)
 				{
 					ctx.fillStyle = "#ccc";
