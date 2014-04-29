@@ -100,15 +100,10 @@ window.Intro = function()
 
 	//draw the toolbox
 	//DRAW COMMON UI ELEMENTS
-		if (this.startDragY != -1)
-		{
-			var toolboxTopPos = getCorrectedPosition({x:75,y:10});
-			toolboxTopPos.y=this.dragCircle.y;
-		}
-		else
-		{
-			var toolboxTopPos = getCorrectedPosition({x:75,y:890});
-		}
+		var toolboxTopPos = getCorrectedPosition({x:75,y:860});
+
+		//insert toolbox draw code here
+		
 		
 		var toolboxTopSize = getCorrectedSize({width:this.toolboxTopIMG.width,height:this.toolboxTopIMG.height});
 

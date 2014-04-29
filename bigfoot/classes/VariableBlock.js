@@ -92,6 +92,7 @@ window.VariableBlock = function(dest,size,options)
 				{
 					//self.checkDisplay();
 					block.displayOptions = true;
+					
 				},2000);
 
 			}else

@@ -620,6 +620,10 @@ window.LevelOne = function()
 	}
 	p.drawUI = function(frame,ctx)
 	{
+		ctx.fillStyle = "#333333";
+		var p = getCorrectedPosition({x:0,y:875});
+		var s = getCorrectedSize({width:1920,height:205});
+		ctx.fillRect(p.x,p.y,s.width,s.height);
 		//DRAW COMMON UI ELEMENTS
 		if (this.startDragY != -1)
 		{
@@ -641,8 +645,6 @@ window.LevelOne = function()
 
 		ctx.drawImage(this.toolboxBottomIMG,toolboxBottomPos.x,toolboxBottomPos.y, toolboxTopSize.width, toolboxTopSize.height);
 		ctx.drawImage(this.toolboxTopIMG,toolboxTopPos.x,toolboxTopPos.y, toolboxTopSize.width, toolboxTopSize.height);
-		
-
 
 		var stagePos = getCorrectedPosition({x:0,y:0}),
 		stageSize = getCorrectedSize({width:1920, height:875});
@@ -952,6 +954,9 @@ window.LevelOne = function()
 					if (this.startDragY != -1)
 					{
 						this.dragCircle.y = c1.y;
+
+						console.log(c1.y);
+
 						if (this.startDragY - c1.y > 100)
 						{
 							//console.log("UITHINGSHAPPEN");
