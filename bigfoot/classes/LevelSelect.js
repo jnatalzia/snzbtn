@@ -111,7 +111,9 @@ window.LevelSelect = function()
 
 			var topicsPos = getCorrectedPosition({x:tpx,y:tpy});
 
-			ctx.drawImage(topics[i],tpx,tpy); // draws the topic number circles -----make this into an array of spriteNodes
+			topics[i].pos = topicsPos; // draws the topic number circles -----make this into an array of spriteNodes
+
+			topics[i].draw(ctx);
 			
 			for(var k in lessons)
 			{
@@ -120,7 +122,8 @@ window.LevelSelect = function()
 
 				var lessonsPos = getCorrectedPosition({x:lpx,y:lpy});
 				
-				ctx.drawImage(lessons[k],lpx,lpy); // draws the lesson number circles -----make this into an array of SpriteNodes
+				lessons[k].pos = lessonsPos; // draws the lesson number circles -----make this into an array of SpriteNodes
+				lessons[k].draw(ctx);
 			
 		
 				tpy = 0;
