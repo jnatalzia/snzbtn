@@ -149,6 +149,7 @@ window.LevelOne = function()
 		var glassBreak;
 		var slottedSnd;
 		var playSnd;
+		this.GLASS_BREAK_FIRED = false;
 	}
 
 	var p = LevelOne.prototype;
@@ -354,7 +355,6 @@ window.LevelOne = function()
   		this.tempHand = new Hand();
   		bgSong.loop();
   		this.BG_SONG_PLAYING = true;
-  		console.log(this.BG_SONG_PLAYING);
   		if(this.PLAY_SONG_PLAYING == true)
   		{
   			playSong.stop();
@@ -802,6 +802,7 @@ window.LevelOne = function()
 			{
 				draw3 = true;
 				failed = true;
+				
 			}
 
 			for (var i = 0; i < this.lvl1flames.length;i++)
@@ -835,11 +836,13 @@ window.LevelOne = function()
 					//console.log('fail!');
 
 					self.currentCaption = captions.failure;
-						zombieSfx.stop();
-  						beeSfx.stop();
-  						woodBreak.stop();
-  						metalBreak.stop();
-  						glassBreak.stop();
+					zombieSfx.stop();
+  					beeSfx.stop();
+  					woodBreak.stop();
+  					metalBreak.stop();
+  					glassBreak.stop();
+  					console.log('glassbreak stop');
+  					this.GLASS_BREAK_FIRED = false;
 					setTimeout(function()
 					{
 						self.currentCaption = undefined;
@@ -882,6 +885,30 @@ window.LevelOne = function()
 				}
 				this.successScreen.draw(ctx);
 			}
+
+			for (var i=0;i<this.spotsToDrag.length;i++)
+			{
+				var s = this.spotsToDrag[i];
+				if(i!=2 && s.slottedBlock.value == 'glass')
+				{
+					if(i==0)
+					{
+						if(this.zombies[0].pos.x+50 > destination.x && this.GLASS_BREAK_FIRED == false)
+						{
+							glassBreak.randomLoop();
+							this.GLASS_BREAK_FIRED = true;
+						}
+					}
+					if(i==1)
+					{
+						if(this.bees[0].pos.x+50 > destination.x && this.GLASS_BREAK_FIRED == false)
+						{
+							glassBreak.randomLoop();
+							this.GLASS_BREAK_FIRED = true;
+						}
+					}
+				}
+			}
 		}
 		else if (this.gameState === this.STATE_OVER)
 		{
@@ -896,6 +923,9 @@ window.LevelOne = function()
 		this.substate = this.SUBSTATE_HOUSE_FALLING;
 		this.gameState = this.STATE_BUILDING;
 		this.whaleSprite.alpha = 1;
+		glassBreak.stop();
+		this.GLASS_BREAK_FIRED = false;
+		console.log('glassbreak stop');
 	}
 
 	p.updateToolbox = function(frame,ctx)
@@ -949,14 +979,11 @@ window.LevelOne = function()
 					}
 					if (circlesIntersect(c1,this.dragCircle) && hand.fingers.length <= 0 && this.startDragY == -1)
 					{
-						console.log("PALM");
 						this.startDragY = c1.y;
 					}
 					if (this.startDragY != -1)
 					{
 						this.dragCircle.y = c1.y;
-
-						console.log(c1.y);
 
 						if (this.startDragY - c1.y > 100)
 						{
@@ -1102,7 +1129,6 @@ window.LevelOne = function()
 						{
 							if (g.direction[1] < -.75 && this.substate != this.SUBSTATE_FIRST_BLOCK_SELECT && this.substate != this.SUBSTATE_FIRST_BLOCK_SLOT)
 							{
-								console.log("CLOSE");
 								this.gestureRecognized = true;
 								for (var i in this.floatingBlocks)
 								{
@@ -1457,7 +1483,7 @@ window.LevelOne = function()
 			this.substate = this.SUBSTATE_CANT_RUN;
 			this.currentCaption = captions.run_not_ready;
 		}
-		if (this.spotsToDrag[1].slottedBlock.value != "wood")
+		/*if (this.spotsToDrag[1].slottedBlock.value != "wood")
 		{
 			setTimeout(function()
 			{
@@ -1478,7 +1504,7 @@ window.LevelOne = function()
 			{
 				glassBreak.randomLoop();
 			},6000);
-		}
+		}*/
 	}
 	/*p.pinch = function(frame){
 		STATE_CAN_PINCH = false;
