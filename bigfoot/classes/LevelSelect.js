@@ -15,28 +15,8 @@ window.LevelSelect = function()
 
 	p.loadAssets = function()
 	{
-		/*
-		screenTitle = new Image(); // title for levelSelect
-		screenTitle.src = "img/levelSelect/title.png";
-		variables = new Image(); // variables topic
-		variables.src = "img/levelSelect/variables.png";
-		functions = new Image(); // funcitons topic
-		functions.src = "img/levelSelect/functions.png";
-		loops = new Image(); // loops topic
-		loops.src = "img/levelSelect/loops.png";
-		conditionals = new Image(); // conditionals topic
-		conditionals.src = "img/levelSelect/conditionals.png";
-		lessonOne = new Image(); // lesson one
-		lessonOne.src = "img/levelSelect/1.png";
-		lessonTwo = new Image(); // lesson two
-		lessonTwo.src = "img/levelSelect/2.png";
-		lessonThree = new Image(); // lesson three
-		lessonThree.src = "img/levelSelect/3.png";
-		lessonFour = new Image(); // lesson four
-		lessonFour.src = "img/levelSelect/4.png";
-		*/
 
-		this.screenTitle = new SpriteNode("img/levelSelect/title.png",1,-1,{width:1920,height:875},{x:0,y:0},1,1,true);
+		this.screenTitle = new SpriteNode("img/levelSelect/title.png",1,-1,{width:1920,height:875},{x:browserWidth/2,y:0},1,1,true);
 		this.variables = new SpriteNode("img/levelSelect/variables.png",1,-1,{width:200,height:80},{x:0,y:0},1,1,true);
 		this.functions = new SpriteNode("img/levelSelect/functions.png",1,-1,{width:200,height:80},{x:0,y:0},1,1,true);
 		this.loops = new SpriteNode("img/levelSelect/loops.png",1,-1,{width:200,height:80},{x:0,y:0},1,1,true);
@@ -45,9 +25,11 @@ window.LevelSelect = function()
 		this.lessonTwo = new SpriteNode("img/levelSelect/2.png",1,-1,{width:80,height:80},{x:0,y:0},1,1,true);
 		this.lessonThree = new SpriteNode("img/levelSelect/3.png",1,-1,{width:80,height:80},{x:0,y:0},1,1,true);
 		this.lessonFour = new SpriteNode("img/levelSelect/4.png",1,-1,{width:80,height:80},{x:0,y:0},1,1,true);
+
 	}
 	p.onloaded = function()
 	{
+		this.tempHand = new Hand();
 		this.browserWidth = window.innerWidth;
 		this.browserHeight = window.innerHeight;
 
@@ -74,7 +56,7 @@ window.LevelSelect = function()
 				var fz = pos[2];
 						
 						
-					//draw the finger on screen
+				//draw the finger on screen
 				fx = map(fx,-150,150,0,browserWidth);
 				fy = map(fy,100,300,0,browserHeight);
 
@@ -89,7 +71,7 @@ window.LevelSelect = function()
 	}
 	p.drawUI = function(frame,ctx)
 	{
-		
+		//arrays of the topics and lessons for drawing the menu
 		var topics = [this.variables,this.functions,this.loops,this.conditionals]; 
 		var lessons = [this.lessonOne,this.lessonTwo,this.lessonThree,this.lessonFour];
 		
@@ -99,20 +81,15 @@ window.LevelSelect = function()
 		var lpx = 0;
 		var lpy = 0;
 
-		
-
 		for(var i in topics)
 		{
-			//console.log('topics loop');
-
 
 			tpx = tpx + 200;
-			tpy = 100;
+			tpy = 200;
 
 			var topicsPos = getCorrectedPosition({x:tpx,y:tpy});
 
-			topics[i].pos = topicsPos; // draws the topic number circles -----make this into an array of spriteNodes
-
+			topics[i].pos = topicsPos;
 			topics[i].draw(ctx);
 			
 			for(var k in lessons)
@@ -122,15 +99,17 @@ window.LevelSelect = function()
 
 				var lessonsPos = getCorrectedPosition({x:lpx,y:lpy});
 				
-				lessons[k].pos = lessonsPos; // draws the lesson number circles -----make this into an array of SpriteNodes
+				lessons[k].pos = lessonsPos; 
 				lessons[k].draw(ctx);
 			
-		
 				tpy = 0;
 			}
 
 			lpy = 0; //reset the start point of the y value for the lessons 
 		}
+		//draw hands
+		this.screenTitle.draw(ctx);
+		this.tempHand.draw(frame,ctx);
 	}
 	return LevelSelect;
 }();
