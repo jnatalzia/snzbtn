@@ -11,5 +11,8 @@ window.captions =
 	run_ready:"I think we’re finally ready. Point and hover \nover the run button now and see how your code stacks \nup!",
 	run_not_ready:"You can't run yet! You must have \nall the blocks slotted and given a value before the attack.",
 	running:"Here they come!",
-	failure:"Oh no! One or more of your levels didn't stop the \nmonsters, try again!"
+	failure:"Oh no! One or more of your levels didn't stop the \nmonsters, try again!",
+	wake_up:"zzz..Wh- Oh! Hello! Welcome \nto Spark*! I’m Snoozer and I’ll \nbe your guide on your \nadventure to programming.",
+	snoozer_intro:"Now in my sleepy stupor I seemed to have lost the tasks I’m supposed to give you.",
+
 }
