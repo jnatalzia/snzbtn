@@ -6,7 +6,6 @@ window.LevelSelect = function()
 
 		var screenTitle, variables, functions, loops, conditionals, lessonOne, lessonTwo, lessonThree, lessonFour;
 
-
 		this.loadAssets();
 		
 	}
@@ -15,16 +14,20 @@ window.LevelSelect = function()
 
 	p.loadAssets = function()
 	{
+		//pretend i have a 1920x1080 resolution im using to test this
 
-		this.screenTitle = new SpriteNode("img/levelSelect/title.png",1,-1,{width:1920,height:875},{x:browserWidth/2,y:0},1,1,true);
-		this.variables = new SpriteNode("img/levelSelect/variables.png",1,-1,{width:200,height:80},{x:0,y:0},1,1,true);
-		this.functions = new SpriteNode("img/levelSelect/functions.png",1,-1,{width:200,height:80},{x:0,y:0},1,1,true);
-		this.loops = new SpriteNode("img/levelSelect/loops.png",1,-1,{width:200,height:80},{x:0,y:0},1,1,true);
-		this.conditionals = new SpriteNode("img/levelSelect/conditionals.png",1,-1,{width:200,height:80},{x:0,y:0},1,1,true);
-		this.lessonOne = new SpriteNode("img/levelSelect/1.png",1,-1,{width:80,height:80},{x:0,y:0},1,1,true);
-		this.lessonTwo = new SpriteNode("img/levelSelect/2.png",1,-1,{width:80,height:80},{x:0,y:0},1,1,true);
-		this.lessonThree = new SpriteNode("img/levelSelect/3.png",1,-1,{width:80,height:80},{x:0,y:0},1,1,true);
-		this.lessonFour = new SpriteNode("img/levelSelect/4.png",1,-1,{width:80,height:80},{x:0,y:0},1,1,true);
+		//change this title to be bigger better becuase it's a little too small atm for the rest of the levels to be able to be clicked comfortably
+		this.screenTitle = new SpriteNode("img/levelSelect/title.png",1,-1,{width:1920,height:875},{x:1920/2,y:0},1,1,true);
+
+		this.variables = new SpriteNode("img/levelSelect/variables.png",1,-1,{width:200,height:80},{x:0,y:0},1,1,true,{width:300,height:120});
+		this.functions = new SpriteNode("img/levelSelect/functions.png",1,-1,{width:200,height:80},{x:0,y:0},1,1,true,{width:300,height:120});
+		this.loops = new SpriteNode("img/levelSelect/loops.png",1,-1,{width:200,height:80},{x:0,y:0},1,1,true,{width:300,height:120});
+		this.conditionals = new SpriteNode("img/levelSelect/conditionals.png",1,-1,{width:200,height:80},{x:0,y:0},1,1,true,{width:300,height:120});
+
+		this.lessonOne = new SpriteNode("img/levelSelect/1.png",1,-1,{width:80,height:80},{x:0,y:0},1,1,true,{width:150,height:150});
+		this.lessonTwo = new SpriteNode("img/levelSelect/2.png",1,-1,{width:80,height:80},{x:0,y:0},1,1,true,{width:150,height:150});
+		this.lessonThree = new SpriteNode("img/levelSelect/3.png",1,-1,{width:80,height:80},{x:0,y:0},1,1,true,{width:150,height:150});
+		this.lessonFour = new SpriteNode("img/levelSelect/4.png",1,-1,{width:80,height:80},{x:0,y:0},1,1,true,{width:150,height:150});
 
 	}
 	p.onloaded = function()
@@ -75,8 +78,8 @@ window.LevelSelect = function()
 		var topics = [this.variables,this.functions,this.loops,this.conditionals]; 
 		var lessons = [this.lessonOne,this.lessonTwo,this.lessonThree,this.lessonFour];
 		
-		//set variable zeros 
-		var tpx = 0;
+		//set variable zeros ------ set for the correct screen resolution  currently 1920x1080
+		var tpx = 192; //sets zero for the starting topic x value 1920/2 = 192 ...not sure how to responsively scale this yet
 		var tpy = 0;
 		var lpx = 0;
 		var lpy = 0;
@@ -84,7 +87,7 @@ window.LevelSelect = function()
 		for(var i in topics)
 		{
 
-			tpx = tpx + 200;
+			tpx = tpx + 300;
 			tpy = 200;
 
 			var topicsPos = getCorrectedPosition({x:tpx,y:tpy});
@@ -94,8 +97,8 @@ window.LevelSelect = function()
 			
 			for(var k in lessons)
 			{
-				lpy = lpy + tpy + 100;
-				lpx = tpx + 55;
+				lpy = lpy + tpy + 160;
+				lpx = tpx + 80;
 
 				var lessonsPos = getCorrectedPosition({x:lpx,y:lpy});
 				
@@ -105,9 +108,9 @@ window.LevelSelect = function()
 				tpy = 0;
 			}
 
-			lpy = 0; //reset the start point of the y value for the lessons 
+			lpy = 0; //reset the start point of the y value for the lessons lists
 		}
-		//draw hands
+		//draw hands and screen title
 		this.screenTitle.draw(ctx);
 		this.tempHand.draw(frame,ctx);
 	}
