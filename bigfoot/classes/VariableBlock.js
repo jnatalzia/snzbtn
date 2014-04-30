@@ -38,6 +38,7 @@ window.VariableBlock = function(dest,size,options)
 	woodTitle.src = "img/wires/radialMenu/topRight.png";
 	var cancelTitle = new Image();
 	cancelTitle.src = "img/wires/radialMenu/bottomRight.png";
+	var buttonSnd = new Audio('button');
 
 	this.isSlotted = false;
 	this.slot = undefined;
@@ -92,7 +93,7 @@ window.VariableBlock = function(dest,size,options)
 				{
 					//self.checkDisplay();
 					block.displayOptions = true;
-					
+					buttonSnd.play();
 				},2000);
 
 			}else

@@ -137,6 +137,8 @@ window.LevelOne = function()
 			pos:getCorrectedPosition({x:1700,y:890}),
 			size:getCorrectedSize({width:175,height:175})
 		};
+
+		//SFX Variables
 		var bgSong;
 		var playSong;
 		var beeSfx;
@@ -145,6 +147,8 @@ window.LevelOne = function()
 		var woodBreak;
 		var metalBreak;
 		var glassBreak;
+		var slottedSnd;
+		var playSnd;
 	}
 
 	var p = LevelOne.prototype;
@@ -333,6 +337,8 @@ window.LevelOne = function()
 		woodBreak = new Audio('wood');
 		metalBreak = new Audio('metal');
 		glassBreak = new Audio('glass');
+		slottedSnd = new Audio('drop');
+		playSnd = new Audio('button');
 	}
 	p.onloaded = function()
 	{
@@ -747,7 +753,6 @@ window.LevelOne = function()
 					{
 						draw2 = true;
 						failed = true;
-						woodBreak.loop();
 					}
 
 				}
@@ -778,8 +783,6 @@ window.LevelOne = function()
 					{
 						draw1 = true;
 						failed = true;
-						metalBreak.randomLoop();
-						console.log('looping metalbreak D:');
 					}
 				}
 				else
@@ -799,8 +802,6 @@ window.LevelOne = function()
 			{
 				draw3 = true;
 				failed = true;
-				glassBreak.randomLoop();
-				console.log('looping glassbreak');
 			}
 
 			for (var i = 0; i < this.lvl1flames.length;i++)
@@ -995,6 +996,7 @@ window.LevelOne = function()
 								var self = this;
 								this.startTimeout = setTimeout(function()
 									{
+										playSnd.play();
 										self.runCode();
 									},2500);
 							}
@@ -1319,6 +1321,7 @@ window.LevelOne = function()
 									//console.log(spot.slottedBlock);
 									b.isSlotted = true;
 									b.slot = spot;
+									slottedSnd.play();
 
 									//console.log('touching spots = 1');
 								}
@@ -1453,6 +1456,28 @@ window.LevelOne = function()
 		{
 			this.substate = this.SUBSTATE_CANT_RUN;
 			this.currentCaption = captions.run_not_ready;
+		}
+		if (this.spotsToDrag[1].slottedBlock.value != "wood")
+		{
+			setTimeout(function()
+			{
+				woodBreak.loop();
+			},6000);
+						
+		}
+		if (this.spotsToDrag[1].slottedBlock.value != "metal")
+		{
+			setTimeout(function()
+			{
+				metalBreak.randomLoop();
+			},6000);
+		}
+		if (this.spotsToDrag[1].slottedBlock.value != "glass")
+		{
+			setTimeout(function()
+			{
+				glassBreak.randomLoop();
+			},6000);
 		}
 	}
 	/*p.pinch = function(frame){
