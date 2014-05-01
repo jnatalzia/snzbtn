@@ -150,6 +150,8 @@ window.LevelOne = function()
 		var slottedSnd;
 		var playSnd;
 		this.GLASS_BREAK_FIRED = false;
+		this.WOOD_BREAK_FIRED = false;
+		this.METAL_BREAK_FIRED = false;
 		this.timer = 0;
 	}
 
@@ -777,7 +779,7 @@ window.LevelOne = function()
 			var done_running = true;
 
 			//move all the bad things
-			var zombiespeed = 1.5,
+			var zombiespeed = 1.75,
 			beespeed = 3;
 
 			var destination = getCorrectedPosition({x:700,y:0});
@@ -881,8 +883,9 @@ window.LevelOne = function()
   					woodBreak.stop();
   					metalBreak.stop();
   					glassBreak.stop();
-  					console.log('glassbreak stop');
   					this.GLASS_BREAK_FIRED = false;
+  					this.WOOD_BREAK_FIRED = false;
+  					this.METAL_BREAK_FIRED = false;
 					setTimeout(function()
 					{
 						self.currentCaption = undefined;
@@ -936,7 +939,6 @@ window.LevelOne = function()
 						if(this.zombies[0].pos.x+50 > destination.x && this.GLASS_BREAK_FIRED == false)
 						{
 							glassBreak.loop();
-							this.GLASS_BREAK_FIRED = true;
 						}
 					}
 					if(i==1)
@@ -944,9 +946,50 @@ window.LevelOne = function()
 						if(this.bees[0].pos.x+50 > destination.x && this.GLASS_BREAK_FIRED == false)
 						{
 							glassBreak.loop();
-							this.GLASS_BREAK_FIRED = true;
 						}
 					}
+				}
+			}
+			for (var i=0;i<this.spotsToDrag.length;i++)
+			{
+				var s = this.spotsToDrag[i];
+				if(i!=1 && s.slottedBlock.value == 'wood')
+				{
+					if(i==0)
+					{
+						if(this.zombies[0].pos.x+50 > destination.x && this.WOOD_BREAK_FIRED == false)
+						{
+							woodBreak.loop();
+						}
+					}
+					/*if(i==2)
+					{
+						if(this.lightning[0].pos.x+50 > destination.x && this.WOOD_BREAK_FIRED == false)
+						{
+							woodBreak.loop();
+						}
+					}*/
+				}
+			}
+			for (var i=0;i<this.spotsToDrag.length;i++)
+			{
+				var s = this.spotsToDrag[i];
+				if(i!=0 && s.slottedBlock.value == 'metal')
+				{
+					if(i==1)
+					{
+						if(this.bees[0].pos.x+50 > destination.x && this.METAL_BREAK_FIRED == false)
+						{
+							metalBreak.loop();
+						}
+					}
+					/*if(i==2)
+					{
+						if(this.lightning[0].pos.x+50 > destination.x && this.METAL_BREAK_FIRED == false)
+						{
+							metalBreak.loop();
+						}
+					}*/
 				}
 			}
 		}
@@ -1002,8 +1045,9 @@ window.LevelOne = function()
 		this.gameState = this.STATE_BUILDING;
 		this.whaleSprite.alpha = 1;
 		glassBreak.stop();
-		this.GLASS_BREAK_FIRED = false;
-		console.log('glassbreak stop');
+		this.GLASS_BREAK_FIRED = true;
+		this.WOOD_BREAK_FIRED = true;
+		this.METAL_BREAK_FIRED = true;
 	}
 
 	p.updateToolbox = function(frame,ctx)
@@ -1503,7 +1547,18 @@ window.LevelOne = function()
 	{
 		//check if the program can run
 		var canRun = true;
-
+		if(this.GLASS_BREAK_FIRED == true)
+		{
+			this.GLASS_BREAK_FIRED = false;
+		}
+		if(this.WOOD_BREAK_FIRED == true)
+		{
+			this.WOOD_BREAK_FIRED = false;
+		}
+		if(this.METAL_BREAK_FIRED == true)
+		{
+			this.METAL_BREAK_FIRED = false;
+		}
 		for (var i in this.spotsToDrag)
 		{
 			if (this.spotsToDrag[i].slottedBlock == undefined)
@@ -1568,28 +1623,6 @@ window.LevelOne = function()
 			this.substate = this.SUBSTATE_CANT_RUN;
 			this.currentCaption = captions.run_not_ready;
 		}
-		/*if (this.spotsToDrag[1].slottedBlock.value != "wood")
-		{
-			setTimeout(function()
-			{
-				woodBreak.loop();
-			},6000);
-						
-		}
-		if (this.spotsToDrag[1].slottedBlock.value != "metal")
-		{
-			setTimeout(function()
-			{
-				metalBreak.randomLoop();
-			},6000);
-		}
-		if (this.spotsToDrag[1].slottedBlock.value != "glass")
-		{
-			setTimeout(function()
-			{
-				glassBreak.randomLoop();
-			},6000);
-		}*/
 	}
 	/*p.pinch = function(frame){
 		STATE_CAN_PINCH = false;
