@@ -1,6 +1,6 @@
 window.Hand = function()
 {
-	this.size = {width:130,height:130};
+	this.size = {width:130,height:140};
 	this.x = 0;
 	this.y = 0;
 

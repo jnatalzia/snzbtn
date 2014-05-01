@@ -18,6 +18,7 @@ window.Intro = function()
 		this.STATE_WHALE_SLEEPING = 3;
 		this.STATE_WHALE_AWAKE = 4;
 		this.STATE_BLOCK_DROPPED = 5;
+		this.STATE_TASK_SEARCH = 6;
 
 		this.flickerCount = 0;
 		this.flickerIndex = 0;
@@ -27,12 +28,17 @@ window.Intro = function()
 
 		this.dragPos= getCorrectedPosition({x:960,y:525});
 
+		this.blockHasBeenDragged = false;
+
 		this.dragCircle;
 
 		this.transitionAlpha = 0;
 
 		this.blockVelocity = 2;
 		this.step = 0;
+
+		this.searchDestinations = [getCorrectedPosition({x:200,y:400}),getCorrectedPosition({x:-400,y:400})];
+		this.destination = this.searchDestinations[0];
 
 		this.currentCaption = undefined;
 		this.timer = 0;
@@ -51,13 +57,15 @@ window.Intro = function()
 
 		this.textBox = new SpriteNode('img/text-box.png',1,1,{width:1732,height:419},{x:565,y:725},1,1,true,{width:1299,height:314});
 
-		this.grabHelper = new SpriteNode('img/lvl1/grab_hand.png',1,1,{width:108,height:102},{x:900,y:450},1,1,true);
-
 		this.block = new SpriteNode('img/lvl1/metalVariable.png',1,1,{width:228,height:228},{x:400,y:200},1,1,true);
 		//this.block = new VariableBlock({x:400,y:200},{width:150,height:150},[]);
 		this.block.stop();
 
+		this.closedHand = new SpriteNode('img/lvl1/grab_hand.png',1,1,{width:108,height:102},{x:900,y:450},1,1,true);
 
+		this.openHand = new SpriteNode('img/open_hand.png',1,1,{width:108,height:102},{x:1250,y:this.block.pos.y},1,1,true);
+
+		this.grabHelper = this.closedHand;
 
 
 		this.toolboxTopIMG = new Image();
@@ -266,7 +274,6 @@ window.Intro = function()
 		}
 		else if (this.gameState == this.STATE_WHALE_SLEEPING)
 		{
-			this.testDrag(ctx,frame);
 
 			var start_pos = getCorrectedPosition({x:this.block.pos.x+100,y:this.block.pos.y+100});
 			var destination = getCorrectedPosition({x:1250,y:this.block.pos.y});
@@ -274,7 +281,8 @@ window.Intro = function()
 				
 			if (isCloseToDestination(this.grabHelper.pos,destination))
 			{
-				this.grabHelper.spriteSheet.src = 'img/open_hand.png';
+				this.grabHelper = this.openHand;
+				//this.grabHelper.pos = {x:destination.x,y:destination.y};
 				this.timer++;
 				if (this.timer > 60)
 				{
@@ -282,10 +290,12 @@ window.Intro = function()
 					this.grabHelper.alpha -= .05;
 					if (this.grabHelper.alpha <= -5)
 					{
+						this.grabHelper = this.closedHand;
 						this.grabHelper.pos = start_pos;
 						this.grabHelper.alpha = 1;
 						this.timer = 0;
-						this.grabHelper.spriteSheet.src = 'img/lvl1/grab_hand.png';
+						this.openHand.alpha = 1;
+						
 					}
 				}
 				
@@ -305,7 +315,8 @@ window.Intro = function()
 
 			this.whaleSprite.draw(ctx);
 			this.block.draw(ctx);
-			this.grabHelper.draw(ctx);
+			if (!this.blockHasBeenDragged) this.grabHelper.draw(ctx);
+			this.testDrag(ctx,frame);
 		}
 		else if (this.gameState == this.STATE_BLOCK_DROPPED)
 		{
@@ -316,7 +327,8 @@ window.Intro = function()
 			this.whaleSprite.draw(ctx);
 			this.block.draw(ctx);
 
-			if (this.block.pos.y >= this.whaleSprite.pos.y)
+
+			if (this.block.pos.y + this.block.size.width/2 >= this.whaleSprite.pos.y)
 			{
 				this.gameState = this.STATE_WHALE_AWAKE;
 				this.transitionAlpha = 1;
@@ -339,7 +351,59 @@ window.Intro = function()
 			this.whaleSprite.draw(ctx);
 			this.block.draw(ctx);
 
-			this.speechBubble.draw(ctx);
+			
+
+			this.timer++;
+			if (this.timer > 400)
+			{
+				this.gameState = this.STATE_TASK_SEARCH;
+				this.currentCaption = captions.snoozer_intro;
+				this.whaleSprite = this.normalWhale;
+				this.timer = 0;
+			}
+		}
+		else if (this.gameState == this.STATE_TASK_SEARCH)
+		{
+			//make whale move
+			this.whaleSprite.draw(ctx);
+
+			this.timer++;
+			if (this.timer > 300)
+			{
+				//start movement
+				this.currentCaption = undefined;
+				var speed = 10;
+				//this.whaleSprite = this.sadWhale;
+
+
+				if (isCloseToDestination(this.whaleSprite.pos,this.destination))
+				{
+					if (this.destination == this.searchDestinations[0])
+					{
+						this.destination = this.searchDestinations[1];
+						//this.whaleSprite.pos.x -= 80;
+						console.log('going back');
+					}
+					else
+					{
+						console.log('going forward');
+						this.destination = this.searchDestinations[0];
+						//this.whaleSprite.pos.x += 80;
+					}
+				}
+				else
+				{
+					var idealVec = getSubtractedVector(this.whaleSprite.pos,this.destination);
+					//arbitrary block speed
+					idealVec = getNormalizedVector(idealVec);
+					idealVec = getScaledVector(idealVec,speed);
+
+					this.whaleSprite.pos.x += idealVec.x;
+					this.whaleSprite.pos.y += idealVec.y;	
+					//console.log('moving');
+				}
+			}
+			
 		}
 
 		//caption drawing
@@ -349,10 +413,11 @@ window.Intro = function()
 
 			var lines = this.currentCaption.split("\n");
 			//console.log(lines);
-			var textPos = getCorrectedPosition({x:1300,y:280});
+			var textPos = getCorrectedPosition({x:1290,y:280});
 			var lineHeight = 20;
 
 			//this.textBox.draw(ctx);
+			this.speechBubble.draw(ctx);
 
 			for (var i = 0; i < lines.length;i++)
 			{
@@ -443,6 +508,8 @@ window.Intro = function()
 						var canDrag = true;
 						if (canDrag)
 							b.isBeingDragged  = true;
+
+						this.blockHasBeenDragged = true;
 				}
 
 			}
@@ -454,6 +521,7 @@ window.Intro = function()
 		{
 			//console.log('dropped!');
 			this.gameState = this.STATE_BLOCK_DROPPED;
+			this.timer = 0;
 		}
 	}
 	p.openToolbox = function()

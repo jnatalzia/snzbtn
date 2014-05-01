@@ -13,6 +13,7 @@ window.captions =
 	running:"Here they come!",
 	failure:"Oh no! One or more of your levels didn't stop the \nmonsters, try again!",
 	wake_up:"zzz..Wh- Oh! Hello! Welcome \nto Spark*! I’m Snoozer and I’ll \nbe your guide on your \nadventure to programming.",
-	snoozer_intro:"Now in my sleepy stupor I seemed to have lost the tasks I’m supposed to give you.",
+	snoozer_intro:"Now in my sleepy stupor I \nseemed to have lost the tasks \nI’m supposed to give you.",
+	//start_search:"Now in my sleepy stupor I seemed to have lost the tasks I’m supposed to give you."
 
 }
