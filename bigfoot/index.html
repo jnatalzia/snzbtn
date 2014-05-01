@@ -27,7 +27,8 @@
 	var canvas,ctx;
 
 	var browserWidth,browserHeight;
-
+	
+	
 	window.onload = function()
 	{
 		browserWidth = window.innerWidth;
@@ -38,19 +39,41 @@
 		ctx.canvas.width  = window.innerWidth;
   		ctx.canvas.height = window.innerHeight;
 
+		this.Intro = new Intro();
+		this.LevelSelect = new LevelSelect();
+		this.LevelOne = new LevelOne();
+		
   		//load all levels
 
   		//currLevel = new LevelOne(); //for testing-------------
-  		currLevel = new Intro(); //for testing ------------------
+  		//currLevel = new Intro(); //for testing ------------------
   		//currLevel = new LevelSelect(); // for testing ------------------
-		console.log(currLevel);
+		//console.log(currLevel);
+		
+		//hypathetically speaking
+		//this sets the currLevel at the Intro
+		levelChange(2);
+		
   		currLevel.onloaded();
 
+		console.log(this.LevelOne);
 
   		console.log(currLevel);
 
   		update();
 	};
+	
+	function levelChange(num)
+	{
+		var levelIndex = num;
+		
+		var levelArray = [this.Intro,this.LevelSelect,this.LevelOne];
+		
+		currLevel = levelArray[levelIndex];
+		
+		//console.log(currLevel);
+	}
+	
 	window.onresize = function()
 	{
 		browserWidth = window.innerWidth;
@@ -68,6 +91,7 @@
 	});
 	function update()
 	{
+		
 		if (globalFrame)
 		{
 
@@ -80,6 +104,7 @@
 
 		window.requestAnimationFrame(update);
 		//console.log(globalFrame);
+		
 	}
 	
 	function isCloseToDestination(pos,dest)
