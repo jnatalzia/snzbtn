@@ -66,7 +66,7 @@ window.LevelOne = function()
 		this.resetTimeout = undefined;
 
 		//caption tracker
-		this.currentCaption = captions.enemies_coming;
+		
 
 		this.loadAssets();
 
@@ -117,9 +117,9 @@ window.LevelOne = function()
 
 		//init variable blocks
 		this.blocks = [
-			new VariableBlock({x:300,y:200},{width:150,height:150},blockOptions),
-			new VariableBlock({x:800,y:200},{width:150,height:150},blockOptions),
-			new VariableBlock({x:1300,y:200},{width:150,height:150},blockOptions)
+			new VariableBlock({x:300,y:200},{width:280,height:280},blockOptions),
+			new VariableBlock({x:800,y:200},{width:280,height:280},blockOptions),
+			new VariableBlock({x:1300,y:200},{width:280,height:280},blockOptions)
 		];
 
 		var spotSize = {width:150,height:150};
@@ -150,6 +150,7 @@ window.LevelOne = function()
 		var slottedSnd;
 		var playSnd;
 		this.GLASS_BREAK_FIRED = false;
+		this.timer = 0;
 	}
 
 	var p = LevelOne.prototype;
@@ -243,7 +244,8 @@ window.LevelOne = function()
 		this.arrowIcon.src = "img/wires/arrow.png";
 
 		//text box
-		this.textBox = new SpriteNode('img/text-box.png',1,1,{width:1732,height:419},{x:330,y:500},1,1,true,{width:1299,height:314});
+		//this.textBox = new SpriteNode('img/text-box.png',1,1,{width:1732,height:419},{x:330,y:500},1,1,true,{width:1299,height:314});
+		this.textBox = new SpriteNode('img/speechBubble.png',1,1,{width:486,height:336},{x:1400,y:50},1,1,true);
 		//this.textBox.destSize = {width:1299,height:314};
 
 		//helper grab hand
@@ -329,6 +331,27 @@ window.LevelOne = function()
 
 		this.successScreen = new SpriteNode('img/lvl1/success.png',1,1,{width:1920,height:1080},{x:0,y:0},1,1,true);
 		this.successScreen.alpha = 0;
+
+		//slotting variables
+		this.firstSlottedSprite = undefined;
+		this.secondSlottedSprite = undefined;
+		this.thirdSlottedSprite = undefined;
+
+		this.fusings = {
+			"1_glass_fuse": new SpriteNode('img/fusings/1_glass_fuse.png',25,2,{width:272,height:187},{x:spotPos[0].x-132,y:spotPos[0].y-93},3,9,true),
+			"1_metal_fuse":new SpriteNode('img/fusings/1_metal_fuse.png',25,2,{width:272,height:187},{x:spotPos[0].x-132,y:spotPos[0].y-93},3,9,true),
+			"1_wood_fuse":new SpriteNode('img/fusings/1_wood_fuse.png',25,2,{width:272,height:187},{x:spotPos[0].x-132,y:spotPos[0].y-93},3,9,true),
+			"2_glass_fuse":new SpriteNode('img/fusings/2_glass_fuse.png',25,2,{width:272,height:187},{x:spotPos[1].x-132,y:spotPos[1].y-93},3,9,true),
+			"2_metal_fuse":new SpriteNode('img/fusings/2_metal_fuse.png',25,2,{width:272,height:187},{x:spotPos[1].x-132,y:spotPos[1].y-93},3,9,true),
+			"2_wood_fuse":new SpriteNode('img/fusings/2_wood_fuse.png',25,2,{width:272,height:187},{x:spotPos[1].x-132,y:spotPos[1].y-93},3,9,true),
+			"3_glass_fuse":new SpriteNode('img/fusings/3_glass_fuse.png',25,2,{width:272,height:187},{x:spotPos[2].x-132,y:spotPos[2].y-93},3,9,true),
+			"3_metal_fuse":new SpriteNode('img/fusings/3_metal_fuse.png',25,2,{width:272,height:187},{x:spotPos[2].x-132,y:spotPos[2].y-93},3,9,true),
+			"3_wood_fuse":new SpriteNode('img/fusings/3_wood_fuse.png',25,2,{width:272,height:187},{x:spotPos[2].x-132,y:spotPos[2].y-93},3,9,true)
+		};
+
+		this.firstSlottedSprite = this.fusings["1_glass_fuse"];
+		this.secondSlottedSprite = this.fusings["2_glass_fuse"];
+		this.thirdSlottedSprite = this.fusings["3_glass_fuse"];
 		
 
 		bgSong = new Audio('cyclone');
@@ -370,7 +393,7 @@ window.LevelOne = function()
 		if (this.gameState === this.STATE_WHALE_SCARED)
 		{
 			//move the whale
-			var speed = 10;
+			var speed = 15;
 			var destination = getCorrectedPosition({x:1400,y:400});
 			this.whaleSprite = this.sadWhale;
 
@@ -379,6 +402,8 @@ window.LevelOne = function()
 			{
 				var self = this;
 				this.gameState = this.WAITING;
+
+				this.currentCaption = captions.enemies_coming;
 
 				setTimeout(function()
 				{
@@ -390,7 +415,7 @@ window.LevelOne = function()
 
 					self.whaleSprite = self.talkingWhale;
 					self.whaleSprite.play();
-				},4000);
+				},6000);
 
 				
 			}
@@ -567,24 +592,53 @@ window.LevelOne = function()
 		if (this.currentCaption != undefined)
 		{
 			//console.log('running');
+			var maxSize = getCorrectedSize({width:325,height:300});
 
-			var lines = this.currentCaption.split("\n");
+			var maxwidth = maxSize.width;
+
+			//var lines = this.currentCaption.split("\n");
 			//console.log(lines);
-			var textPos = getCorrectedPosition({x:400,y:600});
-			var lineHeight = 30;
+			var textPos = getCorrectedPosition({x:1450,y:125});
+			var lineHeight = 20;
+			var breakNum = 0;
+
+			var line = ""
+			var words = this.currentCaption.split(" ");
+
+			//console.log(words);
+
+			ctx.fillStyle = "#1E1E1E";
+
+			var fontSize = 16;
+
+			ctx.font=fontSize+"px GothamMedium";
+			ctx.textAlign = 'left';
 
 			this.textBox.draw(ctx);
 
-			for (var i = 0; i < lines.length;i++)
+			for (var i =0 ; i < words.length; i++)
 			{
-				ctx.fillStyle = "#FFF";
+				var testline = line + words[i] + " ";
+				var metrics = ctx.measureText(testline);
+				var testwidth = metrics.width;
 
-				var fontSize = (30 * .75) * 1920/window.innerWidth;
+				//console.log(testline);
 
-				ctx.font=fontSize+"px GothamMedium";
-				ctx.textAlign = 'left';
-
-				ctx.fillText(lines[i],textPos.x,textPos.y+(lineHeight*i));
+				if (testwidth > maxwidth)
+				{
+					ctx.fillText(testline,textPos.x,textPos.y+(breakNum*lineHeight));
+					breakNum++;
+					line = "";
+					//words.splice(0,i);
+				}
+				else if (i == words.length - 1)
+				{
+					ctx.fillText(testline,textPos.x,textPos.y+(breakNum*lineHeight));
+				}
+				else
+				{
+					line = testline;
+				}
 			}
 		}
 		for (var s in this.emptyBlocks)
@@ -671,20 +725,6 @@ window.LevelOne = function()
 
 		if (this.debug) ctx.strokeRect(this.startHitBox.pos.x,this.startHitBox.pos.y,this.startHitBox.size.width,this.startHitBox.size.height);
 
-
-		//draw current blocks
-		for (var i in this.spotsToDrag)
-		{
-			var s = this.spotsToDrag[i];
-			var b = s.slottedBlock;
-
-			if (b != undefined)
-			{
-				/*ctx.fillStyle = "#000";
-				ctx.fillRect(s.x-.width/2,s.y-s.height/2,s.width,s.height);*/
-				ctx.drawImage(b.image,b.position.x,b.position.y,b.size.width,b.size.height);
-			}
-		}
 
 		//set dragcircleSize to toolbox size
 		this.dragCircle.width = toolboxTopSize.width*2;
@@ -914,6 +954,44 @@ window.LevelOne = function()
 		{
 			this.successScreen.draw(ctx);
 		}
+
+		//draw current blocks
+		for (var i =0; i < this.spotsToDrag.length;i++)
+		{
+			var s = this.spotsToDrag[i];
+			var b = s.slottedBlock;
+
+			if (b != undefined)
+			{
+				var obj = (i + 1) + "_" + b.value + "_fuse";
+				obj = this.fusings[obj];
+
+				if ((obj.frameNumber) == obj.numFrames-1)
+				{
+					obj.stop();
+				}
+				else
+				{
+					obj.play();
+				}
+				/*ctx.fillStyle = "#000";
+				ctx.fillRect(s.x-.width/2,s.y-s.height/2,s.width,s.height);*/
+				//ctx.drawImage(b.image,b.position.x,b.position.y,b.size.width,b.size.height);
+				obj.draw(ctx);
+			}
+			else
+			{
+				var obj = (i + 1) + "_wood_fuse";
+				obj = this.fusings[obj];
+				obj.frameNumber = 0;
+				obj = (i + 1) + "_metal_fuse";
+				obj = this.fusings[obj];
+				obj.frameNumber = 0;
+				obj = (i + 1) + "_glass_fuse";
+				obj = this.fusings[obj];
+				obj.frameNumber = 0;
+			}
+		}
 		
 		/*pinch(frame);
 		zoom(frame);*/
@@ -1057,7 +1135,14 @@ window.LevelOne = function()
 				if (this.substate == this.SUBSTATE_FIRST_OPEN)
 				{
 					this.substate = this.SUBSTATE_FIRST_BLOCK_SELECT;
+					
 					this.currentCaption = captions.point_instruction;
+				}
+				else if (this.substate == this.SUBSTATE_FIRST_BLOCK_SELECT)
+				{
+					this.timer++
+					if (this.timer > 400)
+						this.currentCaption = captions.variable_intro;
 				}
 
 				ctx.globalAlpha = .75;
@@ -1151,7 +1236,7 @@ window.LevelOne = function()
 					var s = spotsToDrag[i];
 					
 
-					ctx.strokeStyle  = "#ff0000";
+					//ctx.strokeStyle  = "#ff0000";
 					ctx.strokeRect(s.position.x-s.size.width/2,s.position.y-s.size.height/2,s.size.width,s.size.height);
 				}
 

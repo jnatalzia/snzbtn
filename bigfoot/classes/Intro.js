@@ -5,8 +5,8 @@ window.Intro = function()
 		var openingVideo;
 		this.loadAssets();
 
-		this.toolboxTopPos = getCorrectedPosition({x:868,y:500});
-		this.toolboxBottomPos = getCorrectedPosition({x:868,y:590});
+		this.toolboxTopPos = getCorrectedPosition({x:868,y:700});
+		this.toolboxBottomPos = getCorrectedPosition({x:868,y:790});
 		this.toolboxAlpha = 1;
 
 		//get gamestates and stuff
@@ -19,10 +19,13 @@ window.Intro = function()
 		this.STATE_WHALE_AWAKE = 4;
 		this.STATE_BLOCK_DROPPED = 5;
 		this.STATE_TASK_SEARCH = 6;
+		this.STATE_TO_LEVEL_SELECT = 7;
 
 		this.flickerCount = 0;
 		this.flickerIndex = 0;
 		this.flickerCounts = [40,100,160,200,205,207];
+
+		this.darkAlpha = 1;
 
 		this.startDragY = -1;
 
@@ -37,8 +40,8 @@ window.Intro = function()
 		this.blockVelocity = 2;
 		this.step = 0;
 
-		this.searchDestinations = [getCorrectedPosition({x:200,y:400}),getCorrectedPosition({x:-400,y:400})];
-		this.destination = this.searchDestinations[0];
+		this.searchDestinations = [getCorrectedPosition({x:2300,y:550}),getCorrectedPosition({x:-800,y:550}),getCorrectedPosition({x:200,y:550})];
+		this.searchDestination = this.searchDestinations[0];
 
 		this.currentCaption = undefined;
 		this.timer = 0;
@@ -50,8 +53,13 @@ window.Intro = function()
 
 		var whaleSize = {width:483,height:313};
 		this.normalWhale = new SpriteNode("img/lvl1/whale_fly.png",162,3,whaleSize,{x:1200,y:550},18,9,true);
+		this.reverseWhale = new SpriteNode("img/lvl1/whale-reverse.png",160,3,{width:500,height:313},{x:1200,y:550},17,9,true);
+		this.sleeping_whale = new SpriteNode("img/intro/sleeping_whale.png",1,1,{width:483,height:284},{x:1200,y:550},18,9,true);
 		this.hitWhale = new SpriteNode("img/intro/whaleHit.png",14,2,{width:whaleSize.width-1,height:whaleSize.height-12},{x:1200,y:550},7,2,true);
-		this.whaleSprite = this.normalWhale;
+		this.talkingWhale = new SpriteNode("img/lvl1/whale_talking.png",161,2,{width:whaleSize.width-1,height:whaleSize.height},{x:1200,y:550},23,7,true);
+		this.happyWhale = new SpriteNode("img/lvl1/whale_happy.png",14,2,{width:whaleSize.width-1,height:whaleSize.height-12},{x:1200,y:550},7,2,true);
+		this.sadWhale = new SpriteNode("img/lvl1/whale_sad.png",14,2,{width:whaleSize.width,height:whaleSize.height-12},{x:1200,y:550},7,2,true);
+		this.whaleSprite = this.sleeping_whale;
 
 		this.whaleSprite.play();
 
@@ -61,9 +69,9 @@ window.Intro = function()
 		//this.block = new VariableBlock({x:400,y:200},{width:150,height:150},[]);
 		this.block.stop();
 
-		this.closedHand = new SpriteNode('img/lvl1/grab_hand.png',1,1,{width:108,height:102},{x:900,y:450},1,1,true);
+		this.closedHand = new SpriteNode('img/lvl1/grab_hand.png',1,1,{width:108,height:102},{x:900,y:650},1,1,true);
 
-		this.openHand = new SpriteNode('img/open_hand.png',1,1,{width:108,height:102},{x:1250,y:this.block.pos.y},1,1,true);
+		this.openHand = new SpriteNode('img/open_hand.png',1,1,{width:108,height:102},{x:1350,y:this.block.pos.y},1,1,true);
 
 		this.grabHelper = this.closedHand;
 
@@ -75,11 +83,31 @@ window.Intro = function()
 		this.toolboxBottomIMG = new Image();
 		this.toolBoxBottom = undefined;
 		this.toolboxBottomIMG.src = "img/toolbox-btm.png";
+
+
+		this.toolboxTopDarkIMG = new Image();
+		//this.toolBoxTopDark = undefined;
+		this.toolboxTopDarkIMG.src = "img/toolbox-top-dark.png";
+
+		this.toolboxBottomDarkIMG = new Image();
+		//this.toolBoxBottom = undefined;
+		this.toolboxBottomDarkIMG.src = "img/toolbox-btm-dark.png";
 		// block info ----------------------------------------------
 		var spotPos = [{x:500,y:980},{x:700,y:980},{x:900,y:980}];
 		new SpriteNode('img/lvl1/box1-empty.png',1,1,{width:155,height:155},{x:spotPos[0].x-77,y:spotPos[0].y-77},1,1,true);
 
 		this.speechBubble = new SpriteNode('img/speechBubble.png',1,1,{width:486,height:336},{x:1250,y:200},1,1,true);
+
+		this.spotlight = undefined;
+		this.spotOn =  new SpriteNode('img/intro/onlight.png',1,1,{width:112,height:155},{x:900,y:150},1,1,true);
+		this.spotOn.stop();
+		this.spotOff = new SpriteNode('img/intro/offlight.png',1,1,{width:112,height:155},{x:900,y:150},1,1,true);
+		this.spotOff.stop();
+
+		this.light = new SpriteNode('img/intro/light.png',1,1,{width:599,height:478},{x:643,y:300},1,1,true);
+
+		this.spotlight = this.spotOff;
+		this.textPos = getCorrectedPosition({x:1290,y:280});
 	}
 	p.onloaded = function()
 	{	
@@ -103,9 +131,14 @@ window.Intro = function()
 	{
 		this.step+=0.04;
         this.whaleSprite.pos.y = this.whaleSprite.initialPos.y +( 5*(Math.sin(this.step)));
+
 		if (this.gameState == this.STATE_INIT)
 		{
-
+			ctx.globalAlpha = this.darkAlpha;
+			ctx.fillStyle = "#333";
+			ctx.fillRect(0,0,window.innerWidth,window.innerHeight);
+			ctx.globalAlpha = 1;
+			this.spotlight.draw(ctx);
 			//draw the toolbox
 			//DRAW COMMON UI ELEMENTS
 			if (this.startDragY != -1)
@@ -123,12 +156,10 @@ window.Intro = function()
 			
 			var toolboxTopSize = getCorrectedSize({width:this.toolboxTopIMG.width,height:this.toolboxTopIMG.height});
 
-
+			var tt = this.toolboxTopDarkIMG;
+			var tb = this.toolboxBottomDarkIMG;
 			
 
-			ctx.fillStyle = "#919191";
-			ctx.drawImage(this.toolboxBottomIMG,toolboxBottomPos.x,toolboxBottomPos.y, toolboxTopSize.width, toolboxTopSize.height);
-			ctx.drawImage(this.toolboxTopIMG,toolboxTopPos.x,toolboxTopPos.y, toolboxTopSize.width, toolboxTopSize.height);
 
 			if (this.flickerCount <= this.flickerCounts[this.flickerCounts.length-1])
 			{
@@ -139,13 +170,27 @@ window.Intro = function()
 				{
 					this.flickerIndex++;
 					console.log('flick!');
+					this.spotlight = this.spotOn;
+					this.light.alpha = 1;
+					tt = this.toolboxTopIMG;
+					tb = this.toolboxBottomIMG; 
+				}
+				else
+				{
+					this.spotlight = this.spotOff;
+					this.light.alpha = 0;	
 				}
 			}
 			else
 			{
+				tt = this.toolboxTopIMG;
+				tb = this.toolboxBottomIMG; 
+
+				this.spotlight = this.spotOn;
+				this.light.alpha = 1;
 				console.log('light stays on!');
-				var start_pos = getCorrectedPosition({x:900,y:450});
-				var destination = getCorrectedPosition({x:900,y:350});
+				var start_pos = getCorrectedPosition({x:900,y:650});
+				var destination = getCorrectedPosition({x:900,y:550});
 				var speed = 1;
 				
 				if (isCloseToDestination(this.grabHelper.pos,destination))
@@ -173,6 +218,11 @@ window.Intro = function()
 				//test for toolbox drag
 				//this.testToolboxOpen(frame);
 			}
+
+
+			ctx.fillStyle = "#919191";
+			ctx.drawImage(tb,toolboxBottomPos.x,toolboxBottomPos.y, toolboxTopSize.width, toolboxTopSize.height);
+			ctx.drawImage(tt,toolboxTopPos.x,toolboxTopPos.y, toolboxTopSize.width, toolboxTopSize.height);
 
 			if (frame.hands[0])
 			{
@@ -220,6 +270,7 @@ window.Intro = function()
 				}
 
 			}
+			this.light.draw(ctx);
 			
 		}
 		else if (this.gameState == this.STATE_TOOLBOX_OPENED)
@@ -234,8 +285,17 @@ window.Intro = function()
 
 
 			this.toolboxAlpha -= .0125;
+			this.darkAlpha -=.0125;
+
+			this.darkAlpha = this.darkAlpha >= 0 ? this.darkAlpha : 0;
+
+			ctx.globalAlpha = this.darkAlpha;
+			ctx.fillStyle = "#333";
+			ctx.fillRect(0,0,window.innerWidth,window.innerHeight);
+			ctx.globalAlpha = 1;
 
 			var alpha = this.toolboxAlpha >= 0 ? this.toolboxAlpha : 0;
+
 
 			ctx.fillStyle = "#919191";
 			ctx.globalAlpha = alpha;
@@ -276,7 +336,7 @@ window.Intro = function()
 		{
 
 			var start_pos = getCorrectedPosition({x:this.block.pos.x+100,y:this.block.pos.y+100});
-			var destination = getCorrectedPosition({x:1250,y:this.block.pos.y});
+			var destination = getCorrectedPosition({x:1350,y:this.block.pos.y});
 			var speed = 5;
 				
 			if (isCloseToDestination(this.grabHelper.pos,destination))
@@ -358,7 +418,7 @@ window.Intro = function()
 			{
 				this.gameState = this.STATE_TASK_SEARCH;
 				this.currentCaption = captions.snoozer_intro;
-				this.whaleSprite = this.normalWhale;
+				this.whaleSprite = this.talkingWhale;
 				this.timer = 0;
 			}
 		}
@@ -371,32 +431,50 @@ window.Intro = function()
 			if (this.timer > 300)
 			{
 				//start movement
+				//this.whaleSprite = this.normalWhale;
 				this.currentCaption = undefined;
-				var speed = 10;
+				var speed = 13;
 				//this.whaleSprite = this.sadWhale;
+				//console.log('firing');
 
+				//console.log(isCloseToDestination(this.whaleSprite.pos,this.searchDestinations[0]));
 
-				if (isCloseToDestination(this.whaleSprite.pos,this.destination))
+				if (isCloseToDestination(this.whaleSprite.pos,this.searchDestinations[0]) && this.searchDestination == this.searchDestinations[0])
 				{
-					if (this.destination == this.searchDestinations[0])
-					{
-						this.destination = this.searchDestinations[1];
-						//this.whaleSprite.pos.x -= 80;
-						console.log('going back');
-					}
-					else
-					{
-						console.log('going forward');
-						this.destination = this.searchDestinations[0];
-						//this.whaleSprite.pos.x += 80;
-					}
+					//console.log('isclose');	
+					this.searchDestination = this.searchDestinations[1];
+					this.whaleSprite = this.reverseWhale;
+					this.whaleSprite.pos = {x:this.searchDestinations[0].x,y:this.searchDestinations[0].y};
+					//console.log(this.whaleSprite);
+
+				}
+				else if (isCloseToDestination(this.whaleSprite.pos,this.searchDestinations[1]) && this.searchDestination == this.searchDestinations[1])
+				{
+					console.log('woop');
+					this.searchDestination = this.searchDestinations[2];
+					this.whaleSprite = this.normalWhale;
+					this.whaleSprite.pos = {x:this.searchDestinations[1].x,y:this.searchDestinations[1].y};
+				}
+				else if (isCloseToDestination(this.whaleSprite.pos,this.searchDestinations[2]) && this.searchDestination == this.searchDestinations[2])
+				{
+					//pop up chat bubble
+					this.speechBubble.pos = getCorrectedPosition({x:this.searchDestination.x + 100,y:this.searchDestination.y -120});
+					this.currentCaption = captions.found_tasks;
+					this.gameState == this.STATE_TO_LEVEL_SELECT;
+					this.textPos = getCorrectedPosition({x:this.searchDestination.x + 140,y:this.searchDestination.y -50});
+					this.whaleSprite = this.talkingWhale;
+					this.whaleSprite.pos = {x:this.searchDestination.x,y:this.searchDestination.y};
 				}
 				else
-				{
-					var idealVec = getSubtractedVector(this.whaleSprite.pos,this.destination);
+				{	
+					var idealVec = getSubtractedVector(this.whaleSprite.pos,this.searchDestination);
+
+
 					//arbitrary block speed
 					idealVec = getNormalizedVector(idealVec);
 					idealVec = getScaledVector(idealVec,speed);
+
+					//console.log(idealVec);
 
 					this.whaleSprite.pos.x += idealVec.x;
 					this.whaleSprite.pos.y += idealVec.y;	
@@ -405,30 +483,64 @@ window.Intro = function()
 			}
 			
 		}
+		else if (this.gameState == this.STATE_TO_LEVEL_SELECT)
+		{
+			this.whaleSprite.draw(ctx);
+		}
 
 		//caption drawing
 		if (this.currentCaption != undefined)
 		{
 			//console.log('running');
+			var maxSize = getCorrectedSize({width:325,height:300});
 
-			var lines = this.currentCaption.split("\n");
+			var maxwidth = maxSize.width;
+
+			//var lines = this.currentCaption.split("\n");
 			//console.log(lines);
-			var textPos = getCorrectedPosition({x:1290,y:280});
-			var lineHeight = 20;
 
-			//this.textBox.draw(ctx);
+			//if (this.gameState != this.STATE_TO_LEVEL_SELECT) var textPos = 
+			//else var textPos = 
+			var lineHeight = 20;
+			var breakNum = 0;
+
+			var line = ""
+			var words = this.currentCaption.split(" ");
+
+			//console.log(words);
+
+			ctx.fillStyle = "#1E1E1E";
+
+			var fontSize = 16;
+
+			ctx.font=fontSize+"px GothamMedium";
+			ctx.textAlign = 'left';
+
 			this.speechBubble.draw(ctx);
 
-			for (var i = 0; i < lines.length;i++)
+			for (var i =0 ; i < words.length; i++)
 			{
-				ctx.fillStyle = "#1E1E1E";
+				var testline = line + words[i] + " ";
+				var metrics = ctx.measureText(testline);
+				var testwidth = metrics.width;
 
-				var fontSize = (20 * .75) * 1920/window.innerWidth;
+				//console.log(testline);
 
-				ctx.font=fontSize+"px GothamMedium";
-				ctx.textAlign = 'left';
-
-				ctx.fillText(lines[i],textPos.x,textPos.y+(lineHeight*i));
+				if (testwidth > maxwidth)
+				{
+					ctx.fillText(testline,this.textPos.x,this.textPos.y+(breakNum*lineHeight));
+					breakNum++;
+					line = "";
+					//words.splice(0,i);
+				}
+				else if (i == words.length - 1)
+				{
+					ctx.fillText(testline,this.textPos.x,this.textPos.y+(breakNum*lineHeight));
+				}
+				else
+				{
+					line = testline;
+				}
 			}
 		}
 		

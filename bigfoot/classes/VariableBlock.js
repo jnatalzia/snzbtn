@@ -31,7 +31,7 @@ window.VariableBlock = function(dest,size,options)
 	this.value = "";
 	this.radialX = 0;
 	this.radialY = 0;
-	this.radialMenu = new SpriteNode('img/lvl1/radialMenu.png',11,2,{width:528,height:549},{x:this.radialX,y:this.radialY},1,24,true);
+	this.radialMenu = new SpriteNode('img/lvl1/radialMenu.png',25,2,{width:528,height:527},{x:this.radialX,y:this.radialY},1,25,true);
 
 	var glassTitle = new Image();
 	glassTitle.src = "img/wires/radialMenu/bottomLeft.png";
@@ -63,9 +63,12 @@ window.VariableBlock = function(dest,size,options)
 	 this.draw = function (frame,ctx){
 		//
 		var block = this;
+
+		this.radialMenu.pos.x = (this.position.x + this.size.width/2) - this.radialMenu.size.width/2;
+		this.radialMenu.pos.y = (this.position.y + this.size.height/2) - this.radialMenu.size.height/2;
 		//draw block
 		//fix this stuff
-		var wheelRadius = block.size.width+130;
+		var wheelRadius = this.radialMenu.size.width/2;
 		if (frame.hands.length == 1 && frame.hands[0].fingers.length == 1)
 		{
 
@@ -97,6 +100,7 @@ window.VariableBlock = function(dest,size,options)
 					//self.checkDisplay();
 					block.displayOptions = true;
 					buttonSnd.play();
+					//this.radialMenu.play();
 				},2000);
 
 			}else
@@ -113,7 +117,7 @@ window.VariableBlock = function(dest,size,options)
 				this.radialY = block.position.y + block.size.height;
 				
 				var e = this.radialMenu;
-				this.radialMenu.draw(ctx);
+				
 				e.reversed = false;
 
 				//console.log(e.frameNumber + ", " + e.numFrames);
@@ -237,8 +241,10 @@ window.VariableBlock = function(dest,size,options)
 				//ctx.stroke();
 				if (block.options[i].isHighlighted)
 				{
+					ctx.globalAlpha = .4;
 					ctx.fillStyle = "#ccc";
 					ctx.fill();
+					ctx.globalAlpha = 1;
 				}
 
 
@@ -250,11 +256,17 @@ window.VariableBlock = function(dest,size,options)
 				//ctx.fillText(i,p.x,p.y);
 
 			}
+			this.radialMenu.draw(ctx);
 
 			//console.log(block.startAngles);
 		}
+
+		if (!this.displayOptions)
+		{
+			this.radialMenu.frameNumber = 0;
+		}
 		ctx.fillStyle = "#000";
-		ctx.drawImage(this.image,this.position.x,this.position.y,this.size.width,this.size.height);
+		if (!this.isSlotted) ctx.drawImage(this.image,this.position.x,this.position.y,this.size.width,this.size.height);
 	}
 
 
