@@ -15,7 +15,9 @@ window.captions =
 	failure:"Oh no! One or more of your levels didn't stop the monsters, try again!",
 	wake_up:"zzz..Wh- Oh! Hello! Welcome to Spark*! I’m Snoozer and I’ll be your guide on your adventure to programming.",
 	snoozer_intro:"Now in my sleepy stupor I seemed to have lost the tasks I’m supposed to give you.",
-	found_tasks:"FOUND THEM"
+	found_tasks:"AHH! Here they are. I knew I couldn't have lost them again. Er- lost them.",
+	pick_task:"Let’s get started! If you look to my right you’ll see a wide variety of tasks. Now, most of them are locked, we wouldn’t want you getting ahead of yourself he-he.",
+	point_and_hold:"Point and hold on Task 1 and we’ll see if we can wreak any havoc in there."
 	//start_search:"Now in my sleepy stupor I seemed to have lost the tasks I’m supposed to give you."
 
 }

@@ -40,7 +40,7 @@ window.Intro = function()
 		this.blockVelocity = 2;
 		this.step = 0;
 
-		this.searchDestinations = [getCorrectedPosition({x:2300,y:550}),getCorrectedPosition({x:-800,y:550}),getCorrectedPosition({x:200,y:550})];
+		this.searchDestinations = [getCorrectedPosition({x:2300,y:550}),getCorrectedPosition({x:-800,y:550}),getCorrectedPosition({x:50,y:550})];
 		this.searchDestination = this.searchDestinations[0];
 
 		this.currentCaption = undefined;
@@ -450,7 +450,7 @@ window.Intro = function()
 				}
 				else if (isCloseToDestination(this.whaleSprite.pos,this.searchDestinations[1]) && this.searchDestination == this.searchDestinations[1])
 				{
-					console.log('woop');
+					
 					this.searchDestination = this.searchDestinations[2];
 					this.whaleSprite = this.normalWhale;
 					this.whaleSprite.pos = {x:this.searchDestinations[1].x,y:this.searchDestinations[1].y};
@@ -458,12 +458,14 @@ window.Intro = function()
 				else if (isCloseToDestination(this.whaleSprite.pos,this.searchDestinations[2]) && this.searchDestination == this.searchDestinations[2])
 				{
 					//pop up chat bubble
+					//console.log('woop');
 					this.speechBubble.pos = getCorrectedPosition({x:this.searchDestination.x + 100,y:this.searchDestination.y -120});
 					this.currentCaption = captions.found_tasks;
-					this.gameState == this.STATE_TO_LEVEL_SELECT;
+					this.gameState = this.STATE_TO_LEVEL_SELECT;
 					this.textPos = getCorrectedPosition({x:this.searchDestination.x + 140,y:this.searchDestination.y -50});
 					this.whaleSprite = this.talkingWhale;
 					this.whaleSprite.pos = {x:this.searchDestination.x,y:this.searchDestination.y};
+					this.timer = 0;
 				}
 				else
 				{	
@@ -486,6 +488,13 @@ window.Intro = function()
 		else if (this.gameState == this.STATE_TO_LEVEL_SELECT)
 		{
 			this.whaleSprite.draw(ctx);
+
+			console.log('firing: ' +this.timer);
+			this.timer++;
+			if (this.timer > 250)
+			{
+				levelChange(1);
+			}
 		}
 
 		//caption drawing

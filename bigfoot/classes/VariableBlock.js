@@ -3,6 +3,8 @@ window.VariableBlock = function(dest,size,options)
 	this.destination = getCorrectedPosition(dest);
 	this.size = getCorrectedSize(size);
 
+
+
 	this.isBeingDragged= false;
 
 	this.image = new Image();
@@ -32,6 +34,9 @@ window.VariableBlock = function(dest,size,options)
 	this.radialX = 0;
 	this.radialY = 0;
 	this.radialMenu = new SpriteNode('img/lvl1/radialMenu.png',25,2,{width:528,height:527},{x:this.radialX,y:this.radialY},1,25,true);
+
+	this.loadingAnimation = new SpriteNode('img/loading_animation.png',48,2,{width:201,height:201},{x:this.position.x,y:this.position.y},5,10,true);
+	this.loadingAnimation.stop();
 
 	var glassTitle = new Image();
 	glassTitle.src = "img/wires/radialMenu/bottomLeft.png";
@@ -64,6 +69,8 @@ window.VariableBlock = function(dest,size,options)
 		//
 		var block = this;
 
+		this.loadingAnimation.pos = {x:this.position.x + this.size.width/2 - this.loadingAnimation.size.width/2,y:this.position.y + this.size.height/2 - this.loadingAnimation.size.height/2};
+
 		this.radialMenu.pos.x = (this.position.x + this.size.width/2) - this.radialMenu.size.width/2;
 		this.radialMenu.pos.y = (this.position.y + this.size.height/2) - this.radialMenu.size.height/2;
 		//draw block
@@ -93,6 +100,16 @@ window.VariableBlock = function(dest,size,options)
 
 			if (this.pointIsInside({x:fx,y:fy}))
 			{
+				if (!this.displayOptions) {
+					this.loadingAnimation.pos = {x:fx - this.loadingAnimation.size.width/2, y:fy - this.loadingAnimation.size.height/2};
+					this.loadingAnimation.play();
+				}
+				else
+				{
+					this.loadingAnimation.frameNumber = 0;
+					this.loadingAnimation.stop();
+				}
+				//console.log(this.loadingAnimation.pos);
 				//console.log('works');
 				var self = this;
 				if (this.optionTimer == undefined) this.optionTimer = setTimeout(function()
@@ -101,12 +118,14 @@ window.VariableBlock = function(dest,size,options)
 					block.displayOptions = true;
 					buttonSnd.play();
 					//this.radialMenu.play();
-				},2000);
+				},1600);
 
 			}else
 			{
 				clearTimeout(this.optionTimer);
 				this.optionTimer = undefined;
+				this.loadingAnimation.frameNumber = 0;
+				this.loadingAnimation.stop();
 			}
 
 
@@ -190,6 +209,8 @@ window.VariableBlock = function(dest,size,options)
 			clearTimeout(this.optionTimer);
 			this.optionTimer = undefined;
 			this.displayOptions = false;
+			this.loadingAnimation.frameNumber = 0;
+			this.loadingAnimation.stop();
 		}
 
 		if (block.displayOptions && !block.isSlotted)
@@ -267,6 +288,8 @@ window.VariableBlock = function(dest,size,options)
 		}
 		ctx.fillStyle = "#000";
 		if (!this.isSlotted) ctx.drawImage(this.image,this.position.x,this.position.y,this.size.width,this.size.height);
+
+		this.loadingAnimation.draw(ctx);
 	}
 
 

@@ -151,6 +151,8 @@ window.LevelOne = function()
 		var playSnd;
 		this.GLASS_BREAK_FIRED = false;
 		this.timer = 0;
+
+		this.onloaded();
 	}
 
 	var p = LevelOne.prototype;
@@ -195,7 +197,7 @@ window.LevelOne = function()
 		this.normalWhale = new SpriteNode("img/lvl1/whale_fly.png",162,3,whaleSize,{x:1400,y:400},18,9,true);
 		this.talkingWhale = new SpriteNode("img/lvl1/whale_talking.png",161,2,{width:whaleSize.width-1,height:whaleSize.height},{x:1400,y:400},23,7,true);
 		this.happyWhale = new SpriteNode("img/lvl1/whale_happy.png",14,2,{width:whaleSize.width-1,height:whaleSize.height-12},{x:1400,y:400},7,2,true);
-		this.sadWhale = new SpriteNode("img/lvl1/whale_sad.png",14,2,{width:whaleSize.width,height:whaleSize.height-12},{x:-500,y:400},7,2,true);
+		this.sadWhale = new SpriteNode("img/lvl1/whale_sad.png",14,2,{width:whaleSize.width,height:whaleSize.height-12},{x:-2500,y:400},7,2,true);
 
 		this.whaleSprite = this.normalWhale;
 
@@ -267,6 +269,9 @@ window.LevelOne = function()
 			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:-225,y:650},32,5,true),
 			new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:-175,y:650},32,5,true)
 		];
+
+		this.lightning = new SpriteNode('img/lightning.png',3,2,{width:729,height:912},{x:900,y:0},3,1,true,{width:400,height:450});
+		this.lightning.stop();
 
 		var spotPos = [{x:525,y:980},{x:925,y:980},{x:1325,y:980}];
 
@@ -352,6 +357,9 @@ window.LevelOne = function()
 		this.firstSlottedSprite = this.fusings["1_glass_fuse"];
 		this.secondSlottedSprite = this.fusings["2_glass_fuse"];
 		this.thirdSlottedSprite = this.fusings["3_glass_fuse"];
+
+		this.loadingAnimation = new SpriteNode('img/loading_animation.png',48,2,{width:201,height:201},{x:0,y:0},5,10,true);
+		this.loadingAnimation.stop();
 		
 
 		bgSong = new Audio('cyclone');
@@ -725,6 +733,7 @@ window.LevelOne = function()
 
 		if (this.debug) ctx.strokeRect(this.startHitBox.pos.x,this.startHitBox.pos.y,this.startHitBox.size.width,this.startHitBox.size.height);
 
+		//this.lightning.draw(ctx);
 
 		//set dragcircleSize to toolbox size
 		this.dragCircle.width = toolboxTopSize.width*2;
@@ -771,6 +780,8 @@ window.LevelOne = function()
 			var draw1 = false,
 			draw2 = false,
 			draw3 = false;
+
+
 
 			var failed = false;
 
@@ -838,9 +849,19 @@ window.LevelOne = function()
 
 				zombie.draw(ctx);
 			}
+			this.timer++;
+			if (this.timer > 100 && this.timer < 120)
+			{
+				
+				if (this.lightning.frameNumber != 2) this.lightning.draw(ctx);
+				else this.lightning.alpha = 0;
+			}
+			else if (this.timer > 120)
+				this.lightning.alpha = 0;
+
 			if (this.spotsToDrag[2].slottedBlock.value != "glass")
 			{
-				draw3 = true;
+				if (this.timer > 100) draw3 = true;
 				failed = true;
 				
 			}
@@ -1095,6 +1116,10 @@ window.LevelOne = function()
 							fy < shb.pos.y + shb.size.height
 							)
 						{
+							this.loadingAnimation.pos = {x:fx - this.loadingAnimation.size.width/2, y:fy - this.loadingAnimation.size.height/2};
+							this.loadingAnimation.play();
+
+							this.loadingAnimation.draw(ctx);
 							//console.log("hover");
 							if (this.startTimeout == undefined)
 							{
@@ -1103,7 +1128,7 @@ window.LevelOne = function()
 									{
 										playSnd.play();
 										self.runCode();
-									},2500);
+									},1600);
 							}
 						}
 						else
@@ -1111,12 +1136,16 @@ window.LevelOne = function()
 							//cut the timer out
 							clearTimeout(this.startTimeout);
 							this.startTimeout = undefined;
+							this.loadingAnimation.frameNumber = 0;
+							this.loadingAnimation.stop();
 						}
 					}
 					else
 					{
 						clearTimeout(this.startTimeout);
 						this.startTimeout = undefined;
+						this.loadingAnimation.frameNumber = 0;
+						this.loadingAnimation.stop();
 					}
 					
 				}
@@ -1144,7 +1173,11 @@ window.LevelOne = function()
 					if (this.timer > 400)
 						this.currentCaption = captions.variable_intro;
 				}
+				else if (this.substate == this.SUBSTATE_SECOND_LEVEL_SLOTTED)
+				{
+					this.currentCaption = undefined;
 
+				}
 				ctx.globalAlpha = .75;
 				ctx.fillStyle = "#000";
 				ctx.fillRect(0,0,this.browserWidth,this.browserHeight);
@@ -1310,6 +1343,7 @@ window.LevelOne = function()
 				}
 				else if (this.substate == this.SUBSTATE_SECOND_LEVEL_SLOTTED)
 				{
+					this.currentCaption = undefined;
 					var count = 0;
 					for (var k in spotsToDrag)
 					{
@@ -1457,7 +1491,7 @@ window.LevelOne = function()
 								}
 							}
 					}
-					else if(grab_positionX <= bx + 100 && grab_positionX >= bx - 100 && grab_positionY <= by + 100 && grab_positionY >= by - 100)
+					else if(grab_positionX <= bx + b.size.width && grab_positionX >= bx - b.size.width && grab_positionY <= by + b.size.height && grab_positionY >= by - b.size.height)
 					{
 							//console.log(b);
 							var canDrag = true;
@@ -1518,7 +1552,9 @@ window.LevelOne = function()
 
 		if (canRun)
 		{
-
+			this.timer = 0;
+			this.lightning.frameNumber = 0;
+			this.lightning.alpha = 1;
 			this.currentCaption = captions.running;
 
 			var self = this;
