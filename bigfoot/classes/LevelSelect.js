@@ -6,6 +6,10 @@ window.LevelSelect = function()
 
 		var screenTitle, variables, functions, loops, conditionals, lessonOne, lessonTwo, lessonThree, lessonFour;
 
+		//this.lessonHitBox = {pos:getCorrectedPosition({x: ,y: }),size:getCorrectedSize({x:150,y:150})};
+
+		this.startTimeout = undefined;
+
 		this.loadAssets();
 		
 	}
@@ -45,32 +49,53 @@ window.LevelSelect = function()
 	p.update = function(ctx,frame)
 	{
 		this.drawUI(frame,ctx);
+		this.nextLevel(frame,ctx);
 	}
 	p.drawFingers = function(frame,ctx)
 	{
-		for (var i in frame.hands)
-			for (var k in frame.hands[i].fingers)
-			{
-				var finger = frame.hands[i].fingers[k];
-				var pos = finger.stabilizedTipPosition;
-
-				var fx = pos[0];
-				var fy = pos[1];
-				var fz = pos[2];
-						
-						
-				//draw the finger on screen
-				fx = map(fx,-150,150,0,browserWidth);
-				fy = map(fy,100,300,0,browserHeight);
-
-				fy = browserHeight - fy;
-				ctx.fillStyle = "#E04C4C";
-				ctx.beginPath();
-				ctx.arc(fx,fy,10,0,2*Math.PI);
-				ctx.fill();
-				ctx.closePath();
-			}
 			
+	}
+	p.nextLevel = function(frame,ctx)
+	{
+		//console.log(this.tempHand);
+		if(frame.hands[0])
+		{
+			var hand = frame.hands[0];
+			var x = hand.palmPosition[0];
+			var y = hand.palmPosition[1];
+
+			var handX = map(x,-150,150,0,browserWidth);
+			var handY = map(y,100,300,browserHeight,0);
+
+			
+			//console.log(handX);
+			//console.log(handY);
+
+			if(hand.fingers.length == 1)
+			{
+				//console.log(hand.fingers.length);
+
+				var f = hand.palmPosition;
+				var fpos = f;
+
+				var x = fpos[0];
+				var y = fpos[1];
+				//console.log(hand);
+
+				var fx = map(x,-150,150,0,browserWidth) - 15;
+				var fy = map(y,100,300,browserHeight,0) - 45;
+
+				var lhb = this.lessonHitBox; // lessonHitBox still needs to be defined as an object
+				// this object should reflect the lesson level
+
+				if(fx > lhb.pos.x && fx < lhb.pos.x + lhb.size.width &&
+					fy > lhb.pos.y && fy < lhb.pos.y + lhb.size.height)
+				{
+					//still need timeout and interaction here
+				}
+
+			}
+		}
 	}
 	p.drawUI = function(frame,ctx)
 	{
@@ -113,6 +138,7 @@ window.LevelSelect = function()
 		//draw hands and screen title
 		this.screenTitle.draw(ctx);
 		this.tempHand.draw(frame,ctx);
+
 	}
 	return LevelSelect;
 }();
