@@ -29,8 +29,9 @@ window.VariableBlock = function(dest,size,options)
 	this.startAngles = [];
 
 	this.value = "";
-
-	//this.radialMenu = new SpriteNode('pathhere',11,2,{width:528,height:549},{x:0,y:0},1,24,true);
+	this.radialX = 0;
+	this.radialY = 0;
+	this.radialMenu = new SpriteNode('img/lvl1/radialMenu.png',11,2,{width:528,height:549},{x:this.radialX,y:this.radialY},1,24,true);
 
 	var glassTitle = new Image();
 	glassTitle.src = "img/wires/radialMenu/bottomLeft.png";
@@ -108,6 +109,24 @@ window.VariableBlock = function(dest,size,options)
 			//check to see if the person's finger is on an display option
 			if (block.displayOptions)
 			{
+				this.radialX = block.position.x + block.size.width;
+				this.radialY = block.position.y + block.size.height;
+				
+				var e = this.radialMenu;
+				this.radialMenu.draw(ctx);
+				e.reversed = false;
+
+				//console.log(e.frameNumber + ", " + e.numFrames);
+
+				if ((e.frameNumber) == e.numFrames-1)
+				{
+					e.stop();
+				}
+				else
+				{
+					e.play();
+				}
+
 				var fAngle = angleFromPointToPoint(block.getCenterPos(),{x:fx,y:fy});
 
 				//console.log(fAngle);
@@ -221,10 +240,6 @@ window.VariableBlock = function(dest,size,options)
 					ctx.fillStyle = "#ccc";
 					ctx.fill();
 				}
-				ctx.drawImage(glassTitle,block.position.x+ block.size.width/2-wheelRadius, block.position.y + block.size.height/2);
-				ctx.drawImage(metalTitle,block.position.x+ block.size.width/2-wheelRadius, block.position.y + block.size.height/2-wheelRadius);
-				ctx.drawImage(woodTitle,block.position.x+ block.size.width/2, block.position.y + block.size.height/2-wheelRadius);
-				ctx.drawImage(cancelTitle,block.position.x+ block.size.width/2, block.position.y + block.size.height/2);
 
 
 				//draw text for debugging
