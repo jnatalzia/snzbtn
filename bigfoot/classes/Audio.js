@@ -30,12 +30,11 @@ window.Audio = function(soundID)
 	{
 		sound.oncanplaythrough = sound.play();
 		sound.addEventListener('ended',function(){
-			setTimeout(function()
-				{
-					sound.oncanplaythrough = sound.play();
-					console.log("restarted: " +soundID);
-				},Math.random()*3000);
-		});
-		
+			if (this.resetTimeout == undefined) this.resetTimeout = setTimeout(function()
+			{
+				sound.oncanplaythrough = sound.play();
+				console.log("restarted: " +soundID);
+			},Math.random()*1500);
+		});		
 	}
 }

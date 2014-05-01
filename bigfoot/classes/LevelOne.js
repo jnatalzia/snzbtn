@@ -895,7 +895,7 @@ window.LevelOne = function()
 					{
 						if(this.zombies[0].pos.x+50 > destination.x && this.GLASS_BREAK_FIRED == false)
 						{
-							glassBreak.randomLoop();
+							glassBreak.loop();
 							this.GLASS_BREAK_FIRED = true;
 						}
 					}
@@ -903,7 +903,7 @@ window.LevelOne = function()
 					{
 						if(this.bees[0].pos.x+50 > destination.x && this.GLASS_BREAK_FIRED == false)
 						{
-							glassBreak.randomLoop();
+							glassBreak.loop();
 							this.GLASS_BREAK_FIRED = true;
 						}
 					}
