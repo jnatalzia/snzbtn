@@ -30,6 +30,8 @@ window.VariableBlock = function(dest,size,options)
 
 	this.value = "";
 
+	//this.radialMenu = new SpriteNode('pathhere',11,2,{width:528,height:549},{x:0,y:0},1,24,true);
+
 	var glassTitle = new Image();
 	glassTitle.src = "img/wires/radialMenu/bottomLeft.png";
 	var metalTitle = new Image();
