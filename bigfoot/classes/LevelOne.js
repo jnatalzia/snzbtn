@@ -368,6 +368,7 @@ window.LevelOne = function()
 		playSong = new Audio('abbey');
 		beeSfx = new Audio('bees');
 		zombieSfx = new Audio('zombies');
+		lightningSfx = new Audio('lightning');
 		woodBreak = new Audio('wood');
 		metalBreak = new Audio('metal');
 		glassBreak = new Audio('glass');
@@ -386,7 +387,8 @@ window.LevelOne = function()
   		this.dragCircle.radius = 50;
 
   		this.tempHand = new Hand();
-  		bgSong.loop();
+  		//introSong.stop();
+  		//bgSong.loop();
   		this.BG_SONG_PLAYING = true;
   		if(this.PLAY_SONG_PLAYING == true)
   		{
@@ -855,7 +857,11 @@ window.LevelOne = function()
 			if (this.timer > 100 && this.timer < 120)
 			{
 				
-				if (this.lightning.frameNumber != 2) this.lightning.draw(ctx);
+				if (this.lightning.frameNumber != 2)
+				{
+					this.lightning.draw(ctx); 
+					lightningSfx.play();
+				} 
 				else this.lightning.alpha = 0;
 			}
 			else if (this.timer > 120)
@@ -983,13 +989,13 @@ window.LevelOne = function()
 							woodBreak.loop();
 						}
 					}
-					/*if(i==2)
+					if(i==2)
 					{
-						if(this.lightning[0].pos.x+50 > destination.x && this.WOOD_BREAK_FIRED == false)
+						if(this.WOOD_BREAK_FIRED == false)
 						{
 							woodBreak.loop();
 						}
-					}*/
+					}
 				}
 			}
 			for (var i=0;i<this.spotsToDrag.length;i++)
@@ -1004,13 +1010,13 @@ window.LevelOne = function()
 							metalBreak.loop();
 						}
 					}
-					/*if(i==2)
+					if(i==2)
 					{
-						if(this.lightning[0].pos.x+50 > destination.x && this.METAL_BREAK_FIRED == false)
+						if(this.METAL_BREAK_FIRED == false)
 						{
 							metalBreak.loop();
 						}
-					}*/
+					}
 				}
 			}
 		}

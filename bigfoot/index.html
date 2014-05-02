@@ -29,6 +29,9 @@
 	var canvas,ctx;
 
 	var browserWidth,browserHeight;
+
+	var introSong = new Audio('dragonfly');
+	var bgSong = new Audio('cyclone');
 	
 	
 	window.onload = function()
@@ -44,6 +47,9 @@
 		this.Intro = new Intro();
 		this.LevelSelect = new LevelSelect();
 		this.LevelOne = new LevelOne();
+
+		introSong.loop();
+
 		
   		//load all levels
 
@@ -58,8 +64,6 @@
 		
   		currLevel.onloaded();
 
-		console.log(this.LevelOne);
-
   		console.log(currLevel);
 
   		update();
@@ -72,6 +76,13 @@
 		var levelArray = [this.Intro,this.LevelSelect,this.LevelOne];
 		
 		currLevel = levelArray[levelIndex];
+
+
+		if(currLevel == this.LevelOne)
+		{
+			introSong.stop()
+			bgSong.loop()
+		}
 		
 		//console.log(currLevel);
 	}
