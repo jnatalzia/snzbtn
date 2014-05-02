@@ -1136,11 +1136,11 @@ window.LevelOne = function()
 
 					//console.log(handX+", "+handY);
 
-					ctx.fillStyle = "#4CE083";
+					/*ctx.fillStyle = "#4CE083";
 					ctx.beginPath();
 					ctx.arc(handX,handY,20,0,2*Math.PI);
 					ctx.fill();
-					ctx.closePath();
+					ctx.closePath();*/
 					//check for placement over pullup
 					var c1 = {};
 					c1.x = handX;

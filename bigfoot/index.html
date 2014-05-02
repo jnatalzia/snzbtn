@@ -7,6 +7,7 @@
 <link rel="icon" href="img/icon.ico" type="image/icon">
 <script src="http://js.leapmotion.com/0.2.0/leap.min.js"></script>
 <script src="jquery.js"></script>
+<script src="modernizr.custom.js"></script>
 <!--//load classes-->
 <script src="utilities/helper.js"></script>
 <script src="utilities/Captions.js"></script>
@@ -32,7 +33,81 @@
 
 	var introSong = new Audio('dragonfly');
 	var bgSong = new Audio('cyclone');
+
+	var loading = true;
+	var loadingZombie = new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:875,y:660},32,5,true)
 	
+	Modernizr.load(
+	{ 
+		// load all of these files
+		load : [
+			// insert "filename" here,
+			"img/buildBar.png",
+			"img/emptyVariable.png",
+			"img/hand_sprite.png",
+			"img/runBTN_active.png",
+			"img/text-box.png",
+			"img/toolbox-btm.png",
+			"img/toolbox-top.png",
+			"img/toolbox.png",
+			"img/levelSelect/1.png",
+			"img/levelSelect/2.png",
+			"img/levelSelect/3.png",
+			"img/levelSelect/4.png",
+			"img/levelSelect/conditionals.png",
+			"img/levelSelect/functions.png",
+			"img/levelSelect/lessons.png",
+			"img/levelSelect/loops.png",
+			"img/levelSelect/title.png",
+			"img/levelSelect/variables.png",
+			"img/lvl1/ash.png",
+			"img/lvl1/bee.png",
+			"img/lvl1/bg-dark.png",
+			"img/lvl1/bg-light.png",
+			"img/lvl1/blank_floor.png",
+			"img/lvl1/box1-empty.png",
+			"img/lvl1/box2-empty.png",
+			"img/lvl1/box3-empty.png",
+			"img/lvl1/glass_LV1.png",
+			"img/lvl1/glass_LV2.png",
+			"img/lvl1/glass_LV3.png",
+			"img/lvl1/glassVariable.png",
+			"img/lvl1/grab_hand.png",
+			"img/lvl1/metal_LV1.png",
+			"img/lvl1/metal_LV2.png",
+			"img/lvl1/metal_LV3.png",
+			"img/lvl1/metalVariable.png",
+			"img/lvl1/success.png",
+			"img/lvl1/whale_fly.png",
+			"img/lvl1/whale_happy.png",
+			"img/lvl1/whale_old.png",
+			"img/lvl1/whale_sad.png",
+			"img/lvl1/whale_talking.png",
+			"img/lvl1/wood_LV1.png",
+			"img/lvl1/wood_LV2.png",
+			"img/lvl1/wood_LV3.png",
+			"img/lvl1/woodVariable.png",
+			"img/lvl1/zombie.png",
+			"img/lvl1/floors/1-empty.png",
+			"img/lvl1/floors/2-empty.png",
+			"img/lvl1/floors/3-empty.png",
+		],
+		
+		
+		
+		// when the loading is complete, this function will be called
+		complete: function(){
+			
+			// set up event handlers
+				levelChange(0);
+				loading = false;
+
+		  		//update();
+			
+			} // end complete
+		
+		} // end object
+	); // end Modernizr.load
 	
 	window.onload = function()
 	{
@@ -50,23 +125,12 @@
 
 		introSong.loop();
 
+		//display load screen
 		
-  		//load all levels
 
-  		//currLevel = new LevelOne(); //for testing-------------
-  		//currLevel = new Intro(); //for testing ------------------
-  		//currLevel = new LevelSelect(); // for testing ------------------
-		//console.log(currLevel);
-		
-		//hypathetically speaking
-		//this sets the currLevel at the Intro
-		levelChange(0);
-		
-  		currLevel.onloaded();
+		//update();
 
-  		console.log(currLevel);
-
-  		update();
+		update();
 	};
 	
 	function levelChange(num)
@@ -104,7 +168,38 @@
 	});
 	function update()
 	{
-		
+		//console.log(loading);
+
+		if (loading)
+		{
+			ctx.clearRect(0,0,browserWidth,browserHeight);
+			ctx.fillStyle = "#00C699";
+			ctx.fillRect(0,0,window.innerWidth,window.innerHeight);
+
+			var img = new Image();
+			img.src = 'img/sparkLogo.png';
+			//img.play();
+
+			var imgPos = getCorrectedPosition({x:800,y:250});
+			var imgSize = getCorrectedSize({width:img.width,height:img.height});
+
+			ctx.drawImage(img,imgPos.x,imgPos.y,imgSize.width,imgSize.height);
+
+			ctx.fillStyle = "#FFFFFF";
+
+			var fontSize = 60;
+
+			ctx.font=fontSize+"px GothamMedium";
+			ctx.textAlign = 'left';
+			var textPos = getCorrectedPosition({x:750,y:550});
+
+			ctx.fillText("LOADING",textPos.x,textPos.y);
+
+			loadingZombie.draw(ctx);
+			window.requestAnimationFrame(update);
+			
+			return;
+		}
 		if (globalFrame)
 		{
 

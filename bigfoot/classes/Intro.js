@@ -45,6 +45,8 @@ window.Intro = function()
 
 		this.currentCaption = undefined;
 		this.timer = 0;
+
+		this.onloaded();
 	}
 	var p = Intro.prototype;
 	p.loadAssets = function()
@@ -180,6 +182,9 @@ window.Intro = function()
 					this.spotlight = this.spotOff;
 					this.light.alpha = 0;	
 				}
+				ctx.fillStyle = "#919191";
+				ctx.drawImage(tb,toolboxBottomPos.x,toolboxBottomPos.y, toolboxTopSize.width, toolboxTopSize.height);
+				ctx.drawImage(tt,toolboxTopPos.x,toolboxTopPos.y, toolboxTopSize.width, toolboxTopSize.height);
 			}
 			else
 			{
@@ -213,16 +218,20 @@ window.Intro = function()
 					this.grabHelper.pos.y += idealVec.y;	
 				}
 
+				ctx.fillStyle = "#919191";
+				ctx.drawImage(tb,toolboxBottomPos.x,toolboxBottomPos.y, toolboxTopSize.width, toolboxTopSize.height);
+				ctx.drawImage(tt,toolboxTopPos.x,toolboxTopPos.y, toolboxTopSize.width, toolboxTopSize.height);
 				this.grabHelper.draw(ctx);
+				
 
 				//test for toolbox drag
 				//this.testToolboxOpen(frame);
 			}
 
 
-			ctx.fillStyle = "#919191";
-			ctx.drawImage(tb,toolboxBottomPos.x,toolboxBottomPos.y, toolboxTopSize.width, toolboxTopSize.height);
-			ctx.drawImage(tt,toolboxTopPos.x,toolboxTopPos.y, toolboxTopSize.width, toolboxTopSize.height);
+			
+
+
 
 			if (frame.hands[0])
 			{
@@ -236,11 +245,11 @@ window.Intro = function()
 
 				//console.log(handX+", "+handY);
 
-				ctx.fillStyle = "#4CE083";
+				/*ctx.fillStyle = "#4CE083";
 				ctx.beginPath();
 				ctx.arc(handX,handY,20,0,2*Math.PI);
 				ctx.fill();
-				ctx.closePath();
+				ctx.closePath();*/
 				//check for placement over pullup
 				var c1 = {};
 				c1.x = handX;
@@ -638,7 +647,7 @@ window.Intro = function()
 		}
 		else this.block.isBeingDragged = false;
 
-		if (!this.block.isBeingDragged && this.block.pos.x > this.whaleSprite.pos.x)
+		if (!this.block.isBeingDragged && this.block.pos.x > this.whaleSprite.pos.x && this.block.pos.y < this.whaleSprite.pos.y)
 		{
 			//console.log('dropped!');
 			this.gameState = this.STATE_BLOCK_DROPPED;
