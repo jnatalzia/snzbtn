@@ -149,9 +149,11 @@ window.LevelOne = function()
 		var glassBreak;
 		var slottedSnd;
 		var playSnd;
+		var successSnd;
 		this.GLASS_BREAK_FIRED = false;
 		this.WOOD_BREAK_FIRED = false;
 		this.METAL_BREAK_FIRED = false;
+		this.SUCCESS_SOUND_FIRED = false;
 		this.timer = 0;
 
 		this.onloaded();
@@ -374,6 +376,7 @@ window.LevelOne = function()
 		glassBreak = new Audio('glass');
 		slottedSnd = new Audio('drop');
 		playSnd = new Audio('button');
+		successSnd = new Audio('success');
 	}
 	p.onloaded = function()
 	{
@@ -993,7 +996,10 @@ window.LevelOne = function()
 					{
 						if(this.WOOD_BREAK_FIRED == false)
 						{
-							woodBreak.loop();
+							if (this.resetTimeout == undefined) this.resetTimeout = setTimeout(function()
+							{
+								woodBreak.loop();
+							},1500);
 						}
 					}
 				}
@@ -1014,7 +1020,10 @@ window.LevelOne = function()
 					{
 						if(this.METAL_BREAK_FIRED == false)
 						{
-							metalBreak.loop();
+							if (this.resetTimeout == undefined) this.resetTimeout = setTimeout(function()
+							{
+								metalBreak.loop();
+							},1500);
 						}
 					}
 				}
@@ -1023,6 +1032,22 @@ window.LevelOne = function()
 		else if (this.gameState === this.STATE_OVER)
 		{
 			this.successScreen.draw(ctx);
+			zombieSfx.stop();
+  			beeSfx.stop();
+  			woodBreak.stop();
+  			metalBreak.stop();
+  			glassBreak.stop();
+  			this.GLASS_BREAK_FIRED = false;
+  			this.WOOD_BREAK_FIRED = false;
+  			this.METAL_BREAK_FIRED = false;
+  			playSong.stop();
+			this.PLAY_SONG_PLAYING = false;
+			if(this.SUCCESS_SOUND_FIRED == false)
+			{
+				console.log('in loop');
+				successSnd.play();
+				this.SUCCESS_SOUND_FIRED = true;
+			}
 		}
 
 		//draw current blocks
