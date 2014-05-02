@@ -134,7 +134,7 @@ window.Hand = function()
 			this.handTwoX = map(Hand.x,-150,150,0,browserWidth);
 			this.handTwoY = map(Hand.y,100,300,browserHeight,0);
 
-			ctx.globalAlpha = 0.75;
+			ctx.globalAlpha = 0.85;
 			ctx.drawImage(this.spriteSheet,sx,sy,this.size.width,this.size.height,this.handX - this.size.width/2,this.handY - this.size.height/2,this.size.width,this.size.height);
 			ctx.drawImage(this.spriteSheet,sx2,sy2,this.size.width,this.size.height,this.handTwoX- this.size.width/2,this.handTwoY- this.size.height/2,this.size.width,this.size.height);
 			ctx.globalAlpha = 1.0;
