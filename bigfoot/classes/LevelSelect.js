@@ -21,6 +21,7 @@ window.LevelSelect = function()
 		this.timer = 0;
 		this.onloaded();
 
+		this.step = 0;
 	}
 
 	var p = LevelSelect.prototype;
@@ -299,6 +300,9 @@ window.LevelSelect = function()
 		//draw hands and screen title
 		this.screenTitle.alpha = this.mainAlpha;
 		this.screenTitle.draw(ctx);
+
+		this.step+=0.04;
+        this.whaleSprite.pos.y = this.whaleSprite.initialPos.y +( 5*(Math.sin(this.step)));
 
 		this.whaleSprite.draw(ctx);
 

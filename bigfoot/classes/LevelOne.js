@@ -117,9 +117,9 @@ window.LevelOne = function()
 
 		//init variable blocks
 		this.blocks = [
-			new VariableBlock({x:300,y:200},{width:280,height:280},blockOptions),
-			new VariableBlock({x:800,y:200},{width:280,height:280},blockOptions),
-			new VariableBlock({x:1300,y:200},{width:280,height:280},blockOptions)
+			new VariableBlock({x:300,y:200},{width:280,height:280},blockOptions,0),
+			new VariableBlock({x:800,y:200},{width:280,height:280},blockOptions,1),
+			new VariableBlock({x:1300,y:200},{width:280,height:280},blockOptions,2)
 		];
 
 		var spotSize = {width:150,height:150};
@@ -256,6 +256,7 @@ window.LevelOne = function()
 
 		//helper grab hand
 		this.grabHelper = new SpriteNode('img/lvl1/grab_hand.png',1,1,{width:108,height:102},{x:135,y:920},1,1,true);
+		this.pointSprite = new SpriteNode('img/point_sprite.png',1,1,{width:110,height:118},{x:135,y:920},1,1,true);
 
 
 		this.bees = [
@@ -724,7 +725,7 @@ window.LevelOne = function()
 		var stagePos = getCorrectedPosition({x:0,y:0}),
 		stageSize = getCorrectedSize({width:1920, height:875});
 		ctx.strokeStyle = "#000";
-		ctx.strokeRect( stagePos.x,stagePos.y,stageSize.width,stageSize.height);
+		//ctx.strokeRect( stagePos.x,stagePos.y,stageSize.width,stageSize.height);
 
 		var runPos = getCorrectedPosition({x:1700,y:890}),
 		runSize = getCorrectedSize({width:175,height:175});
@@ -950,11 +951,7 @@ window.LevelOne = function()
 				else
 				{
 					this.gameState = this.STATE_OVER;
-					setTimeout(function()
-					{
-						//opens up the survey
-						window.open("http://google.com",'_blank');
-					},5000);
+					youWon();
 				}
 				this.successScreen.draw(ctx);
 			}
@@ -1072,7 +1069,7 @@ window.LevelOne = function()
 				/*ctx.fillStyle = "#000";
 				ctx.fillRect(s.x-.width/2,s.y-s.height/2,s.width,s.height);*/
 				//ctx.drawImage(b.image,b.position.x,b.position.y,b.size.width,b.size.height);
-				obj.draw(ctx);
+				if (this.substate != this.SUBSTATE_SUCCESS) obj.draw(ctx);
 			}
 			else
 			{
@@ -1180,7 +1177,7 @@ window.LevelOne = function()
 						var fy = map(y,100,300,browserHeight,0) - 45;
 
 						ctx.fillStyle = "#000";
-						ctx.fillRect(fx,fy,10,10);
+						//ctx.fillRect(fx,fy,10,10);
 
 						var shb = this.startHitBox;
 
@@ -1272,6 +1269,7 @@ window.LevelOne = function()
 
 					if (this.substate == this.SUBSTATE_FIRST_BLOCK_SELECT)
 					{
+						
 						//
 						if (b.value != '')
 						{
@@ -1279,6 +1277,7 @@ window.LevelOne = function()
 							this.substate = this.SUBSTATE_FIRST_BLOCK_SLOT;
 							//change caption to
 							this.currentCaption = captions.drag_instruction;
+							
 						}
 					}
 
@@ -1366,6 +1365,7 @@ window.LevelOne = function()
 						}
 					}
 				}
+				//this.pointSprite.draw(ctx);
 				//drawFingers(frame);
 			}
 			//fix this to implement in the STATE_TOOLBOX OPEN

@@ -3,7 +3,7 @@ window.captions =
 	enemies_coming:"ACK. ZOMBIES. THE ZOMBIES ARE COMING. HELP ME BUILD A HOUSE THAT CAN KEEP THEM OUT!",
 	first_open:"Grab the toolbox and pull up to find the materials!",
 	point_instruction:"Now I know they don’t look very magical, but these circle blocks have the ability to change what’s inside!",
-	variable_intro:"Let’s call these ‘variables’. By pointing and holding over a block you can select a different value for the block",
+	variable_intro:"Let’s call these ‘variables’. By pointing one finger and holding it over a block you can select a different value for the block",
 	drag_instruction:"OOO, Good choice! You can drag your blocks down into the slots on the bottom of the screen. Drag this one into the '1st floor' block",
 	close_instruction:"Okay, now just wave an open hand downwards to close the toolbox",
 	first_slotted:"AWESOME! You’re on your way to saving my humble abode.",

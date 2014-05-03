@@ -1,4 +1,4 @@
-window.VariableBlock = function(dest,size,options)
+window.VariableBlock = function(dest,size,options,fn)
 {
 	this.destination = getCorrectedPosition(dest);
 	this.size = getCorrectedSize(size);
@@ -7,13 +7,19 @@ window.VariableBlock = function(dest,size,options)
 
 	this.isBeingDragged= false;
 
+	this.initialImageSRC = "img/empty_variable_animation.png";
 	this.image = new Image();
-	this.image.src = 'img/emptyVariable.png';
+	this.image.src = 'img/empty_variable_animation.png';
 
 	this.position = getCorrectedPosition({
 			x:browserWidth/2 - this.size.width/2,
 			y:browserHeight + this.size.height/2
 		});
+
+	this.frameNumber = fn;
+
+
+	this.count = 0;
 
 	this.initialPosition = this.destination;
 
@@ -287,7 +293,22 @@ window.VariableBlock = function(dest,size,options)
 			this.radialMenu.frameNumber = 0;
 		}
 		ctx.fillStyle = "#000";
-		if (!this.isSlotted) ctx.drawImage(this.image,this.position.x,this.position.y,this.size.width,this.size.height);
+
+		if (this.value == '')
+		{
+			//console.log('woo');
+			this.count++;
+
+			if (this.count % 60 == 0)
+			{
+				this.frameNumber++;
+				if (this.frameNumber > 2) this.frameNumber = 0;
+				this.count = 0;
+			}
+
+			ctx.drawImage(this.image,228 * this.frameNumber,0,228,228,this.position.x,this.position.y,this.size.width,this.size.height);
+		}
+		else if (!this.isSlotted) ctx.drawImage(this.image,this.position.x,this.position.y,this.size.width,this.size.height);
 
 		this.loadingAnimation.draw(ctx);
 	}

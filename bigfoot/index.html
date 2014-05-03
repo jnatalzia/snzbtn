@@ -35,8 +35,25 @@
 	var bgSong = new Audio('cyclone');
 
 	var loading = true;
-	var loadingZombie = new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:875,y:660},32,5,true)
+
+	var playing = false;
+
+	var waiting = false;
+
+	var loadingZombie = new SpriteNode('img/lvl1/zombie.png',141,1,{width:124,height:183},{x:875,y:660},32,5,true);
+
+	var tempHand = new Hand();
+
+	var playPos = {x:890,y:400};
+	var playSize = {width:105,height:105};
+	var playIMG = new SpriteNode("img/start-btn.png",1,-1,playSize,playPos,1,1,true);
+	//playIMG.src = ;
+
+	var loadingAnimation = new SpriteNode('img/white_loading.png',48,2,{width:201,height:201},{x:0,y:0},5,10,true);
+	loadingAnimation.stop();
 	
+	var startTimeout = undefined;
+
 	Modernizr.load(
 	{ 
 		// load all of these files
@@ -91,6 +108,25 @@
 			"img/lvl1/floors/1-empty.png",
 			"img/lvl1/floors/2-empty.png",
 			"img/lvl1/floors/3-empty.png",
+			"img/empty_variable_animation.png",
+			"img/intro/light.png",
+			"img/intro/offlight.png",
+			"img/intro/onlight.png",
+			"img/intro/sleeping_whale.png",
+			"img/intro/whaleHit.png",
+			"img/speechBubble.png",
+			"img/toolbox-top-dark.png",
+			"img/toolbox-btm-dark.png",
+			"img/fusings/1_glass_fuse.png",
+			"img/fusings/2_glass_fuse.png",
+			"img/fusings/3_glass_fuse.png",
+			"img/fusings/1_wood_fuse.png",
+			"img/fusings/2_wood_fuse.png",
+			"img/fusings/3_wood_fuse.png",
+			"img/fusings/1_metal_fuse.png",
+			"img/fusings/2_metal_fuse.png",
+			"img/fusings/3_metal_fuse.png",
+			"img/start-btn.png"
 		],
 		
 		
@@ -101,7 +137,7 @@
 			// set up event handlers
 				levelChange(0);
 				loading = false;
-
+				waiting = true;
 		  		//update();
 			
 			} // end complete
@@ -117,7 +153,18 @@
 		canvas = document.getElementById("canvas");
 		ctx = canvas.getContext("2d");
 		ctx.canvas.width  = window.innerWidth;
+
+		if (ctx.canvas.width > 1920) ctx.canvas.width = 1920;
+
   		ctx.canvas.height = window.innerHeight;
+
+  		if (ctx.canvas.height > 1080) ctx.canvas.height = 1080;
+
+  		/*canvas.style.marginLeft = -1 * ctx.canvas.width/2;
+  		canvas.style.marginTop = -1 * ctx.canvas.height/2;*/
+
+  		$('canvas').css('margin-left',-1 * ctx.canvas.width/2);
+  		$('canvas').css('margin-top',-1 * ctx.canvas.height/2);
 
 		this.Intro = new Intro();
 		this.LevelSelect = new LevelSelect();
@@ -180,7 +227,7 @@
 			img.src = 'img/sparkLogo.png';
 			//img.play();
 
-			var imgPos = getCorrectedPosition({x:800,y:250});
+			var imgPos = getCorrectedPosition({x:630,y:150});
 			var imgSize = getCorrectedSize({width:img.width,height:img.height});
 
 			ctx.drawImage(img,imgPos.x,imgPos.y,imgSize.width,imgSize.height);
@@ -200,7 +247,44 @@
 			
 			return;
 		}
-		if (globalFrame)
+		if (waiting)
+		{
+			ctx.clearRect(0,0,browserWidth,browserHeight);
+			ctx.fillStyle = "#00C699";
+			ctx.fillRect(0,0,window.innerWidth,window.innerHeight);
+
+			var img = new Image();
+			img.src = 'img/sparkLogo.png';
+			//img.play();
+
+			var imgPos = getCorrectedPosition({x:630,y:150});
+			var imgSize = getCorrectedSize({width:img.width,height:img.height});
+
+			ctx.drawImage(img,imgPos.x,imgPos.y,imgSize.width,imgSize.height);
+
+			ctx.fillStyle = "#FFFFFF";
+
+			var fontSize = 24;
+
+			ctx.font=fontSize+"px GothamMedium";
+			ctx.textAlign = 'left';
+			var textPos = getCorrectedPosition({x:750,y:600});
+
+			ctx.fillText("Point and hover to start",textPos.x,textPos.y);
+
+			playIMG.draw(ctx);
+
+			loadingZombie.draw(ctx);
+
+			testPlay(globalFrame,ctx);
+
+			tempHand.draw(globalFrame,ctx);
+			window.requestAnimationFrame(update);
+			
+			return;
+		}
+		
+		if (globalFrame && playing)
 		{
 
 			ctx.clearRect(0,0,browserWidth,browserHeight);
@@ -213,6 +297,91 @@
 		window.requestAnimationFrame(update);
 		//console.log(globalFrame);
 		
+	}
+	function testPlay(frame,ctx)
+	{
+		if(frame.hands[0])
+		{
+			var hand = frame.hands[0];
+			var x = hand.palmPosition[0];
+			var y = hand.palmPosition[1];
+
+			var handX = map(x,-150,150,0,browserWidth);
+			var handY = map(y,100,300,browserHeight,0);
+
+			
+			//console.log(handX);
+			//console.log(handY);
+
+			if(hand.fingers.length == 1)
+			{
+				//console.log(hand.fingers.length);
+
+				var f = hand.palmPosition;
+				var fpos = f;
+
+				var x = fpos[0];
+				var y = fpos[1];
+				//console.log(hand);
+
+				var fx = map(x,-150,150,0,browserWidth) - 15;
+				var fy = map(y,100,300,browserHeight,0) - 45;
+
+				var lhb = this.playIMG; // lessonHitBox still needs to be defined as an object
+				// this object should reflect the lesson level
+
+				//console.log(lhb);
+
+				//ctx.strokeRect(lhb.pos.x,lhb.pos.y,lhb.size.width,lhb.size.height);
+
+				if(fx > lhb.pos.x && fx < lhb.pos.x + lhb.size.width &&
+					fy > lhb.pos.y && fy < lhb.pos.y + lhb.size.height)
+				{
+					//still need timeout and interaction here
+					var self = this;
+
+					loadingAnimation.pos = {x:fx - loadingAnimation.size.width/2, y:fy - loadingAnimation.size.height/2};
+					loadingAnimation.play();
+
+					loadingAnimation.draw(ctx);
+
+
+					if (startTimeout == undefined)
+					{
+						startTimeout = setTimeout(function()
+							{
+								//start game
+								waiting = false;
+								playing = true;
+
+								
+							},1600);
+					}
+				}
+				else
+				{
+					clearTimeout(startTimeout);
+					startTimeout = undefined;
+					loadingAnimation.frameNumber = 0;
+					loadingAnimation.stop();
+				}
+
+			}
+			else
+			{
+				clearTimeout(startTimeout);
+				startTimeout = undefined;
+				loadingAnimation.frameNumber = 0;
+				loadingAnimation.stop();
+			}
+		}
+		else
+		{
+			clearTimeout(startTimeout);
+			startTimeout = undefined;
+			loadingAnimation.frameNumber = 0;
+			loadingAnimation.stop();
+		}
 	}
 	
 	function isCloseToDestination(pos,dest)
@@ -344,6 +513,10 @@
 	{
 		//levelIndex++;
 	}
+	function youWon()
+	{
+		$("#container").fadeIn(1000);
+	}
 </script>
 <style>
 	@font-face {
@@ -414,11 +587,129 @@
 	.circ.clicked
 	{
 		background-color:#A8A0EB;
-		border:3px solid #A8A0EB;d
+		border:3px solid #A8A0EB;
 	}
+
+	canvas
+	{
+		position:absolute;
+		top:50%;
+		left:50%;
+		border:1px solid #333;
+		z-index:-1;
+	}
+
+	/*WIN BANNER */
+	@font-face {
+        font-family: MikadoRegular;
+        src: url(fonts/MikadoRegular.otf);
+      }
+
+      @font-face {
+        font-family: MikadoBold;
+        src: url(fonts/MikadoBold.otf);
+      }
+
+       @font-face {
+        font-family: MikadoBoldItalic;
+        src: url(fonts/MikadoBold-Italic.otf);
+      }
+
+      #container {
+      	display:none;
+      	z-index:40000;
+        width: 424px;
+        height: 638px;
+        margin: 0 auto;
+        padding-top: 50px;
+        /*background-image: url(images/guide.png);*/
+        background-color: #3fc2ff;
+        text-align: center;
+
+        -moz-border-radius: 20px;
+        -webkit-border-radius: 20px;
+        border-radius: 20px;
+
+        box-shadow: 0px 8px 0px 0px rgba(0,0,0,.2);
+        h-shadow v-shadow blur spread color
+
+		position: absolute;
+		top:50%;
+		left:50%;
+      }
+
+      #congrats {
+        width: 366px;
+        height: 55px;
+        margin: 0 auto;
+      }
+
+      .link {
+        width: 126px;
+        height: auto;
+        text-align: center;
+        float: left;
+      }
+
+      .linkIMG {
+        width: 130px;
+        height: 130px;
+        margin-top: 25px;
+      }
+
+      h1 {
+        font-family: MikadoBold, sans-serif;
+        font-size: 20px;
+        color: white;
+        letter-spacing: 1px;
+        line-height: 24px;
+        margin-top: 40px;
+      }
+
+      p {
+        font-family: MikadoBold, sans-serif;
+        font-size: 18px;
+        color: #267499;
+        letter-spacing: 1px;
+        margin-top: 15px;
+      }
+
+      .link a {
+        font-family: MikadoBoldItalic, sans-serif;
+        font-size: 18px;
+        color: white;
+        letter-spacing: 2px;
+        margin-top: 10px;
+        text-decoration: none;
+      }
+
+      .link a:hover {
+        border-bottom: 2px solid white;
+      }
 </style>
 </head>
 <body>
 	<canvas id='canvas'>GET A BROWSER</canvas>
+	<div id="container">
+
+ 	 <div id="congrats">
+    <img src="img/uDidIt.png">
+	  </div>
+	  <p>Go ahead and brag about your <br/> victory to all your friends!</p>
+	  <h1>Then check out these other great <br/> places to learn programming</h1>
+	  <div class="link" style="margin-left: 45px">
+	    <img class="linkIMG" src="img/lightbot.png">
+	    <a href="#">Lightbot</a>
+	  </div>
+	  <div class="link" style="margin-left: 80px">
+	    <img class="linkIMG" src="img/scratch.png">
+	    <a href="#">MIT Scratch</a>
+	  </div>
+	  <div class="link" style="float: none; clear:both; margin: 0 auto; width: 160px;">
+	    <img class="linkIMG" src="img/khanacademy.png">
+	    <a href="#">Khan Academy</a>
+	  </div>
+
+	</div>
 </body>
 </html>
