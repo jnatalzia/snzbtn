@@ -1,3 +1,17 @@
+/**
+	* @class SpriteNode
+	* @classdesc Reads in a sprite sheet and plays the animation.
+	* @constructor
+	* @param {string} src- Source of the sprite sheet
+	* @param {string} numFrames - Number of frames in the sprite sheet
+	* @param {string} framesBetween - 
+	* @param {string} sizeV -
+	* @param {string} posV -
+	* @param {string} cols - Number of columns in the sheet
+	* @param {string} rows - Number of rows in the sheet
+	* @param {string} isOnScreen -
+	* @param {string} destSize -
+*/
 window.SpriteNode = function(src,numFrames,framesBetween,sizeV,posV,cols,rows,isOnScreen,destSize)
 {
 	if (src.length > 0)
@@ -28,6 +42,9 @@ window.SpriteNode = function(src,numFrames,framesBetween,sizeV,posV,cols,rows,is
 
 	this.alpha = 1;
 
+	/**
+		* draws the sprite sheet to the canvas
+	*/
 	this.draw = function(ctx)
 	{
 		if (this.isOnScreen)
@@ -83,10 +100,16 @@ window.SpriteNode = function(src,numFrames,framesBetween,sizeV,posV,cols,rows,is
 		}
 	}
 
+	/**
+		* Plays the sprite animation
+	*/
 	this.play = function(){
 		this.isPlaying = true;
 	}
 
+	/**
+		* Stops the sprite animations
+	*/
 	this.stop = function()
 	{
 		this.isPlaying = false;

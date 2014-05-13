@@ -1,3 +1,7 @@
+/**
+	* @class LevelSelect
+	* @classdesc Level Selection Screen that moves users to the proper stage
+*/
 window.LevelSelect = function()
 {
 	var LevelSelect = function() // init parameters
@@ -26,6 +30,9 @@ window.LevelSelect = function()
 
 	var p = LevelSelect.prototype;
 
+	/**
+		* Loads all of the required assets for the Level Select.
+	*/
 	p.loadAssets = function()
 	{
 		//pretend i have a 1920x1080 resolution im using to test this
@@ -61,6 +68,10 @@ window.LevelSelect = function()
 		this.speechBubble = new SpriteNode('img/speechBubble.png',1,1,{width:486,height:336},{x:100,y:230},1,1,true);
 
 	}
+
+	/**
+		* Creates a Hand for the screen once all assets are loaded 
+	*/
 	p.onloaded = function()
 	{
 		this.tempHand = new Hand();
@@ -73,6 +84,13 @@ window.LevelSelect = function()
   		this.dragCircle.y = browserHeight - 50;
   		this.dragCircle.radius = 50;
 	}
+
+	/**
+		* Continually runs to check progress though the level select and also handles whale captions.
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} ctx - The current drawing context passed in from the canvas. 
+	*/
 	p.update = function(ctx,frame)
 	{
 		//console.log(this.gameState);
@@ -153,10 +171,24 @@ window.LevelSelect = function()
 		this.tempHand.draw(frame,ctx);
 		//ctx.globalAlpha = 1;
 	}
+
+	/**
+		* Draws the Fingers to the screen.
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} ctx - The current drawing context passed in from the canvas. 
+	*/
 	p.drawFingers = function(frame,ctx)
 	{
 			
 	}
+
+	/**
+		* Allows the user to hover over the level they want to select.
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} ctx - The current drawing context passed in from the canvas. 
+	*/
 	p.nextLevel = function(frame,ctx)
 	{
 		//console.log(this.tempHand);
@@ -242,6 +274,13 @@ window.LevelSelect = function()
 			this.loadingAnimation.stop();
 		}
 	}
+
+	/**
+		* Draws all UI elements.
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} ctx - The current drawing context passed in from the canvas. 
+	*/
 	p.drawUI = function(frame,ctx)
 	{
 		//arrays of the topics and lessons for drawing the menu

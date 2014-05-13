@@ -1,3 +1,9 @@
+/**
+	* @class Audio
+	* @classdesc Creates an Audio Element with the specified source.
+	* @constructor
+	* @param {string} soundID - The filename of the audio source. Currently must be an mp3 file.
+*/
 window.Audio = function(soundID)
 {
 
@@ -8,24 +14,43 @@ window.Audio = function(soundID)
 	sound.autoplay = false;
 	sound.loop = false;
 
+	/**
+		* Plays the sound when the browser knows it can play through without stopping
+	*/
 	this.play = function()
 	{
 		sound.oncanplaythrough = sound.play();
 	}
+
+	/**
+		* Pauses the sound at the current frame
+	*/
 	this.pause = function()
 	{
 		sound.pause();
 	}
+
+	/**
+		* Stops the sound
+	*/
 	this.stop = function()
 	{
 		sound.pause();
 		sound.currentTime = 0;
 	}
+
+	/**
+		* Loops the sound when the browser knows it can play through without stopping
+	*/
 	this.loop = function()
 	{
 		sound.loop = true;
 		sound.oncanplaythrough = sound.play();
 	}
+
+	/**
+		* Loops the sound at a random interval when the browser knows it can play through without stopping
+	*/
 	this.randomLoop = function()
 	{
 		sound.oncanplaythrough = sound.play();

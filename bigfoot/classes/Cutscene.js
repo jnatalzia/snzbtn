@@ -1,3 +1,10 @@
+/**
+	* @class Cutscene
+	* @classdesc Creates a cutscene.
+	* @constructor
+	* @param {string} timestamp -
+	* @param {string} movements -
+*/
 window.Cutscene = function(timestamp, movements)
 {
 	this.timestamp = timestamp;
@@ -27,6 +34,11 @@ window.Cutscene = function(timestamp, movements)
 		}
 	];*/
 
+	/**
+		* Initializes the cutscene.
+		* @constructor
+		* @param {string} timestamp - 
+	*/
 	this.init = function(timestamp)
 	{
 		for (var i in this.movements)
@@ -44,6 +56,12 @@ window.Cutscene = function(timestamp, movements)
 		this.ended = false;
 
 	}
+	/**
+		* Continually checks the position of the assets to decide whether or not the cutscene is finished.
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} ctx - The current drawing context passed in from the canvas.
+	*/
 	this.update = function(frame,ctx)
 	{
 		var ts = frame.timestamp;

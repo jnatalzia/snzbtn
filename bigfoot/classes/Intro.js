@@ -1,3 +1,7 @@
+/**
+	* @class Intro
+	* @classdesc All of the code for the Introductory Tutorial
+*/
 window.Intro = function()
 {
 	var Intro = function()
@@ -49,6 +53,10 @@ window.Intro = function()
 		this.onloaded();
 	}
 	var p = Intro.prototype;
+
+	/**
+		* Loads all of the required assets for the Intro
+	*/
 	p.loadAssets = function()
 	{	
 		openingVideo = new Video(canvas,ctx,'opening'); //load the opening video
@@ -111,6 +119,10 @@ window.Intro = function()
 		this.spotlight = this.spotOff;
 		this.textPos = getCorrectedPosition({x:1290,y:280});
 	}
+
+	/**
+		* Runs when the assets are all loaded.  Instantiates the hand class for the Intro as well as the drag spot. 
+	*/
 	p.onloaded = function()
 	{	
 		this.tempHand = new Hand();
@@ -129,6 +141,13 @@ window.Intro = function()
 			return('hi');
 		});*/
 	}
+
+	/**
+		* Draws all UI elements.  Also handles all of the gesture tracking and interactions of the tutorial.
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} ctx - The current drawing context passed in from the canvas. 
+	*/
 	p.drawUI = function(ctx,frame)
 	{
 		this.step+=0.04;
@@ -227,11 +246,6 @@ window.Intro = function()
 				//test for toolbox drag
 				//this.testToolboxOpen(frame);
 			}
-
-
-			
-
-
 
 			if (frame.hands[0])
 			{
@@ -606,6 +620,13 @@ window.Intro = function()
 		this.tempHand.draw(frame,ctx);
 		
 	}
+
+	/**
+		* Dragging function for the tutorial level.
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} ctx - The current drawing context passed in from the canvas. 
+	*/
 	p.testDrag = function(ctx,frame)
 	{
 		if(frame.hands.length == 1)
@@ -654,6 +675,10 @@ window.Intro = function()
 			this.timer = 0;
 		}
 	}
+
+	/**
+		* Sets the game state to Toolbox Opened.
+	*/
 	p.openToolbox = function()
 	{
 		this.gameState = this.STATE_TOOLBOX_OPENED;
@@ -661,6 +686,12 @@ window.Intro = function()
 		//do some crazy stuff with the blocks
 	}
 
+	/**
+		* Calls the drawUI function to continually update what is on the screen.
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} ctx - The current drawing context passed in from the canvas. 
+	*/
 	p.update = function(ctx,frame)
 	{
 		this.drawUI(ctx,frame);

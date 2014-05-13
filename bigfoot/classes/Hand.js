@@ -1,3 +1,7 @@
+/**
+	* @class Hand
+	* @classdesc Creates an Hand Element reads the amount of fingers on each hand and draws the sprite accordingly.
+*/
 window.Hand = function()
 {
 	this.size = {width:130,height:140};
@@ -10,6 +14,12 @@ window.Hand = function()
 	this.handX = 0,this.handTwoX=0;
 	this.handY = 0,this.handTwoY=0;
 
+	/**
+		* Draws the hand to the screen based on the amount of fingers being held up.
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} ctx - The current drawing context passed in from the canvas.
+	*/
 	this.draw = function(frame,ctx)
 	{
 		var hand = frame.hands[0];
@@ -124,13 +134,13 @@ window.Hand = function()
 					break;
 			}
 
-				Hand.x = righthand.palmPosition[0];
-				Hand.y = righthand.palmPosition[1];
+			Hand.x = righthand.palmPosition[0];
+			Hand.y = righthand.palmPosition[1];
 			this.handX = map(Hand.x,-150,150,0,browserWidth);
 			this.handY = map(Hand.y,100,300,browserHeight,0);
 
-				Hand.x = lefthand.palmPosition[0];
-				Hand.y = lefthand.palmPosition[1];
+			Hand.x = lefthand.palmPosition[0];
+			Hand.y = lefthand.palmPosition[1];
 			this.handTwoX = map(Hand.x,-150,150,0,browserWidth);
 			this.handTwoY = map(Hand.y,100,300,browserHeight,0);
 
@@ -139,8 +149,6 @@ window.Hand = function()
 			ctx.drawImage(this.spriteSheet,sx2,sy2,this.size.width,this.size.height,this.handTwoX- this.size.width/2,this.handTwoY- this.size.height/2,this.size.width,this.size.height);
 			ctx.globalAlpha = 1.0;
 		}
-
-		//draw current frame
 	}
 }
 

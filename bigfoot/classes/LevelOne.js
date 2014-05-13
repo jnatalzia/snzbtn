@@ -1,3 +1,7 @@
+/**
+	* @class LevelOne
+	* @classdesc All of the code unique to Level One.
+*/
 window.LevelOne = function()
 {
 	var LevelOne = function() //takes in all init parameters here
@@ -161,6 +165,9 @@ window.LevelOne = function()
 
 	var p = LevelOne.prototype;
 
+	/**
+		* Loads all of the required assets for Level One
+	*/
 	p.loadAssets = function()
 	{
 		var lvl1Size = {width:490,height:243};
@@ -379,6 +386,10 @@ window.LevelOne = function()
 		playSnd = new Audio('button');
 		successSnd = new Audio('success');
 	}
+
+	/**
+		* Runs when the assets are all loaded.  Instantiates the hand class for the level as well as the drag spot and starts the background music. 
+	*/
 	p.onloaded = function()
 	{
 		this.browserWidth = window.innerWidth;
@@ -403,6 +414,12 @@ window.LevelOne = function()
   		
 	}
 
+	/**
+		* Continually updates what is displayed on the screen
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} ctx - The current drawing context passed in from the canvas. 
+	*/
 	p.update = function(ctx,frame)
 	{
 
@@ -668,6 +685,12 @@ window.LevelOne = function()
 
 	}
 
+	/**
+		* Draws the users fingers to the screen.
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} ctx - The current drawing context passed in from the canvas. 
+	*/
 	p.drawFingers = function(frame,ctx)
 	{
 		for (var i in frame.hands)
@@ -694,6 +717,13 @@ window.LevelOne = function()
 			}
 			
 	}
+
+	/**
+		* Draws all UI elements.  Also handles all of the gesture tracking and interactions of the Level.
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} ctx - The current drawing context passed in from the canvas. 
+	*/
 	p.drawUI = function(frame,ctx)
 	{
 		ctx.fillStyle = "#333333";
@@ -1088,6 +1118,10 @@ window.LevelOne = function()
 		/*pinch(frame);
 		zoom(frame);*/
 	}
+
+	/**
+		* Resets the stage to the building phase
+	*/
 	p.reset = function()
 	{
 		this.substate = this.SUBSTATE_HOUSE_FALLING;
@@ -1099,6 +1133,12 @@ window.LevelOne = function()
 		this.METAL_BREAK_FIRED = true;
 	}
 
+	/**
+		* Updates the amount of variable blocks in the toolbox based on what has been slotted into the constructor bar.
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} ctx - The current drawing context passed in from the canvas. 
+	*/
 	p.updateToolbox = function(frame,ctx)
 	{
 		if (this.toolboxState === this.STATE_TOOLBOX_CLOSED)
@@ -1438,6 +1478,13 @@ window.LevelOne = function()
 
 			}
 	}
+
+		/**
+		* Allows the user to grab an object and drag it around the screen.
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} spotsToDrag - The spots that needed to be dragged to.
+	*/
 	p.drag = function(frame, spotsToDrag){
 		for (var i in this.emptyBlocks)
 			{
@@ -1602,12 +1649,19 @@ window.LevelOne = function()
 		}
 	}
 
+	/**
+		* Changes the game state to an open toolbox
+	*/
 	p.openToolbox = function()
 	{
 		//console.log(toolboxIMG);
 
 		this.toolboxState = this.STATE_TOOLBOX_OPEN;
 	}
+
+	/**
+		* Runs the user's built house against all of the possible threats.
+	*/
 	p.runCode = function()
 	{
 		//check if the program can run

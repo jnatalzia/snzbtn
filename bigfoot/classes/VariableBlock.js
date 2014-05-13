@@ -1,3 +1,12 @@
+/**
+	* @class VariableBlock
+	* @classdesc Handles all of the variable blocks that live inside of the toolbox.
+	* @constructor
+	* @param {string} dest - Destination of the block
+	* @param {string} size - Size of the block
+	* @param {string} options - The different things the variable block can become, eg. metal, wood, glass
+	* @param {string} fn - Frame Number of the block
+*/
 window.VariableBlock = function(dest,size,options,fn)
 {
 	this.destination = getCorrectedPosition(dest);
@@ -57,21 +66,32 @@ window.VariableBlock = function(dest,size,options,fn)
 	this.isSlotted = false;
 	this.slot = undefined;
 
+	/**
+		* Checks to see if the user is pointing at a block.
+		* @constructor
+		* @param {string} pt - Point on the screen.
+	*/
 	this.pointIsInside = function(pt)
 	{
 		return (pt.x > this.position.x && pt.x < this.position.x + this.size.width && pt.y > this.position.y && pt.y < this.position.y + this.size.height);
 	}
 	//test options
 	this.options = options;
+
+	/**
+		* Gets the center position of an object
+	*/
 	this.getCenterPos = function(){
 		return {x:this.position.x + (this.size.width/2),y:this.position.y + (this.size.height/2)};
 	}
-	//test function
-	this.sayHi = function()
-	 {
-	 	console.log('hi');
-	 }
-	 this.draw = function (frame,ctx){
+
+	/**
+		* Draws the variable block to the screen
+		* @constructor
+		* @param {string} frame - The current frame passed in from the canvas.
+		* @param {string} ctx - The current drawing context passed in from the canvas.
+	*/
+	this.draw = function (frame,ctx){
 		//
 		var block = this;
 
