@@ -36,9 +36,19 @@ the file will white screen with no errors.</p>
    hovering over the play button at the bottom right hand of the screen.</p>
 
 
-<h3>Updates</h3>
-<p>Known bugs: After a build of all the same materials, the house wont draw when the reset function is called.
-               The window size is hard coded to 1920x1080, it needs to have variable scaling to fit most screen resolutions
-               The Opening screen Spark* title, doesn't display correctly.</p>
+<h3>Future Updates</h3>
+<ul>
+<li>Additional Hints for each different interaction.</li>
+<li>Give Mascot a nametag.</li>
+<li>Add narrator voice for Snoozer instead of text bubbles. or in addtion to text bubbles.</li>
+<li>More stable reset() function.</li>
+</ul>
 
+<h3>Future Levels</h3>
+<ul>
+  <li>Start Level one as a single level house, and proceed each level from there.</li>
+  <li>Each topic is building a "thing".</li>
+  <li>Within each topic, a level is literally adding a level onto that "thing".</li>
+  <li>Have something (boss) climbing the tower in a level? (suggestion from a play tester)</li>
+</ul>
 
