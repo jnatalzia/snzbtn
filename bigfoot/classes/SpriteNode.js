@@ -4,13 +4,13 @@
 	* @constructor
 	* @param {string} src- Source of the sprite sheet
 	* @param {string} numFrames - Number of frames in the sprite sheet
-	* @param {string} framesBetween - 
-	* @param {string} sizeV -
-	* @param {string} posV -
+	* @param {string} framesBetween - this is the number of frames between when the next frame is played. for instance if the number is 1, there is one frame played every timestep, if it's two there is 1 frame played every two timesteps
+	* @param {string} sizeV - This is the size of each individual frames of the image. so if the image has 3 images per row and is 300 wide, the size vector would have a width of 100 in the form of: {width:WIDTH,height:HEIGHT}
+	* @param {string} posV - This is the position of the sprite intially in the format: {x:xPos,y:yPos}
 	* @param {string} cols - Number of columns in the sheet
 	* @param {string} rows - Number of rows in the sheet
-	* @param {string} isOnScreen -
-	* @param {string} destSize -
+	* @param {string} isOnScreen - this boolean is used to determine whether the sprite should be drawn in the draw function
+	* @param {string} destSize - this is the size that the image should be displayed on the screen
 */
 window.SpriteNode = function(src,numFrames,framesBetween,sizeV,posV,cols,rows,isOnScreen,destSize)
 {
