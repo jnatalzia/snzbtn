@@ -1321,7 +1321,7 @@ window.LevelOne = function()
 						}
 					}
 
-					if (isClosevi(ToDestination(b.position,b.destination))
+					if (isCloseToDestination(b.position,b.destination))
 					{
 						b.isMoving = false;
 					}
