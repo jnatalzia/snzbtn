@@ -53,6 +53,9 @@
 	
 	var startTimeout = undefined;
 
+	var leapCounter = 0;
+	var animationID = undefined;
+
 	Modernizr.load(
 	{ 
 		// load all of these files
@@ -215,6 +218,12 @@
 	function update()
 	{
 		//console.log(loading);
+		if (!globalFrame)
+		{
+			//leapCounter++;
+			console.log("unplugged");
+			window.location.href = "noleap.html";
+		}
 
 		if (loading)
 		{
@@ -242,7 +251,7 @@
 			ctx.fillText("LOADING",textPos.x,textPos.y);
 
 			loadingZombie.draw(ctx);
-			window.requestAnimationFrame(update);
+			animationID = window.requestAnimationFrame(update);
 			
 			return;
 		}
@@ -278,7 +287,7 @@
 			testPlay(globalFrame,ctx);
 
 			tempHand.draw(globalFrame,ctx);
-			window.requestAnimationFrame(update);
+			animationID = window.requestAnimationFrame(update);
 			
 			return;
 		}
@@ -293,7 +302,7 @@
 		}
 
 
-		window.requestAnimationFrame(update);
+		animationID = window.requestAnimationFrame(update);
 		//console.log(globalFrame);
 		
 	}

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>No LEAP</title>
+</head>
+<body>
+	<p>Leap Motion is <strong>required</strong> for this application. You will be redirected to their website in <span id='time'>5</span>.</p>
+	<script>
+	var time = 5;
+	setTimeout(function()
+	{
+		window.location.href = 'https://www.leapmotion.com/';
+	},5000);
+	setInterval(function()
+	{
+		time--;
+		document.querySelector('#time').innerHTML = time;
+	},1000);
+	</script>
+</body>
+</html>
