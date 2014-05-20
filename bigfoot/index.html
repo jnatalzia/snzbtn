@@ -218,7 +218,7 @@
 	function update()
 	{
 		//console.log(loading);
-		if (!globalFrame)
+		if (!globalFrame || globalFrame.valid == false)
 		{
 			//leapCounter++;
 			console.log("unplugged");
